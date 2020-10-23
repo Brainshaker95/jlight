@@ -15,27 +15,27 @@ const jLightGlobalData = {};
 
 const getElementPath = (element) => {
   let path = element.nodeName;
-  let parent = element.parentNode;
+  let parent = element.parentElement;
 
   while (parent) {
     path = `${parent.nodeName}/${path}`;
-    parent = parent.parentNode;
+    parent = parent.parentElement;
   }
 
-  const attributeNames = element.getAttributeNames();
-  const attributeValues = [];
+  return `${path
+    .replace(/\s+/g, '')
+    .replace('HTML/BODY/', '')
+    .toLowerCase()}`;
+};
 
-  attributeNames.forEach((attributeName) => {
-    attributeValues.push(element.getAttribute(attributeName));
-  });
+const initalizeJLightElementData = (element, selector) => {
+  const elementPath = getElementPath(element);
 
-  path = `
-    ${path}
-    ${attributeNames.length ? `-${attributeNames.join('-')}` : ''}
-    ${attributeValues.length ? `-${attributeValues.join('-')}` : ''}
-  `.trim().replace(/\n\s+/g, '');
-
-  return path.replace('#document/HTML/BODY/', '').toLowerCase();
+  if (!jLightGlobalData[elementPath]) {
+    jLightGlobalData[elementPath] = {
+      jLightInternal: { selector },
+    };
+  }
 };
 
 const dashCaseToCamelCase = (string) => {
@@ -163,7 +163,7 @@ const getNextMatchingElement = (element, selector) => {
 };
 
 const getClosestMatchingElement = (element, selector) => {
-  const closest = element.parentNode;
+  const closest = element.parentElement;
 
   if (closest
     && closest !== document
@@ -277,6 +277,28 @@ const $ = (elements) => ({
 
       jLightGlobalData[elementPath].jLightInternal.display = computedStyles.getPropertyValue('display');
       element.style.display = 'none';
+    });
+
+    return $(elements);
+  },
+  toggle: () => {
+    elements.forEach((theElement) => {
+      const element = theElement;
+      const computedStyles = window.getComputedStyle(element);
+      const elementPath = getElementPath(element);
+
+      if (!jLightGlobalData[elementPath]) {
+        jLightGlobalData[elementPath] = {
+          jLightInternal: {},
+        };
+      }
+
+      if (computedStyles.getPropertyValue('display') === 'none') {
+        element.style.display = jLightGlobalData[elementPath].jLightInternal.display || 'block';
+      } else {
+        jLightGlobalData[elementPath].jLightInternal.display = computedStyles.getPropertyValue('display');
+        element.style.display = 'none';
+      }
     });
 
     return $(elements);
@@ -728,7 +750,7 @@ const $ = (elements) => ({
     const parents = [];
 
     elements.forEach((element) => {
-      parents.push(element.parentNode);
+      parents.push(element.parentElement);
     });
 
     return $(parents);
@@ -749,12 +771,12 @@ const $ = (elements) => ({
     const siblings = {};
 
     elements.forEach((element) => {
-      const { parentNode } = element;
+      const { parentElement } = element;
 
-      if (!siblingGroups[parentNode]) {
-        Array.from(parentNode.children).forEach((child) => {
+      if (!siblingGroups[parentElement]) {
+        Array.from(parentElement.children).forEach((child) => {
           if (child !== element) {
-            siblingGroups[parentNode] = [...siblingGroups[parentNode] || [], child];
+            siblingGroups[parentElement] = [...siblingGroups[parentElement] || [], child];
           }
         });
       }
@@ -988,7 +1010,7 @@ export default (argument) => {
   }
 
   if (argument instanceof NodeList
-      || argument instanceof HTMLCollection) {
+    || argument instanceof HTMLCollection) {
     return $([...argument]);
   }
 
@@ -1002,15 +1024,7 @@ export default (argument) => {
       elements = [...document.querySelectorAll(argument)];
 
       elements.forEach((element) => {
-        const elementPath = getElementPath(element);
-
-        if (!jLightGlobalData[elementPath]) {
-          jLightGlobalData[elementPath] = {
-            jLightInternal: {},
-          };
-        }
-
-        jLightGlobalData[elementPath].jLightInternal.selector = argument;
+        initalizeJLightElementData(element, argument);
       });
     }
   }
