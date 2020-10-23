@@ -13,6 +13,31 @@
 
 const jLightGlobalData = {};
 
+const getElementPath = (element) => {
+  let path = element.nodeName;
+  let parent = element.parentNode;
+
+  while (parent) {
+    path = `${parent.nodeName}/${path}`;
+    parent = parent.parentNode;
+  }
+
+  const attributeNames = element.getAttributeNames();
+  const attributeValues = [];
+
+  attributeNames.forEach((attributeName) => {
+    attributeValues.push(element.getAttribute(attributeName));
+  });
+
+  path = `
+    ${path}
+    ${attributeNames.length ? `-${attributeNames.join('-')}` : ''}
+    ${attributeValues.length ? `-${attributeValues.join('-')}` : ''}
+  `.trim().replace(/\n\s+/g, '');
+
+  return path.replace('#document/HTML/BODY/', '').toLowerCase();
+};
+
 const dashCaseToCamelCase = (string) => {
   if (!string || typeof string === 'object') {
     return null;
@@ -59,13 +84,15 @@ const createElementFromString = (string) => {
     );
   }
 
-  if (!jLightGlobalData[element]) {
-    jLightGlobalData[element] = {
+  const elementPath = getElementPath(element);
+
+  if (!jLightGlobalData[elementPath]) {
+    jLightGlobalData[elementPath] = {
       jLightInternal: {},
     };
   }
 
-  jLightGlobalData[element].jLightInternal.selector = tagName;
+  jLightGlobalData[elementPath].jLightInternal.selector = tagName;
 
   return element;
 };
@@ -223,14 +250,15 @@ const $ = (elements) => ({
   show: (type) => {
     elements.forEach((theElement) => {
       const element = theElement;
+      const elementPath = getElementPath(element);
 
-      if (!jLightGlobalData[element]) {
-        jLightGlobalData[element] = {
+      if (!jLightGlobalData[elementPath]) {
+        jLightGlobalData[elementPath] = {
           jLightInternal: {},
         };
       }
 
-      element.style.display = type || jLightGlobalData[element].jLightInternal.display || 'block';
+      element.style.display = type || jLightGlobalData[elementPath].jLightInternal.display || 'block';
     });
 
     return $(elements);
@@ -239,14 +267,15 @@ const $ = (elements) => ({
     elements.forEach((theElement) => {
       const element = theElement;
       const computedStyles = window.getComputedStyle(element);
+      const elementPath = getElementPath(element);
 
-      if (!jLightGlobalData[element]) {
-        jLightGlobalData[element] = {
+      if (!jLightGlobalData[elementPath]) {
+        jLightGlobalData[elementPath] = {
           jLightInternal: {},
         };
       }
 
-      jLightGlobalData[element].jLightInternal.display = computedStyles.getPropertyValue('display');
+      jLightGlobalData[elementPath].jLightInternal.display = computedStyles.getPropertyValue('display');
       element.style.display = 'none';
     });
 
@@ -283,14 +312,16 @@ const $ = (elements) => ({
     return $(elements);
   },
   delegate: (type, callback) => {
-    if (!jLightGlobalData[elements[0]]) {
-      jLightGlobalData[elements[0]] = {
+    const elementPath = getElementPath(elements[0]);
+
+    if (!jLightGlobalData[elementPath]) {
+      jLightGlobalData[elementPath] = {
         jLightInternal: {},
       };
     }
 
     document.addEventListener(type, (event) => {
-      if (event.target.matches(jLightGlobalData[elements[0]].jLightInternal.selector)) {
+      if (event.target.matches(jLightGlobalData[elementPath].jLightInternal.selector)) {
         if (callback === false
           || callback(event, event.jLightEventData) === false) {
           event.preventDefault();
@@ -363,16 +394,18 @@ const $ = (elements) => ({
   data: (theKey, value) => {
     if (typeof theKey === 'object' && theKey !== null) {
       elements.forEach((element) => {
-        if (!jLightGlobalData[element]) {
-          jLightGlobalData[element] = {
+        const elementPath = getElementPath(element);
+
+        if (!jLightGlobalData[elementPath]) {
+          jLightGlobalData[elementPath] = {
             jLightInternal: {},
           };
         }
 
-        jLightGlobalData[element] = {
+        jLightGlobalData[elementPath] = {
           ...theKey,
           jLightInternal: {
-            ...jLightGlobalData[element].jLightInternal,
+            ...jLightGlobalData[elementPath].jLightInternal,
           },
         };
       });
@@ -384,13 +417,15 @@ const $ = (elements) => ({
 
     if (value) {
       elements.forEach((element) => {
-        if (!jLightGlobalData[element]) {
-          jLightGlobalData[element] = {
+        const elementPath = getElementPath(element);
+
+        if (!jLightGlobalData[elementPath]) {
+          jLightGlobalData[elementPath] = {
             jLightInternal: {},
           };
         }
 
-        jLightGlobalData[element][key] = value;
+        jLightGlobalData[elementPath][key] = value;
       });
 
       return $(elements);
@@ -400,10 +435,12 @@ const $ = (elements) => ({
 
     elements.forEach((element) => {
       if (!data) {
+        const elementPath = getElementPath(element);
+
         if (!theKey) {
-          data = jLightGlobalData[element];
+          data = jLightGlobalData[elementPath];
         } else {
-          data = jLightGlobalData[element][key];
+          data = jLightGlobalData[elementPath][key];
 
           if (!data) {
             data = element.getAttribute(`data-${theKey}`)
@@ -965,13 +1002,15 @@ export default (argument) => {
       elements = [...document.querySelectorAll(argument)];
 
       elements.forEach((element) => {
-        if (!jLightGlobalData[element]) {
-          jLightGlobalData[element] = {
+        const elementPath = getElementPath(element);
+
+        if (!jLightGlobalData[elementPath]) {
+          jLightGlobalData[elementPath] = {
             jLightInternal: {},
           };
         }
 
-        jLightGlobalData[element].jLightInternal.selector = argument;
+        jLightGlobalData[elementPath].jLightInternal.selector = argument;
       });
     }
   }
