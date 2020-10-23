@@ -8,6 +8,8 @@
 // TODO: outerWidth
 // TODO: outerHeight
 // TODO: Add ajax
+// TODO: Add not
+// TODO: Add has
 
 const jLightGlobalData = {};
 
@@ -422,6 +424,7 @@ const $ = (elements) => ({
 
     return $(elements);
   },
+  clone: (deep = true) => $(elements.map((element) => element.cloneNode(deep))),
   add: ($elements) => {
     let theElements = $elements;
     const addedElements = [];
@@ -442,11 +445,45 @@ const $ = (elements) => ({
 
     return $([...elements, ...addedElements]);
   },
-  clone: (deep = true) => $(elements.map((element) => element.cloneNode(deep))),
-  remove: () => {
+  remove: ($elements, removeFromDom = true) => {
+    if (!$elements) {
+      elements.forEach((element) => {
+        element.remove();
+      });
+
+      return null;
+    }
+
+    const remainingElements = [];
+    let theElements = $elements;
+
+    if (theElements.elements) {
+      theElements = theElements.elements;
+    } else if (typeof $elements === 'string') {
+      theElements = [...document.querySelectorAll($elements)];
+    } else {
+      theElements = [theElements];
+    }
+
     elements.forEach((element) => {
-      element.remove();
+      let wasRemoved;
+
+      theElements.forEach((referenceElement) => {
+        if (element === referenceElement) {
+          if (removeFromDom) {
+            element.remove();
+          }
+
+          wasRemoved = true;
+        }
+      });
+
+      if (!wasRemoved) {
+        remainingElements.push(element);
+      }
     });
+
+    return $(remainingElements);
   },
   text: (theText) => {
     let text = theText;
