@@ -1,6 +1,13 @@
 // TODO: SlideUp, SlideDown, SlideToggle
 // TODO: FadeIn, FadeOut, FadeToggle
 // TODO: Add animate
+// TODO: width
+// TODO: height
+// TODO: innerWidth
+// TODO: innerHeight
+// TODO: outerWidth
+// TODO: outerHeight
+// TODO: Add ajax
 
 const jLightGlobalData = {};
 
@@ -25,7 +32,7 @@ const createElementFromString = (string) => {
   const lastTagIndex = tags.length - 1;
   const openingTag = tags[1];
 
-  if (openingTag.indexOf('/') === 0) {
+  if (!openingTag || openingTag.indexOf('/') === 0) {
     return null;
   }
 
@@ -63,14 +70,24 @@ const createElementFromString = (string) => {
 
 const documentAndWindowEventListener = (argument) => ({
   on: (type, callbackOrSelector, delegatedCallback) => {
-    if (typeof callbackOrSelector === 'function') {
+    if (typeof callbackOrSelector === 'function' || callbackOrSelector === false) {
       argument.addEventListener(type, (event) => {
-        callbackOrSelector(event, event.jLightEventData);
+        if (callbackOrSelector === false
+          || callbackOrSelector(event, event.jLightEventData) === false) {
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+        }
       });
     } else {
       argument.addEventListener(type, (event) => {
         if (event.target.matches(callbackOrSelector)) {
-          delegatedCallback(event, event.jLightEventData);
+          if (delegatedCallback === false
+            || delegatedCallback(event, event.jLightEventData) === false) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+          }
         }
       });
     }
@@ -182,6 +199,7 @@ const $ = (elements) => ({
 
       return $(elements);
     }
+
     if (value) {
       elements.forEach((theElement) => {
         const element = theElement;
@@ -233,17 +251,28 @@ const $ = (elements) => ({
     return $(elements);
   },
   on: (type, callbackOrSelector, delegatedCallback) => {
-    if (typeof callbackOrSelector === 'function') {
+    if (typeof callbackOrSelector === 'function' || callbackOrSelector === false) {
       elements.forEach((element) => {
         element.addEventListener(type, (event) => {
-          callbackOrSelector(event, event.jLightEventData);
+          if (callbackOrSelector === false
+            || delegatedCallback === false
+            || callbackOrSelector(event, event.jLightEventData) === false) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+          }
         });
       });
     } else {
       elements.forEach((element) => {
         document.addEventListener(type, (event) => {
           if (element.contains(event.target) && event.target.matches(callbackOrSelector)) {
-            delegatedCallback(event, event.jLightEventData);
+            if (delegatedCallback === false
+              || delegatedCallback(event, event.jLightEventData) === false) {
+              event.preventDefault();
+              event.stopPropagation();
+              event.stopImmediatePropagation();
+            }
           }
         });
       });
@@ -260,7 +289,12 @@ const $ = (elements) => ({
 
     document.addEventListener(type, (event) => {
       if (event.target.matches(jLightGlobalData[elements[0]].jLightInternal.selector)) {
-        callback(event, event.jLightEventData);
+        if (callback === false
+          || callback(event, event.jLightEventData) === false) {
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+        }
       }
     });
   },
@@ -388,6 +422,27 @@ const $ = (elements) => ({
 
     return $(elements);
   },
+  add: ($elements) => {
+    let theElements = $elements;
+    const addedElements = [];
+
+    if (theElements.elements) {
+      theElements = theElements.elements;
+    } else if (typeof $elements === 'string') {
+      theElements = [createElementFromString($elements)];
+    } else {
+      theElements = [theElements];
+    }
+
+    theElements.forEach((referenceElement) => {
+      if (referenceElement && !elements.includes(referenceElement)) {
+        addedElements.push(referenceElement);
+      }
+    });
+
+    return $([...elements, ...addedElements]);
+  },
+  clone: (deep = true) => $(elements.map((element) => element.cloneNode(deep))),
   remove: () => {
     elements.forEach((element) => {
       element.remove();
@@ -397,8 +452,12 @@ const $ = (elements) => ({
     let text = theText;
 
     if (text) {
-      elements.forEach((theElement) => {
+      elements.forEach((theElement, index) => {
         const element = theElement;
+
+        if (typeof theText === 'function') {
+          text = theText(index, element.textContent);
+        }
 
         element.textContent = text;
       });
@@ -418,8 +477,12 @@ const $ = (elements) => ({
     let html = theHtml;
 
     if (html) {
-      elements.forEach((theElement) => {
+      elements.forEach((theElement, index) => {
         const element = theElement;
+
+        if (typeof theHtml === 'function') {
+          html = theHtml(index, element.innerHTML);
+        }
 
         element.innerHTML = html;
       });
@@ -477,6 +540,48 @@ const $ = (elements) => ({
 
     return $(elements);
   },
+  prependTo: ($elements) => {
+    let theElements = $elements;
+
+    if (theElements.elements) {
+      theElements = theElements.elements;
+    } else if (typeof $elements === 'string') {
+      theElements = [createElementFromString($elements)];
+    } else {
+      theElements = [theElements];
+    }
+
+    elements.forEach((element) => {
+      theElements.forEach((elementToPrependTo) => {
+        if (element !== elementToPrependTo) {
+          elementToPrependTo.prepend(element);
+        }
+      });
+    });
+
+    return $(elements);
+  },
+  appendTo: ($elements) => {
+    let theElements = $elements;
+
+    if (theElements.elements) {
+      theElements = theElements.elements;
+    } else if (typeof $elements === 'string') {
+      theElements = [createElementFromString($elements)];
+    } else {
+      theElements = [theElements];
+    }
+
+    elements.forEach((element) => {
+      theElements.forEach((elementToAppendTo) => {
+        if (element !== elementToAppendTo) {
+          elementToAppendTo.append(element);
+        }
+      });
+    });
+
+    return $(elements);
+  },
   insertBefore: ($elements) => {
     elements.forEach((element) => {
       $elements.elements.forEach((referenceElement) => {
@@ -500,8 +605,18 @@ const $ = (elements) => ({
     return $(elements);
   },
   before: ($elements) => {
+    let theElements = $elements;
+
+    if (theElements.elements) {
+      theElements = theElements.elements;
+    } else if (typeof $elements === 'string') {
+      theElements = [createElementFromString($elements)];
+    } else {
+      theElements = [theElements];
+    }
+
     elements.forEach((element) => {
-      $elements.elements.forEach((referenceElement) => {
+      theElements.forEach((referenceElement) => {
         if (element !== referenceElement) {
           element.insertAdjacentElement('beforeBegin', referenceElement);
         }
@@ -511,8 +626,18 @@ const $ = (elements) => ({
     return $(elements);
   },
   after: ($elements) => {
+    let theElements = $elements;
+
+    if (theElements.elements) {
+      theElements = theElements.elements;
+    } else if (typeof $elements === 'string') {
+      theElements = [createElementFromString($elements)];
+    } else {
+      theElements = [theElements];
+    }
+
     elements.forEach((element) => {
-      $elements.elements.forEach((referenceElement) => {
+      theElements.forEach((referenceElement) => {
         if (element !== referenceElement) {
           element.insertAdjacentElement('afterEnd', referenceElement);
         }
@@ -617,16 +742,46 @@ const $ = (elements) => ({
 
     return $(nextElements);
   },
-  filter: (selector) => {
+  filter: (selectorOrCallback) => {
     const filteredElements = [];
 
-    elements.forEach((element) => {
-      if (element.matches(selector)) {
+    elements.forEach((element, index) => {
+      if (typeof selectorOrCallback === 'function') {
+        if (selectorOrCallback($([element]), index)) {
+          filteredElements.push(element);
+        }
+      } else if (element.matches(selectorOrCallback)) {
         filteredElements.push(element);
       }
     });
 
     return $(filteredElements);
+  },
+  slice: (startIndex, stopIndex) => {
+    const slicedElements = [];
+
+    elements.forEach((element, index) => {
+      if (index >= startIndex) {
+        if (!stopIndex || index <= stopIndex) {
+          slicedElements.push(element);
+        }
+      }
+    });
+
+    return $(slicedElements);
+  },
+  splice: (startIndex, stopIndex) => {
+    const splicedElements = [];
+
+    elements.forEach((element, index) => {
+      if (index <= startIndex) {
+        splicedElements.push(element);
+      } if (index >= stopIndex) {
+        splicedElements.push(element);
+      }
+    });
+
+    return $(splicedElements);
   },
   find: (selector) => {
     let foundElements = [];
@@ -636,6 +791,30 @@ const $ = (elements) => ({
     });
 
     return $(foundElements);
+  },
+  contains: ($elements) => {
+    let contains;
+    let theElements = $elements;
+
+    if (theElements.elements) {
+      theElements = theElements.elements;
+    } else if (typeof $elements === 'string') {
+      theElements = $($elements);
+    } else {
+      theElements = [theElements];
+    }
+
+    elements.forEach((element) => {
+      if (!contains) {
+        theElements.forEach((referenceElement) => {
+          if (!contains) {
+            contains = element.contains(referenceElement);
+          }
+        });
+      }
+    });
+
+    return contains;
   },
   closest: (selector) => {
     const closestElements = [];
