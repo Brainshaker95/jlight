@@ -765,32 +765,24 @@ const $ = (elements) => ({
     return $(children);
   },
   siblings: () => {
-    // TODO: This is probably way too complicated
-
-    const siblingGroups = {};
-    const siblings = {};
+    const siblingGroups = [];
+    const siblings = [];
 
     elements.forEach((element) => {
       const { parentElement } = element;
 
-      if (!siblingGroups[parentElement]) {
+      if (!siblingGroups.includes(parentElement)) {
+        siblingGroups.push(parentElement);
+
         Array.from(parentElement.children).forEach((child) => {
-          if (child !== element) {
-            siblingGroups[parentElement] = [...siblingGroups[parentElement] || [], child];
+          if (!siblings.includes(child) && !elements.includes(child)) {
+            siblings.push(child);
           }
         });
       }
     });
 
-    Object.values(siblingGroups).forEach((siblingGroup) => {
-      siblingGroup.forEach((sibling) => {
-        if (!siblings[sibling]) {
-          siblings[sibling] = sibling;
-        }
-      });
-    });
-
-    return $(Object.values(siblings));
+    return $(siblings);
   },
   prev: (selector) => {
     const prevElements = [];
