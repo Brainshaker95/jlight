@@ -197,6 +197,7 @@ const getClosestMatchingElement = (element, selector) => {
 
 const $ = (elements) => ({
   elements,
+  length: elements.length,
   addClass: (cssClass) => {
     elements.forEach((element) => {
       element.classList.add(cssClass);
@@ -372,11 +373,29 @@ const $ = (elements) => ({
   is: (property) => {
     let is;
 
-    elements.forEach((element) => {
-      if (is === undefined) {
-        is = element[property];
+    if (typeof property === 'string') {
+      elements.forEach((element) => {
+        if (is === undefined) {
+          is = element[property];
+        }
+      });
+    } else {
+      let theElements = property;
+
+      if (property.elements) {
+        theElements = property.elements;
+      } else if (theElements instanceof HTMLCollection) {
+        theElements = [...theElements];
       }
-    });
+
+      theElements.forEach((theElement) => {
+        if (elements.includes(theElement)) {
+          if (is === undefined) {
+            is = true;
+          }
+        }
+      });
+    }
 
     return !!is;
   },
