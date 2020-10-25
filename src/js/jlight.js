@@ -96,7 +96,8 @@ const documentAndWindowJLightElement = (argument) => ({
     if (typeof callbackOrSelector === 'function' || callbackOrSelector === false) {
       argument.addEventListener(type, (event) => {
         if (callbackOrSelector === false
-          || callbackOrSelector(event, event.jLightEventData) === false) {
+          || callbackOrSelector(event, event.jLightEventData) === false
+          || delegatedCallback === false) {
           event.preventDefault();
           event.stopPropagation();
           event.stopImmediatePropagation();
@@ -324,8 +325,8 @@ const $ = (elements) => ({
       elements.forEach((element) => {
         element.addEventListener(type, (event) => {
           if (callbackOrSelector === false
-            || delegatedCallback === false
-            || callbackOrSelector(event, event.jLightEventData) === false) {
+            || callbackOrSelector(event, event.jLightEventData) === false
+            || delegatedCallback === false) {
             event.preventDefault();
             event.stopPropagation();
             event.stopImmediatePropagation();
@@ -1237,6 +1238,7 @@ export const ajax = (opts = {}) => {
     done: noop,
     fail: noop,
     always: noop,
+    abort: noop,
     xhr: () => new XMLHttpRequest(),
     ...opts,
   };
@@ -1287,6 +1289,8 @@ export const ajax = (opts = {}) => {
     request.setRequestHeader(key, value);
   });
 
+  request.onabort = options.abort;
+
   request.onerror = () => {
     options.fail(
       isJson ? JSON.parse(request.response) : request.response,
@@ -1305,8 +1309,14 @@ export const ajax = (opts = {}) => {
 
   request.onreadystatechange = () => {
     if (request.readyState === XMLHttpRequest.DONE) {
-      if (request.status && request.status < 300) {
+      if (request.status && request.status >= 200 && request.status < 300) {
         options.done(
+          isJson ? JSON.parse(request.response) : request.response,
+          request.status,
+          request,
+        );
+      } else if (request.status) {
+        options.fail(
           isJson ? JSON.parse(request.response) : request.response,
           request.status,
           request,
@@ -1321,10 +1331,22 @@ export const ajax = (opts = {}) => {
     }
   };
 
-  request.send(data);
+  request.send(options.method === 'POST' ? data : null);
 
   return request;
 };
+
+export const get = (url, opts = {}) => ajax({
+  method: 'GET',
+  url,
+  ...opts,
+});
+
+export const post = (url, opts = {}) => ajax({
+  method: 'POST',
+  url,
+  ...opts,
+});
 
 export default (argument) => {
   if (typeof argument === 'function') {
