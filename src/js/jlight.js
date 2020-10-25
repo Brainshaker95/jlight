@@ -1220,6 +1220,112 @@ const $ = (elements) => ({
   },
 });
 
+export const noop = () => {};
+
+export const ajax = (opts = {}) => {
+  const options = {
+    url: window.location.href,
+    method: 'POST',
+    data: {},
+    headers: {},
+    processData: true,
+    crossDomain: false,
+		contentType: 'application/x-www-form-urlencoded',
+    async: true,
+    username: null,
+    password: null,
+    done: noop,
+    fail: noop,
+    always: noop,
+    xhr: () => new XMLHttpRequest(),
+    ...opts,
+  };
+
+  const request = options.xhr();
+  const isJson = options.contentType === 'application/json';
+  let { data, headers } = options;
+
+  if (!options.crossDomain && !headers['X-Requested-With']) {
+    headers['X-Requested-With'] = 'XMLHttpRequest';
+  }
+
+  if (!headers['Content-Type']) {
+    headers['Content-Type'] = options.contentType;
+  }
+
+  if (options.processData) {
+    if (isJson) {
+      data = JSON.stringify(data);
+    } else {
+      const params = [];
+
+      Object.entries(options.data).forEach(([theKey, value]) => {
+        let key = theKey;
+
+        if (Array.isArray(value)) {
+          value.forEach((item) => {
+            params.push(`${key}[]=${item}`);
+          });
+        } else {
+          params.push(`${key}=${value}`);
+        }
+      });
+
+      data = params.join('&');
+    }
+  }
+
+  request.open(
+    options.method,
+    `${options.url}${options.method === 'GET' ? `?${data}` : ''}`,
+    options.async,
+    options.username,
+    options.password,
+  );
+
+  Object.entries(options.headers).forEach(([key, value]) => {
+    request.setRequestHeader(key, value);
+  });
+
+  request.onerror = () => {
+    options.fail(
+      isJson ? JSON.parse(request.response) : request.response,
+      request.status,
+      request,
+    );
+  };
+
+  request.ontimeout = () => {
+    options.fail(
+      isJson ? JSON.parse(request.response) : request.response,
+      request.status,
+      request,
+    );
+  };
+
+  request.onreadystatechange = () => {
+    if (request.readyState === XMLHttpRequest.DONE) {
+      if (request.status && request.status < 300) {
+        options.done(
+          isJson ? JSON.parse(request.response) : request.response,
+          request.status,
+          request,
+        );
+      }
+
+      options.always(
+        isJson ? JSON.parse(request.response) : request.response,
+        request.status,
+        request,
+      );
+    }
+  };
+
+  request.send(data);
+
+  return request;
+};
+
 export default (argument) => {
   if (typeof argument === 'function') {
     document.addEventListener('DOMContentLoaded', argument);
