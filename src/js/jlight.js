@@ -267,15 +267,8 @@ const $ = (elements) => ({
   show: (type) => {
     elements.forEach((theElement) => {
       const element = theElement;
-      const elementPath = getElementPath(element);
 
-      if (!jLightGlobalData[elementPath]) {
-        jLightGlobalData[elementPath] = {
-          jLightInternal: {},
-        };
-      }
-
-      element.style.display = type || jLightGlobalData[elementPath].jLightInternal.display || 'block';
+      element.style.display = '';
     });
 
     return $(elements);
@@ -283,16 +276,7 @@ const $ = (elements) => ({
   hide: () => {
     elements.forEach((theElement) => {
       const element = theElement;
-      const computedStyles = window.getComputedStyle(element);
-      const elementPath = getElementPath(element);
 
-      if (!jLightGlobalData[elementPath]) {
-        jLightGlobalData[elementPath] = {
-          jLightInternal: {},
-        };
-      }
-
-      jLightGlobalData[elementPath].jLightInternal.display = computedStyles.getPropertyValue('display');
       element.style.display = 'none';
     });
 
@@ -302,18 +286,10 @@ const $ = (elements) => ({
     elements.forEach((theElement) => {
       const element = theElement;
       const computedStyles = window.getComputedStyle(element);
-      const elementPath = getElementPath(element);
-
-      if (!jLightGlobalData[elementPath]) {
-        jLightGlobalData[elementPath] = {
-          jLightInternal: {},
-        };
-      }
 
       if (computedStyles.getPropertyValue('display') === 'none') {
-        element.style.display = jLightGlobalData[elementPath].jLightInternal.display || 'block';
+        element.style.display = '';
       } else {
-        jLightGlobalData[elementPath].jLightInternal.display = computedStyles.getPropertyValue('display');
         element.style.display = 'none';
       }
     });
