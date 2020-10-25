@@ -1,12 +1,6 @@
 // TODO: SlideUp, SlideDown, SlideToggle
 // TODO: FadeIn, FadeOut, FadeToggle
 // TODO: Add animate
-// TODO: width
-// TODO: height
-// TODO: innerWidth
-// TODO: innerHeight
-// TODO: outerWidth
-// TODO: outerHeight
 // TODO: Add ajax
 // TODO: Add not
 // TODO: Add has
@@ -97,7 +91,7 @@ const createElementFromString = (string) => {
   return element;
 };
 
-const documentAndWindowEventListener = (argument) => ({
+const documentAndWindowJLightElement = (argument) => ({
   on: (type, callbackOrSelector, delegatedCallback) => {
     if (typeof callbackOrSelector === 'function' || callbackOrSelector === false) {
       argument.addEventListener(type, (event) => {
@@ -121,7 +115,7 @@ const documentAndWindowEventListener = (argument) => ({
       });
     }
 
-    return documentAndWindowEventListener(argument);
+    return documentAndWindowJLightElement(argument);
   },
   trigger: (type, jLightEventData) => {
     const theEvent = document.createEvent('Event');
@@ -130,7 +124,29 @@ const documentAndWindowEventListener = (argument) => ({
     theEvent.initEvent(type, true, true);
     argument.dispatchEvent(theEvent);
 
-    return documentAndWindowEventListener(argument);
+    return documentAndWindowJLightElement(argument);
+  },
+  innerWidth: () => window.innerWidth,
+  innerHeight: () => window.innerHeight,
+  outerWidth: () => window.outerWidth,
+  outerHeight: () => window.outerHeight,
+  scrollTop: (value) => {
+    if (value) {
+      window.scrollTo(0, value);
+
+      return $(argument);
+    }
+
+    return window.pageYOffset;
+  },
+  scrollLeft: (value) => {
+    if (value) {
+      window.scrollTo(value, 0);
+
+      return $(argument);
+    }
+
+    return window.pageXOffset;
   },
 });
 
@@ -942,6 +958,224 @@ const $ = (elements) => ({
 
     return value;
   },
+  width: (value) => {
+    if (value) {
+      elements.forEach((element) => {
+        element.style.width = `${value}${typeof value !== 'string' ? 'px': ''}`;
+      });
+
+      return $(elements);
+    }
+
+    let width;
+
+    elements.forEach((element) => {
+      if (!width) {
+        const computedStyles = window.getComputedStyle(element);
+
+        width = parseFloat(computedStyles.getPropertyValue('width'), 10);
+      }
+    });
+
+    return width;
+  },
+  height: (value) => {
+    if (value) {
+      elements.forEach((element) => {
+        element.style.height = `${value}${typeof value !== 'string' ? 'px': ''}`;
+      });
+
+      return $(elements);
+    }
+
+    let height;
+
+    elements.forEach((element) => {
+      if (!height) {
+        const computedStyles = window.getComputedStyle(element);
+
+        height = parseFloat(computedStyles.getPropertyValue('height'), 10);
+      }
+    });
+
+    return height;
+  },
+  innerWidth: () => {
+    let width;
+
+    elements.forEach((element) => {
+      if (!width) {
+        const computedStyles = window.getComputedStyle(element);
+        const borderLeft = parseFloat(computedStyles.getPropertyValue('border-left'), 10);
+        const borderRight = parseFloat(computedStyles.getPropertyValue('border-right'), 10);
+
+        width = Math.max(
+          element.clientWidth,
+          element.offsetWidth,
+        ) - borderLeft - borderRight;
+      }
+    });
+
+    return width;
+  },
+  innerHeight: () => {
+    let height;
+
+    elements.forEach((element) => {
+      if (!height) {
+        const computedStyles = window.getComputedStyle(element);
+        const borderTop = parseFloat(computedStyles.getPropertyValue('border-top'), 10);
+        const borderBottom = parseFloat(computedStyles.getPropertyValue('border-bottom'), 10);
+
+        height = Math.max(
+          element.clientHeight,
+          element.offsetHeight,
+        ) - borderTop - borderBottom;
+      }
+    });
+
+    return height;
+  },
+  outerWidth: (includeMargins) => {
+    let width;
+
+    elements.forEach((element) => {
+      if (!width) {
+        const computedStyles = window.getComputedStyle(element);
+        let marginLeft = 0;
+        let marginRight = 0;
+
+        if (includeMargins) {
+          marginLeft = parseFloat(computedStyles.getPropertyValue('margin-left'), 10);
+          marginRight = parseFloat(computedStyles.getPropertyValue('margin-right'), 10);
+        }
+
+        width = Math.max(
+          element.clientWidth,
+          element.offsetWidth,
+        ) + marginLeft + marginRight;
+      }
+    });
+
+    return width;
+  },
+  outerHeight: (includeMargins) => {
+    let height;
+
+    elements.forEach((element) => {
+      if (!height) {
+        const computedStyles = window.getComputedStyle(element);
+        let marginTop = 0;
+        let marginBottom = 0;
+
+        if (includeMargins) {
+          marginTop = parseFloat(computedStyles.getPropertyValue('margin-top'), 10);
+          marginBottom = parseFloat(computedStyles.getPropertyValue('margin-bottom'), 10);
+        }
+
+        height = Math.max(
+          element.clientHeight,
+          element.offsetHeight,
+        ) + marginTop + marginBottom;
+      }
+    });
+
+    return height;
+  },
+  scrollWidth: () => {
+    let width;
+
+    elements.forEach((element) => {
+      if (!width) {
+        width = element.scrollWidth;
+      }
+    });
+
+    return width;
+  },
+  scrollHeight: () => {
+    let height;
+
+    elements.forEach((element) => {
+      if (!height) {
+        height = element.scrollHeight;
+      }
+    });
+
+    return height;
+  },
+  scrollTop: (value) => {
+    if (value) {
+      elements.forEach((element) => {
+        element.scrollTop = value;
+      });
+
+      return $(elements);
+    }
+
+    let scrollTop;
+
+    elements.forEach((element) => {
+      if (!scrollTop) {
+        scrollTop = element.scrollTop;
+      }
+    });
+
+    return scrollTop;
+  },
+  scrollLeft: (value) => {
+    if (value) {
+      elements.forEach((element) => {
+        element.scrollLeft = value;
+      });
+
+      return $(elements);
+    }
+
+    let scrollLeft;
+
+    elements.forEach((element) => {
+      if (!scrollLeft) {
+        scrollLeft = element.scrollLeft;
+      }
+    });
+
+    return scrollLeft;
+  },
+  offset: (value) => {
+    if (value) {
+      const { top, left } = value;
+
+      elements.forEach((element) => {
+        const computedStyles = window.getComputedStyle(element);
+
+        element.style.top = top
+          ? `${top}${typeof top !== 'string' ? 'px': ''}`
+          : parseFloat(computedStyles.getPropertyValue('top'), 10);
+
+        element.style.left = left
+          ? `${left}${typeof left !== 'string' ? 'px': ''}`
+          : parseFloat(computedStyles.getPropertyValue('left'), 10);
+      });
+
+      return $(elements);
+    }
+
+    let offset;
+
+    elements.forEach((element) => {
+      const boundingBox = element.getBoundingClientRect();
+
+      if (!offset) {
+        offset = boundingBox;
+      }
+    });
+
+    return {
+      top: offset.top || 0,
+      left: offset.left || 0,
+    };
+  },
   animate: (properties, speed = 300, easing, callback) => {
     elements.forEach((theElement) => {
       const element = theElement;
@@ -994,7 +1228,7 @@ export default (argument) => {
   }
 
   if (argument === document || argument === window) {
-    return documentAndWindowEventListener(argument);
+    return documentAndWindowJLightElement(argument);
   }
 
   if (argument instanceof HTMLElement) {
