@@ -1138,20 +1138,26 @@ const $ = (elements) => ({
 
     return scrollLeft;
   },
-  offset: (value) => {
+  offset: (value, relativeToViewport) => {
     if (value) {
-      const { top, left } = value;
+      let { top, left } = value;
+      const topIsPixelUnit = typeof top === 'number' || (top && top.indexOf('px') > -1);
+      const leftIsPixelUnit = typeof left === 'number' || (left && left.indexOf('px') > -1);
+      const offsetTop = relativeToViewport ? window.pageYOffset : 0;
+      const offsetLeft = relativeToViewport ? window.pageXOffset : 0;
+      const unitTop = topIsPixelUnit ? 'px': '';
+      const unitLeft = leftIsPixelUnit ? 'px': '';
 
       elements.forEach((element) => {
         const computedStyles = window.getComputedStyle(element);
 
         element.style.top = top
-          ? `${top}${typeof top !== 'string' ? 'px': ''}`
-          : parseFloat(computedStyles.getPropertyValue('top'), 10);
+          ? `${topIsPixelUnit ? parseFloat(top, 10) + offsetTop : top}${unitTop}`
+          : `${parseFloat(computedStyles.getPropertyValue('top'), 10)}${offsetTop || ''}${unitTop}`;
 
         element.style.left = left
-          ? `${left}${typeof left !== 'string' ? 'px': ''}`
-          : parseFloat(computedStyles.getPropertyValue('left'), 10);
+          ? `${leftIsPixelUnit ? parseFloat(left, 10) + offsetLeft : top}${unitLeft}`
+          : `${parseFloat(computedStyles.getPropertyValue('left'), 10)}${offsetLeft || ''}${unitLeft}`;
       });
 
       return $(elements);
@@ -1168,8 +1174,8 @@ const $ = (elements) => ({
     });
 
     return {
-      top: offset.top || 0,
-      left: offset.left || 0,
+      top: (offset.top || 0) + window.pageYOffset,
+      left: (offset.left || 0) + window.pageXOffset,
     };
   },
   animate: (properties, speed = 300, easing, callback) => {
