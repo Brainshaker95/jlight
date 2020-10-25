@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import $, { ajax, noop } from './jlight';
+import $, { ajax, get, post, noop } from './jlight';
 
 $(() => {
   const $button = $('button');
