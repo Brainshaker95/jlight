@@ -6,13 +6,11 @@
 // TODO: Add has
 
 const jLightGlobalElements = [];
-const jLightGlobalData = {};
+const jLightGlobalData = [];
 
 const initalizeJLightElementData = (element, selector) => {
-  const elementIndex = jLightGlobalElements.indexOf(element);
-
-  if (elementIndex > -1) {
-    return
+  if (jLightGlobalElements.indexOf(element) > -1) {
+    return;
   }
 
   jLightGlobalElements.push(element);
@@ -20,6 +18,17 @@ const initalizeJLightElementData = (element, selector) => {
   jLightGlobalData[jLightGlobalElements.length - 1] = {
     jLightInternal: { selector },
   };
+};
+
+const removeJLightElementData = (element) => {
+  const elementIndex = jLightGlobalElements.indexOf(element);
+
+  if (elementIndex < 0) {
+    return;
+  }
+
+  jLightGlobalElements.splice(elementIndex, 1);
+  jLightGlobalData.splice(elementIndex, 1);
 };
 
 const getJlightElementData = (element) => {
@@ -669,6 +678,7 @@ const $ = (elements) => ({
     if (!$elements) {
       elements.forEach((element) => {
         element.remove();
+        removeJLightElementData(element);
       });
 
       return null;
@@ -692,6 +702,7 @@ const $ = (elements) => ({
         if (element === referenceElement) {
           if (removeFromDom) {
             element.remove();
+            removeJLightElementData(element);
           }
 
           wasRemoved = true;
