@@ -1126,9 +1126,10 @@ const $ = (elements) => ({
 
     elements.forEach((element) => {
       if (!width) {
-        const computedStyles = window.getComputedStyle(element);
-
-        width = parseFloat(computedStyles.getPropertyValue('width'), 10);
+        width = Math.max(
+          element.clientWidth,
+          element.offsetWidth,
+        );
       }
     });
 
@@ -1147,9 +1148,10 @@ const $ = (elements) => ({
 
     elements.forEach((element) => {
       if (!height) {
-        const computedStyles = window.getComputedStyle(element);
-
-        height = parseFloat(computedStyles.getPropertyValue('height'), 10);
+        height = Math.max(
+          element.clientHeight,
+          element.offsetHeight,
+        );
       }
     });
 
@@ -1335,9 +1337,26 @@ const $ = (elements) => ({
     const relative = typeof value === 'boolean' && value;
 
     return {
-      top: (offset.top || 0) + (!relative ? window.pageYOffset : 0),
-      left: (offset.left || 0) + (!relative ? window.pageXOffset : 0),
+      top: (offset.top || 0) + (relative ? window.pageYOffset : 0),
+      left: (offset.left || 0) + (relative ? window.pageXOffset : 0),
     };
+  },
+  inView: (theOffset) => {
+    const boundingBox = elements[0].getBoundingClientRect();
+    const offset = {
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      ...theOffset,
+    };
+
+    return (
+      boundingBox.top >= parseFloat(offset.top, 10)
+        && boundingBox.left >= parseFloat(offset.left, 10)
+        && boundingBox.bottom <= (window.innerHeight || document.documentElement.clientHeight) + parseFloat(offset.bottom, 10)
+        && boundingBox.right <= (window.innerWidth || document.documentElement.clientWidth) +  parseFloat(offset.right, 10)
+    );
   },
   animate: (properties, speed = 300, easing, callback) => {
     elements.forEach((theElement) => {
