@@ -5,31 +5,100 @@
 // TODO: Add not
 // TODO: Add has
 
+const jLightGlobalElements = [];
 const jLightGlobalData = {};
 
-const getElementPath = (element) => {
-  let path = element.nodeName;
-  let parent = element.parentElement;
+const initalizeJLightElementData = (element, selector) => {
+  const elementIndex = jLightGlobalElements.indexOf(element);
 
-  while (parent) {
-    path = `${parent.nodeName}/${path}`;
-    parent = parent.parentElement;
+  if (elementIndex > -1) {
+    return
   }
 
-  return `${path
-    .replace(/\s+/g, '')
-    .replace('HTML/BODY/', '')
-    .toLowerCase()}`;
+  jLightGlobalElements.push(element);
+
+  jLightGlobalData[jLightGlobalElements.length - 1] = {
+    jLightInternal: { selector },
+  };
 };
 
-const initalizeJLightElementData = (element, selector) => {
-  const elementPath = getElementPath(element);
+const getJlightElementData = (element) => {
+  const elementIndex = jLightGlobalElements.indexOf(element);
 
-  if (!jLightGlobalData[elementPath]) {
-    jLightGlobalData[elementPath] = {
-      jLightInternal: { selector },
-    };
+  if (elementIndex > -1) {
+    return jLightGlobalData[elementIndex];
   }
+
+  initalizeJLightElementData(element, element);
+
+  return getJlightElementData(element);
+};
+
+const setJlightElementData = (element, key, value) => {
+  const elementIndex = jLightGlobalElements.indexOf(element);
+
+  if (elementIndex > -1) {
+    jLightGlobalData[elementIndex][key] = value;
+
+    return;
+  }
+
+  initalizeJLightElementData(element, element);
+  setJlightElementData(element, key, value);
+};
+
+const updateJlightElementData = (element, data) => {
+  const elementIndex = jLightGlobalElements.indexOf(element);
+
+  if (elementIndex > -1) {
+    jLightGlobalData[elementIndex] = {
+      ...jLightGlobalData[elementIndex],
+      ...data,
+    };
+
+    return;
+  }
+
+  initalizeJLightElementData(element, element);
+  updateJlightElementData(element, data);
+};
+
+const addJLightElementEventData = (element, type, callback, realCallback) => {
+  const jLightElementData = getJlightElementData(element);
+  const events = jLightElementData.jLightInternal.events || [];
+
+  events.push({
+    type,
+    callback,
+    realCallback,
+  });
+
+  updateJlightElementData(element, {
+    jLightInternal: {
+      ...jLightElementData.jLightInternal,
+      events,
+    },
+  })
+};
+
+const removeJLightElementEventData = (element, type, callback, realCallback) => {
+  const jLightElementData = getJlightElementData(element);
+  const events = jLightElementData.jLightInternal.events || [];
+
+  updateJlightElementData(element, {
+    jLightInternal: {
+      ...jLightElementData.jLightInternal,
+    events: events.filter((event) => event.type !== type
+        || event.callback !== callback
+        || event.realCallback !== realCallback),
+    },
+  })
+};
+
+const preventEvent = (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  event.stopImmediatePropagation();
 };
 
 const dashCaseToCamelCase = (string) => {
@@ -78,15 +147,7 @@ const createElementFromString = (string) => {
     );
   }
 
-  const elementPath = getElementPath(element);
-
-  if (!jLightGlobalData[elementPath]) {
-    jLightGlobalData[elementPath] = {
-      jLightInternal: {},
-    };
-  }
-
-  jLightGlobalData[elementPath].jLightInternal.selector = tagName;
+  initalizeJLightElementData(element, tagName);
 
   return element;
 };
@@ -94,27 +155,45 @@ const createElementFromString = (string) => {
 const documentAndWindowJLightElement = (argument) => ({
   on: (type, callbackOrSelector, delegatedCallback) => {
     if (typeof callbackOrSelector === 'function' || callbackOrSelector === false) {
-      argument.addEventListener(type, (event) => {
+      const callback = (event) => {
+        event.$target = $([event.target]);
+        event.$currentTarget = $([event.currentTarget]);
+
         if (callbackOrSelector === false
           || callbackOrSelector(event, event.jLightEventData) === false
           || delegatedCallback === false) {
-          event.preventDefault();
-          event.stopPropagation();
-          event.stopImmediatePropagation();
+          preventEvent(event);
         }
-      });
+      };
+
+      addJLightElementEventData(argument, type, callbackOrSelector, callback);
+      argument.addEventListener(type, callback);
     } else {
       argument.addEventListener(type, (event) => {
         if (event.target.matches(callbackOrSelector)) {
+          event.$target = $([event.target]);
+          event.$currentTarget = $([event.currentTarget]);
+
           if (delegatedCallback === false
             || delegatedCallback(event, event.jLightEventData) === false) {
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
+            preventEvent(event);
           }
         }
       });
     }
+
+    return documentAndWindowJLightElement(argument);
+  },
+  off: (type, callback) => {
+    const jLightElementData = getJlightElementData(argument);
+    const events = jLightElementData.jLightInternal.events || [];
+
+    events.forEach((event) => {
+      if (event.type === type && event.callback === callback) {
+        removeJLightElementEventData(argument, type, callback, event.realCallback)
+        argument.removeEventListener(type, event.realCallback);
+      }
+    });
 
     return documentAndWindowJLightElement(argument);
   },
@@ -225,11 +304,7 @@ const $ = (elements) => ({
   },
   toggleClass: (cssClass) => {
     elements.forEach((element) => {
-      if (element.classList.contains(cssClass)) {
-        element.classList.remove(cssClass);
-      } else {
-        element.classList.add(cssClass);
-      }
+      element.classList.toggle(cssClass);
     });
 
     return $(elements);
@@ -269,7 +344,7 @@ const $ = (elements) => ({
     elements.forEach((theElement) => {
       const element = theElement;
 
-      element.style.display = '';
+      element.style.display = type || '';
     });
 
     return $(elements);
@@ -300,52 +375,132 @@ const $ = (elements) => ({
   on: (type, callbackOrSelector, delegatedCallback) => {
     if (typeof callbackOrSelector === 'function' || callbackOrSelector === false) {
       elements.forEach((element) => {
-        element.addEventListener(type, (event) => {
+        const callback = (event) => {
+          event.$target = $([event.target]);
+          event.$currentTarget = $([event.currentTarget]);
+
           if (callbackOrSelector === false
             || callbackOrSelector(event, event.jLightEventData) === false
             || delegatedCallback === false) {
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
+            preventEvent(event);
           }
-        });
+        };
+
+        addJLightElementEventData(element, type, callbackOrSelector, callback);
+        element.addEventListener(type, callback);
       });
     } else {
       elements.forEach((element) => {
-        document.addEventListener(type, (event) => {
+        const callback = (event) => {
           if (element.contains(event.target) && event.target.matches(callbackOrSelector)) {
+            event.$target = $([event.target]);
+            event.$currentTarget = $([event.currentTarget]);
+
             if (delegatedCallback === false
               || delegatedCallback(event, event.jLightEventData) === false) {
-              event.preventDefault();
-              event.stopPropagation();
-              event.stopImmediatePropagation();
+              preventEvent(event);
             }
           }
-        });
+        };
+
+        document.addEventListener(type, callback);
       });
     }
 
     return $(elements);
   },
-  delegate: (type, callback) => {
-    const elementPath = getElementPath(elements[0]);
+  once: (type, callbackOrSelector, delegatedCallback) => {
+    if (typeof callbackOrSelector === 'function' || callbackOrSelector === false) {
+      elements.forEach((element) => {
+        const callback = (event) => {
+          event.$target = $([event.target]);
+          event.$currentTarget = $([event.currentTarget]);
 
-    if (!jLightGlobalData[elementPath]) {
-      jLightGlobalData[elementPath] = {
-        jLightInternal: {},
-      };
+          if (callbackOrSelector === false
+            || callbackOrSelector(event, event.jLightEventData) === false
+            || delegatedCallback === false) {
+            preventEvent(event);
+          }
+
+          element.removeEventListener(type, callback);
+        };
+
+        element.addEventListener(type, callback);
+      });
+    } else {
+      elements.forEach((element) => {
+        const callback = (event) => {
+          if (element.contains(event.target) && event.target.matches(callbackOrSelector)) {
+            event.$target = $([event.target]);
+            event.$currentTarget = $([event.currentTarget]);
+
+            if (delegatedCallback === false
+              || delegatedCallback(event, event.jLightEventData) === false) {
+              preventEvent(event);
+            }
+
+            document.removeEventListener(type, callback);
+          }
+        };
+
+        document.addEventListener(type, callback);
+      });
     }
 
-    document.addEventListener(type, (event) => {
-      if (event.target.matches(jLightGlobalData[elementPath].jLightInternal.selector)) {
+    return $(elements);
+  },
+  off: (type, callback) => {
+    elements.forEach((element) => {
+      const jLightElementData = getJlightElementData(element);
+      const events = jLightElementData.jLightInternal.events || [];
+
+      events.forEach((event) => {
+        if (event.type === type && event.callback === callback) {
+          removeJLightElementEventData(element, type, callback, event.realCallback)
+          element.removeEventListener(type, event.realCallback);
+        }
+      });
+    });
+
+    return $(elements);
+  },
+  delegate: (type, callback) => {
+    const realCallback = (event) => {
+      const jLightElementData = getJlightElementData(elements[0]);
+      const { selector } = jLightElementData.jLightInternal;
+
+      if (!selector) {
+        return;
+      }
+
+      if (event.target.matches(selector)) {
+        event.$target = $([event.target]);
+        event.$currentTarget = $([event.currentTarget]);
+
         if (callback === false
           || callback(event, event.jLightEventData) === false) {
-          event.preventDefault();
-          event.stopPropagation();
-          event.stopImmediatePropagation();
+            preventEvent(event);
         }
       }
+    };
+
+    addJLightElementEventData(document, type, callback, realCallback);
+    document.addEventListener(type, realCallback);
+
+    return $(elements);
+  },
+  undelegate: (type, callback) => {
+    const jLightElementData = getJlightElementData(document);
+    const events = jLightElementData.jLightInternal.events || [];
+
+    events.forEach((event) => {
+      if (event.type === type && event.callback === callback) {
+        removeJLightElementEventData(document, type, callback, event.realCallback)
+        document.removeEventListener(type, event.realCallback);
+      }
     });
+
+    return $(elements);
   },
   trigger: (type, jLightEventData) => {
     const theEvent = document.createEvent('Event');
@@ -416,7 +571,15 @@ const $ = (elements) => ({
   },
   attr: (attribute, value) => {
     if (value === undefined) {
-      return elements[0].getAttribute(attribute);
+      let attr;
+
+      elements.forEach((element) => {
+        if (!attr) {
+          attr = element.getAttribute(attribute);
+        }
+      });
+
+      return attr;
     }
 
     elements.forEach((element) => {
@@ -425,23 +588,17 @@ const $ = (elements) => ({
 
     return $(elements);
   },
+  removeAttr: (attribute) => {
+    elements.forEach((element) => {
+      element.removeAttribute(attribute);
+    });
+
+    return $(elements);
+  },
   data: (theKey, value) => {
     if (typeof theKey === 'object' && theKey !== null) {
       elements.forEach((element) => {
-        const elementPath = getElementPath(element);
-
-        if (!jLightGlobalData[elementPath]) {
-          jLightGlobalData[elementPath] = {
-            jLightInternal: {},
-          };
-        }
-
-        jLightGlobalData[elementPath] = {
-          ...theKey,
-          jLightInternal: {
-            ...jLightGlobalData[elementPath].jLightInternal,
-          },
-        };
+        updateJlightElementData(element, { ...theKey });
       });
 
       return $(elements);
@@ -451,15 +608,7 @@ const $ = (elements) => ({
 
     if (value) {
       elements.forEach((element) => {
-        const elementPath = getElementPath(element);
-
-        if (!jLightGlobalData[elementPath]) {
-          jLightGlobalData[elementPath] = {
-            jLightInternal: {},
-          };
-        }
-
-        jLightGlobalData[elementPath][key] = value;
+        setJlightElementData(element, key, value);
       });
 
       return $(elements);
@@ -469,12 +618,12 @@ const $ = (elements) => ({
 
     elements.forEach((element) => {
       if (!data) {
-        const elementPath = getElementPath(element);
+        const jLightElementData = getJlightElementData(element);
 
         if (!theKey) {
-          data = jLightGlobalData[elementPath];
+          data = jLightElementData;
         } else {
-          data = jLightGlobalData[elementPath][key];
+          data = jLightElementData[key];
 
           if (!data) {
             data = element.getAttribute(`data-${theKey}`)
@@ -1139,7 +1288,7 @@ const $ = (elements) => ({
     return scrollLeft;
   },
   offset: (value, relativeToViewport) => {
-    if (value) {
+    if (value && typeof value !== 'boolean') {
       let { top, left } = value;
       const topIsPixelUnit = typeof top === 'number' || (top && top.indexOf('px') > -1);
       const leftIsPixelUnit = typeof left === 'number' || (left && left.indexOf('px') > -1);
@@ -1173,9 +1322,11 @@ const $ = (elements) => ({
       }
     });
 
+    const relative = typeof value === 'boolean' && value;
+
     return {
-      top: (offset.top || 0) + window.pageYOffset,
-      left: (offset.left || 0) + window.pageXOffset,
+      top: (offset.top || 0) + (!relative ? window.pageYOffset : 0),
+      left: (offset.left || 0) + (!relative ? window.pageXOffset : 0),
     };
   },
   animate: (properties, speed = 300, easing, callback) => {
@@ -1357,6 +1508,8 @@ export default (argument) => {
   }
 
   if (argument === document || argument === window) {
+    initalizeJLightElementData(argument, argument);
+
     return documentAndWindowJLightElement(argument);
   }
 
