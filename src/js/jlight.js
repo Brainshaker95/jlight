@@ -1,7 +1,6 @@
 // TODO: SlideUp, SlideDown, SlideToggle
 // TODO: FadeIn, FadeOut, FadeToggle
 // TODO: Add animate
-// TODO: Add ajax
 // TODO: Add not
 // TODO: Add has
 
@@ -529,7 +528,7 @@ const $ = (elements) => ({
     }
 
     elements.forEach((element, index) => {
-      callback($(element), index);
+      callback($([element]), index);
     });
 
     return $(elements);
@@ -615,7 +614,7 @@ const $ = (elements) => ({
 
     const key = dashCaseToCamelCase(theKey);
 
-    if (value) {
+    if (value !== undefined) {
       elements.forEach((element) => {
         setJlightElementData(element, key, value);
       });
@@ -634,7 +633,7 @@ const $ = (elements) => ({
         } else {
           data = jLightElementData[key];
 
-          if (!data) {
+          if (data === undefined) {
             data = element.getAttribute(`data-${theKey}`)
               || element.getAttribute(`data-${key}`);
           }
