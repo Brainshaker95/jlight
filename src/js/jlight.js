@@ -1,8 +1,6 @@
 // TODO: SlideUp, SlideDown, SlideToggle
 // TODO: FadeIn, FadeOut, FadeToggle
 // TODO: Add animate
-// TODO: Add not
-// TODO: Add has
 
 const jLightGlobalElements = [];
 const jLightGlobalData = [];
@@ -166,7 +164,7 @@ const getElementsFromArgument = (argument) => {
   }
 
   if (typeof argument === 'string') {
-    return [...document.querySelectorAll(argument)];
+    return argument.match(/^<.+>$/) ? [(createElementFromString(argument))] : [...document.querySelectorAll(argument)];
   }
 
   if (argument instanceof HTMLCollection || argument instanceof NodeList) {
@@ -1372,8 +1370,10 @@ const $ = (elements) => ({
       let isIn = false;
 
       selectedElements.forEach((selectedElement) => {
-        if (element.contains(selectedElement)) {
-          isIn = true;
+        if (!isIn) {
+          if (element.contains(selectedElement)) {
+            isIn = true;
+          }
         }
       });
 
@@ -1389,8 +1389,10 @@ const $ = (elements) => ({
       let isIn = true;
 
       selectedElements.forEach((selectedElement) => {
-        if (selectedElement === element) {
-          isIn = false;
+        if (isIn) {
+          if (selectedElement === element) {
+            isIn = false;
+          }
         }
       });
 
