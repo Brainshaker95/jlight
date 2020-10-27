@@ -160,6 +160,8 @@ const createElementFromString = (string) => {
   return element;
 };
 
+export const noop = () => {};
+
 const documentAndWindowJLightElement = (argument) => ({
   on: (type, callbackOrSelector, delegatedCallback) => {
     if (typeof callbackOrSelector === 'function' || callbackOrSelector === false) {
@@ -1358,51 +1360,68 @@ const $ = (elements) => ({
         && boundingBox.right <= (window.innerWidth || document.documentElement.clientWidth) +  parseFloat(offset.right, 10)
     );
   },
-  animate: (properties, speed = 300, easing, callback) => {
+  animate: (properties, speed = 300, easing = 'ease', callback = noop) => {
+    elements.forEach((theElement) => {
+      const jLightElementData = getJlightElementData(theElement).jLightInternal = {};
+      const element = theElement;
+      let transition = '';
+
+      Object.entries(properties).forEach(([theKey, value], index) => {
+        const key = camelCaseToDashCase(theKey);
+
+        transition += `${index === 0 ? '' : ','}${key} ${speed}ms ${easing}`;
+
+        if (!element.style[key]) {
+          const computedStyles = window.getComputedStyle(element);
+
+          element.style[key] = computedStyles.getPropertyValue(key);
+        }
+
+        setTimeout(() => {
+          element.style[key] = `${value}${typeof value === 'number' ? 'px' : ''}`;
+        }, 0);
+      });
+
+      updateJlightElementData(element, {
+        jLightInternal: {
+          ...jLightElementData,
+          animatedProperties: Object.keys(properties),
+        },
+      });
+
+      element.style.transition = transition;
+    });
+
+    setTimeout(() => {
+      elements.forEach((theElement) => {
+        const element = theElement;
+
+        element.style.transition = '';
+      });
+
+      callback();
+    }, speed);
+
+    return $(elements);
+  },
+  stop: () => {
     elements.forEach((theElement) => {
       const element = theElement;
-      const startComputedStyles = window.getComputedStyle(element);
+      const computedStyles = window.getComputedStyle(element);
+      const animatedProperties = getJlightElementData(element).jLightInternal.animatedProperties || [];
 
-      Object.entries(properties).forEach(([theKey, value]) => {
-        const key = camelCaseToDashCase(theKey);
-        const targetValue = parseInt(value, 10);
-        const startValue = parseInt(startComputedStyles.getPropertyValue(key), 10);
-        const difference = targetValue - startValue;
-        let animation;
-        const valueToAnimateEachFrame = difference !== 0
-          ? Math.round(difference / speed)
-          : 0;
-
-        // TODO: Implement duration correctly
-        // TODO: Implement easing and callback
-
-        console.log(valueToAnimateEachFrame);
-
-        const doAnimate = () => {
-          const currentComputedStyles = window.getComputedStyle(element);
-          const currentValue = parseInt(currentComputedStyles.getPropertyValue(key), 10);
-          const nextValue = currentValue + valueToAnimateEachFrame;
-
-          if (Math.abs(nextValue - targetValue) >= Math.abs(valueToAnimateEachFrame)) {
-            // TODO: Add dynamic units
-
-            element.style[key] = `${nextValue}px`;
-
-            animation = window.requestAnimationFrame(doAnimate);
-          } else {
-            element.style[key] = `${targetValue}px`;
-
-            window.cancelAnimationFrame(animation);
-          }
-        };
-
-        animation = window.requestAnimationFrame(doAnimate);
+      animatedProperties.forEach((key) => {
+        element.style[key] = computedStyles.getPropertyValue(
+          camelCaseToDashCase(key),
+        );
       });
+
+      element.style.transition = '';
     });
+
+    return $(elements);
   },
 });
-
-export const noop = () => {};
 
 export const ajax = (opts = {}) => {
   const options = {
