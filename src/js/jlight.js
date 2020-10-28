@@ -1,8 +1,6 @@
 // TODO: SlideUp, SlideDown, SlideToggle
 // TODO: FadeIn, FadeOut, FadeToggle
 // TODO: Add animate
-// TODO: Add not
-// TODO: Add has
 
 const jLightGlobalElements = [];
 const jLightGlobalData = [];
@@ -96,7 +94,7 @@ const removeJLightElementEventData = (element, type, callback, realCallback) => 
   updateJlightElementData(element, {
     jLightInternal: {
       ...jLightElementData.jLightInternal,
-    events: events.filter((event) => event.type !== type
+      events: events.filter((event) => event.type !== type
         || event.callback !== callback
         || event.realCallback !== realCallback),
     },
@@ -160,7 +158,23 @@ const createElementFromString = (string) => {
   return element;
 };
 
-export const noop = () => {};
+const getElementsFromArgument = (argument) => {
+  if (argument.elements) {
+    return argument.elements;
+  }
+
+  if (typeof argument === 'string') {
+    return argument.match(/^<.+>$/) ? [(createElementFromString(argument))] : [...document.querySelectorAll(argument)];
+  }
+
+  if (argument instanceof HTMLCollection || argument instanceof NodeList) {
+    return [...argument];
+  }
+
+  return [argument];
+};
+
+export const noop = () => { };
 
 const documentAndWindowJLightElement = (argument) => ({
   on: (type, callbackOrSelector, delegatedCallback) => {
@@ -489,7 +503,7 @@ const $ = (elements) => ({
 
         if (callback === false
           || callback(event, event.jLightEventData) === false) {
-            preventEvent(event);
+          preventEvent(event);
         }
       }
     };
@@ -656,16 +670,8 @@ const $ = (elements) => ({
   },
   clone: (deep = true) => $(elements.map((element) => element.cloneNode(deep))),
   add: ($elements) => {
-    let theElements = $elements;
     const addedElements = [];
-
-    if (theElements.elements) {
-      theElements = theElements.elements;
-    } else if (typeof $elements === 'string') {
-      theElements = [createElementFromString($elements)];
-    } else {
-      theElements = [theElements];
-    }
+    const theElements = getElementsFromArgument($elements);
 
     theElements.forEach((referenceElement) => {
       if (referenceElement && !elements.includes(referenceElement)) {
@@ -686,15 +692,7 @@ const $ = (elements) => ({
     }
 
     const remainingElements = [];
-    let theElements = $elements;
-
-    if (theElements.elements) {
-      theElements = theElements.elements;
-    } else if (typeof $elements === 'string') {
-      theElements = [...document.querySelectorAll($elements)];
-    } else {
-      theElements = [theElements];
-    }
+    const theElements = getElementsFromArgument($elements);
 
     elements.forEach((element) => {
       let wasRemoved;
@@ -768,15 +766,7 @@ const $ = (elements) => ({
     return html;
   },
   prepend: ($elements) => {
-    let theElements = $elements;
-
-    if (theElements.elements) {
-      theElements = theElements.elements;
-    } else if (typeof $elements === 'string') {
-      theElements = [createElementFromString($elements)];
-    } else {
-      theElements = [theElements];
-    }
+    const theElements = getElementsFromArgument($elements);
 
     elements.forEach((element) => {
       theElements.forEach((elementToPrepend) => {
@@ -789,15 +779,7 @@ const $ = (elements) => ({
     return $(elements);
   },
   append: ($elements) => {
-    let theElements = $elements;
-
-    if (theElements.elements) {
-      theElements = theElements.elements;
-    } else if (typeof $elements === 'string') {
-      theElements = [createElementFromString($elements)];
-    } else {
-      theElements = [theElements];
-    }
+    const theElements = getElementsFromArgument($elements);
 
     elements.forEach((element) => {
       theElements.forEach((elementToAppend) => {
@@ -810,15 +792,7 @@ const $ = (elements) => ({
     return $(elements);
   },
   prependTo: ($elements) => {
-    let theElements = $elements;
-
-    if (theElements.elements) {
-      theElements = theElements.elements;
-    } else if (typeof $elements === 'string') {
-      theElements = [createElementFromString($elements)];
-    } else {
-      theElements = [theElements];
-    }
+    const theElements = getElementsFromArgument($elements);
 
     elements.forEach((element) => {
       theElements.forEach((elementToPrependTo) => {
@@ -831,15 +805,7 @@ const $ = (elements) => ({
     return $(elements);
   },
   appendTo: ($elements) => {
-    let theElements = $elements;
-
-    if (theElements.elements) {
-      theElements = theElements.elements;
-    } else if (typeof $elements === 'string') {
-      theElements = [createElementFromString($elements)];
-    } else {
-      theElements = [theElements];
-    }
+    const theElements = getElementsFromArgument($elements);
 
     elements.forEach((element) => {
       theElements.forEach((elementToAppendTo) => {
@@ -874,15 +840,7 @@ const $ = (elements) => ({
     return $(elements);
   },
   before: ($elements) => {
-    let theElements = $elements;
-
-    if (theElements.elements) {
-      theElements = theElements.elements;
-    } else if (typeof $elements === 'string') {
-      theElements = [createElementFromString($elements)];
-    } else {
-      theElements = [theElements];
-    }
+    const theElements = getElementsFromArgument($elements);
 
     elements.forEach((element) => {
       theElements.forEach((referenceElement) => {
@@ -895,15 +853,7 @@ const $ = (elements) => ({
     return $(elements);
   },
   after: ($elements) => {
-    let theElements = $elements;
-
-    if (theElements.elements) {
-      theElements = theElements.elements;
-    } else if (typeof $elements === 'string') {
-      theElements = [createElementFromString($elements)];
-    } else {
-      theElements = [theElements];
-    }
+    const theElements = getElementsFromArgument($elements);
 
     elements.forEach((element) => {
       theElements.forEach((referenceElement) => {
@@ -1055,15 +1005,7 @@ const $ = (elements) => ({
   },
   contains: ($elements) => {
     let contains;
-    let theElements = $elements;
-
-    if (theElements.elements) {
-      theElements = theElements.elements;
-    } else if (typeof $elements === 'string') {
-      theElements = $($elements);
-    } else {
-      theElements = [theElements];
-    }
+    const theElements = getElementsFromArgument($elements);
 
     elements.forEach((element) => {
       if (!contains) {
@@ -1118,7 +1060,7 @@ const $ = (elements) => ({
   width: (value) => {
     if (value) {
       elements.forEach((element) => {
-        element.style.width = `${value}${typeof value !== 'string' ? 'px': ''}`;
+        element.style.width = `${value}${typeof value !== 'string' ? 'px' : ''}`;
       });
 
       return $(elements);
@@ -1140,7 +1082,7 @@ const $ = (elements) => ({
   height: (value) => {
     if (value) {
       elements.forEach((element) => {
-        element.style.height = `${value}${typeof value !== 'string' ? 'px': ''}`;
+        element.style.height = `${value}${typeof value !== 'string' ? 'px' : ''}`;
       });
 
       return $(elements);
@@ -1308,8 +1250,8 @@ const $ = (elements) => ({
       const leftIsPixelUnit = typeof left === 'number' || (left && left.indexOf('px') > -1);
       const offsetTop = relativeToViewport ? window.pageYOffset : 0;
       const offsetLeft = relativeToViewport ? window.pageXOffset : 0;
-      const unitTop = topIsPixelUnit ? 'px': '';
-      const unitLeft = leftIsPixelUnit ? 'px': '';
+      const unitTop = topIsPixelUnit ? 'px' : '';
+      const unitLeft = leftIsPixelUnit ? 'px' : '';
 
       elements.forEach((element) => {
         const computedStyles = window.getComputedStyle(element);
@@ -1357,7 +1299,7 @@ const $ = (elements) => ({
       boundingBox.top >= parseFloat(offset.top, 10)
         && boundingBox.left >= parseFloat(offset.left, 10)
         && boundingBox.bottom <= (window.innerHeight || document.documentElement.clientHeight) + parseFloat(offset.bottom, 10)
-        && boundingBox.right <= (window.innerWidth || document.documentElement.clientWidth) +  parseFloat(offset.right, 10)
+        && boundingBox.right <= (window.innerWidth || document.documentElement.clientWidth) + parseFloat(offset.right, 10)
     );
   },
   animate: (properties, speed = 300, easing = 'ease', callback = noop) => {
@@ -1421,6 +1363,44 @@ const $ = (elements) => ({
 
     return $(elements);
   },
+  has: ($elements) => {
+    const selectedElements = getElementsFromArgument($elements);
+
+    const filtered = elements.filter((element) => {
+      let isIn = false;
+
+      selectedElements.forEach((selectedElement) => {
+        if (!isIn) {
+          if (element.contains(selectedElement)) {
+            isIn = true;
+          }
+        }
+      });
+
+      return isIn;
+    });
+
+    return $(filtered);
+  },
+  not: ($elements) => {
+    const selectedElements = getElementsFromArgument($elements);
+
+    const filtered = elements.filter((element) => {
+      let isIn = true;
+
+      selectedElements.forEach((selectedElement) => {
+        if (isIn) {
+          if (selectedElement === element) {
+            isIn = false;
+          }
+        }
+      });
+
+      return isIn;
+    });
+
+    return $(filtered);
+  },
 });
 
 export const ajax = (opts = {}) => {
@@ -1431,7 +1411,7 @@ export const ajax = (opts = {}) => {
     headers: {},
     processData: true,
     crossDomain: false,
-		contentType: 'application/x-www-form-urlencoded',
+    contentType: 'application/x-www-form-urlencoded',
     async: true,
     username: null,
     password: null,
