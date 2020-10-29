@@ -1,7 +1,23 @@
 const jLightGlobalElements = [];
 const jLightGlobalData = [];
 
+export const noop = () => { };
+
 export const uuid = () => Math.random().toString(36).substr(2, 9);
+
+export const preventEvent = (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  event.stopImmediatePropagation();
+};
+
+export const dashCaseToCamelCase = (string) => (typeof string === 'string'
+  ? string.replace(/-([a-z])/g, (chars) => chars[1].toUpperCase())
+  : null);
+
+export const camelCaseToDashCase = (string) => (typeof string === 'string'
+  ? string.replace(/([a-z][A-Z])/g, (char) => `${char[0]}-${char[1].toLowerCase()}`)
+  : null);
 
 const initalizeJLightElementData = (element, selector) => {
   if (jLightGlobalElements.indexOf(element) > -1) {
@@ -99,28 +115,6 @@ const removeJLightElementEventData = (element, type, callback, realCallback) => 
   });
 };
 
-const preventEvent = (event) => {
-  event.preventDefault();
-  event.stopPropagation();
-  event.stopImmediatePropagation();
-};
-
-const dashCaseToCamelCase = (string) => {
-  if (!string || typeof string === 'object') {
-    return null;
-  }
-
-  return string.replace(/-([a-z])/g, (chars) => chars[1].toUpperCase());
-};
-
-const camelCaseToDashCase = (string) => {
-  if (!string || typeof string === 'object') {
-    return null;
-  }
-
-  return string.replace(/([a-z][A-Z])/g, (char) => `${char[0]}-${char[1].toLowerCase()}`);
-};
-
 const createElementFromString = (string) => {
   const tags = string.split('<');
   const lastTagIndex = tags.length - 1;
@@ -172,8 +166,6 @@ const getElementsFromArgument = (argument) => {
   return [argument];
 };
 
-export const noop = () => { };
-
 const getPrevMatchingElement = (element, selector) => {
   const prev = element.previousElementSibling;
 
@@ -216,6 +208,23 @@ const getClosestMatchingElement = (element, selector) => {
   }
 
   return null;
+};
+
+const canBeSeralized = (element) => (element.name
+  && (element instanceof HTMLInputElement
+    || element instanceof HTMLTextAreaElement
+    || element instanceof HTMLSelectElement));
+
+const addValueToJson = (element, theSerializedJson) => {
+  const serializedJson = theSerializedJson;
+
+  if (element.type === 'checkbox') {
+    serializedJson[element.name] = element.checked;
+  } else {
+    serializedJson[element.name] = element.value;
+  }
+
+  return serializedJson;
 };
 
 const $ = (elements) => ({
@@ -1515,6 +1524,43 @@ const $ = (elements) => ({
 
     return $(elements);
   },
+  serialize: () => {
+    let serializedString = '';
+
+    elements.forEach((element, index) => {
+      if (element instanceof HTMLFormElement) {
+        serializedString += Array.from(new FormData(element),
+          (formDataItem) => formDataItem.map(encodeURIComponent).join('=')).join('&');
+      } else if (canBeSeralized(element)) {
+        let { value } = element;
+
+        if (element.type === 'checkbox') {
+          value = element.checked;
+        }
+
+        serializedString += `${index === 0 ? '' : '&'}${element.name}=${value}`;
+      }
+    });
+
+    return serializedString;
+  },
+  serializeJson: () => {
+    let serializedJson = {};
+
+    elements.forEach((element) => {
+      if (element instanceof HTMLFormElement) {
+        Array.from(element.children).forEach((child) => {
+          if (child.name) {
+            serializedJson = addValueToJson(element, serializedJson);
+          }
+        });
+      } else if (canBeSeralized(element)) {
+        serializedJson = addValueToJson(element, serializedJson);
+      }
+    });
+
+    return serializedJson;
+  },
 });
 
 export const ajax = (opts = {}) => {
@@ -1584,7 +1630,7 @@ export const ajax = (opts = {}) => {
     request.setRequestHeader(key, value);
   });
 
-  const fail = options.fail(
+  const fail = () => options.fail(
     isJson ? JSON.parse(request.response) : request.response,
     request.status,
     request,
@@ -1738,9 +1784,7 @@ export default (argument) => {
   let elements = [];
 
   if (typeof argument === 'string') {
-    // TODO: Use regex from above for this
-    if (argument.indexOf('<') === 0
-      && argument.lastIndexOf('>') === argument.length - 1) {
+    if (argument.match(/^<.+>$/)) {
       elements = [createElementFromString(argument)];
     } else {
       elements = [...document.querySelectorAll(argument)];
