@@ -1,5 +1,12 @@
 /* eslint-disable no-console */
-import $, { ajax, get, post, noop } from './jlight';
+/* eslint-disable no-unused-vars */
+import $, {
+  ajax,
+  get,
+  post,
+  noop,
+  uuid,
+} from './jlight';
 
 $(() => {
   const $button = $('button');
