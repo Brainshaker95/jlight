@@ -9,7 +9,7 @@ module.exports = (_, args) => {
 
   return {
     mode: productionMode ? 'production' : 'development',
-    entry: './src/js/app.js',
+    entry: './app.js',
     output: {
       path: path.resolve(__dirname, 'dist'),
       filename: 'app.js',
