@@ -1,6 +1,6 @@
 {
   "name": "jlight",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Lightweight JQuery alternative",
   "author": "Patrick Rupp",
   "license": "MIT",
@@ -27,8 +27,5 @@
   },
   "files": [
     "index.js"
-  ],
-  "dependencies": {
-    "jlight": "^1.0.1"
-  }
+  ]
 }
