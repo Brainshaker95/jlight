@@ -6,6 +6,8 @@ import $, {
   post,
   noop,
   uuid,
+  ucfirst,
+  isSameObject,
   preventEvent,
   dashCaseToCamelCase,
   camelCaseToDashCase,
@@ -17,6 +19,8 @@ $(() => {
   const $spans = $('.span');
   const $input = $('input');
   const $link = $('a');
+
+  window.$ = $;
 
   // Try something
 });
