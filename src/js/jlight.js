@@ -1,9 +1,13 @@
 const jLightGlobalElements = [];
 const jLightGlobalData = [];
 
-export const noop = () => { };
+export const noop = () => {};
 
 export const uuid = () => Math.random().toString(36).substr(2, 9);
+
+export const ucfirst = (string) => string.charAt(0).toUpperCase() + string.slice(1);
+
+export const isSameObject = (obj1, obj2) => JSON.stringify(obj1) === JSON.stringify(obj2);
 
 export const preventEvent = (event) => {
   event.preventDefault();
@@ -13,11 +17,125 @@ export const preventEvent = (event) => {
 
 export const dashCaseToCamelCase = (string) => (typeof string === 'string'
   ? string.replace(/-([a-z])/g, (chars) => chars[1].toUpperCase())
-  : null);
+  : '');
 
 export const camelCaseToDashCase = (string) => (typeof string === 'string'
   ? string.replace(/([a-z][A-Z])/g, (char) => `${char[0]}-${char[1].toLowerCase()}`)
-  : null);
+  : '');
+
+export const ajax = (opts = {}) => {
+  const options = {
+    url: window.location.href,
+    method: 'POST',
+    data: {},
+    headers: {},
+    processData: true,
+    crossDomain: false,
+    contentType: 'application/x-www-form-urlencoded',
+    async: true,
+    username: null,
+    password: null,
+    done: noop,
+    fail: noop,
+    always: noop,
+    abort: noop,
+    xhr: () => new XMLHttpRequest(),
+    ...opts,
+  };
+
+  const request = options.xhr();
+  const isJson = options.contentType === 'application/json';
+  const { headers } = options;
+  let { data } = options;
+
+  if (!options.crossDomain && !headers['X-Requested-With']) {
+    headers['X-Requested-With'] = 'XMLHttpRequest';
+  }
+
+  if (!headers['Content-Type']) {
+    headers['Content-Type'] = options.contentType;
+  }
+
+  if (options.processData) {
+    if (isJson) {
+      data = JSON.stringify(data);
+    } else {
+      const params = [];
+
+      Object.entries(options.data).forEach(([theKey, value]) => {
+        const key = theKey;
+
+        if (Array.isArray(value)) {
+          value.forEach((item) => {
+            params.push(`${key}[]=${item}`);
+          });
+        } else {
+          params.push(`${key}=${value}`);
+        }
+      });
+
+      data = params.join('&');
+    }
+  }
+
+  request.open(
+    options.method,
+    `${options.url}${options.method === 'GET' ? `?${data}` : ''}`,
+    options.async,
+    options.username,
+    options.password,
+  );
+
+  Object.entries(headers).forEach(([key, value]) => {
+    request.setRequestHeader(key, value);
+  });
+
+  const fail = () => options.fail(
+    isJson ? JSON.parse(request.response) : request.response,
+    request.status,
+    request,
+  );
+
+  request.onerror = fail;
+  request.ontimeout = fail;
+  request.onabort = options.abort;
+
+  request.onreadystatechange = () => {
+    if (request.readyState === XMLHttpRequest.DONE) {
+      if (request.status && request.status >= 200 && request.status < 300) {
+        options.done(
+          isJson ? JSON.parse(request.response) : request.response,
+          request.status,
+          request,
+        );
+      } else if (request.status) {
+        fail();
+      }
+
+      options.always(
+        isJson ? JSON.parse(request.response) : request.response,
+        request.status,
+        request,
+      );
+    }
+  };
+
+  request.send(options.method === 'POST' ? data : null);
+
+  return request;
+};
+
+export const get = (url, opts = {}) => ajax({
+  method: 'GET',
+  url,
+  ...opts,
+});
+
+export const post = (url, opts = {}) => ajax({
+  method: 'POST',
+  url,
+  ...opts,
+});
 
 const initalizeJLightElementData = (element, selector) => {
   if (jLightGlobalElements.indexOf(element) > -1) {
@@ -136,6 +254,7 @@ const createElementFromString = (string) => {
 
   const tagName = openingTag.substring(0, endOfTagIndex);
   const element = document.createElement(tagName);
+  const innerText = openingTag.substring(endOfTagIndex + 1, openingTag.length);
 
   if (lastTagIndex - 2 > 0) {
     const innerHtml = tags.splice(2, lastTagIndex - 2).join('<');
@@ -143,6 +262,8 @@ const createElementFromString = (string) => {
     element.append(
       createElementFromString(`<${innerHtml}`),
     );
+  } else if (innerText) {
+    element.innerText = innerText;
   }
 
   initalizeJLightElementData(element, tagName);
@@ -227,23 +348,264 @@ const addValueToJson = (element, theSerializedJson) => {
   return serializedJson;
 };
 
+const getUpdateAnimationId = (element) => {
+  const jLightElementData = getJlightElementData(element).jLightInternal || {};
+  const animationId = uuid();
+
+  updateJlightElementData(element, {
+    jLightInternal: {
+      ...jLightElementData,
+      currentAnimation: animationId,
+    },
+  });
+
+  return animationId;
+};
+
+const getOrSetDimension = (identifier, $elements, value) => {
+  const { elements } = $elements;
+
+  if (value) {
+    elements.forEach((theElement) => {
+      const element = theElement;
+
+      element.style[identifier] = `${value}${typeof value !== 'string' ? 'px' : ''}`;
+    });
+
+    return $elements;
+  }
+
+  const upperIdentifier = ucfirst(identifier);
+  let dimension;
+
+  elements.forEach((element) => {
+    if (!dimension) {
+      dimension = Math.max(
+        element[`client${upperIdentifier}`],
+        element[`offset${upperIdentifier}`],
+      );
+    }
+  });
+
+  return dimension;
+};
+
+const getDimension = (identifier, elements, includeMargins) => {
+  let spacingOne;
+  let spacingTwo;
+  let dimension;
+  let functionSuffix;
+
+  switch (identifier) {
+    case 'innerWidth':
+      spacingOne = 'border-left';
+      spacingTwo = 'border-right';
+      functionSuffix = 'Width';
+
+      break;
+    case 'innerHeight':
+      spacingOne = 'border-top';
+      spacingTwo = 'border-bottom';
+      functionSuffix = 'Height';
+
+      break;
+    case 'outerWidth':
+      spacingOne = 'margin-left';
+      spacingTwo = 'margin-right';
+      functionSuffix = 'Width';
+
+      break;
+    case 'outerHeight':
+      spacingOne = 'margin-top';
+      spacingTwo = 'margin-bottom';
+      functionSuffix = 'Height';
+
+      break;
+    default:
+      break;
+  }
+
+  elements.forEach((element) => {
+    if (dimension) {
+      return;
+    }
+
+    let spacingLeftOrTop = 0;
+    let spacingRightOrBottom = 0;
+    const computedStyles = window.getComputedStyle(element);
+    const isInner = identifier.indexOf('inner') > -1;
+
+    if (isInner || includeMargins) {
+      const sign = isInner ? -1 : 1;
+
+      spacingLeftOrTop = sign * parseFloat(computedStyles.getPropertyValue(spacingOne), 10);
+      spacingRightOrBottom = sign * parseFloat(computedStyles.getPropertyValue(spacingTwo), 10);
+    }
+
+    dimension = Math.max(
+      element[`client${functionSuffix}`],
+      element[`offset${functionSuffix}`],
+    ) + spacingLeftOrTop + spacingRightOrBottom;
+  });
+
+  return dimension;
+};
+
+const getOrSetTextOrHtml = (identifier, $elements, theValue) => {
+  const { elements } = $elements;
+  let value = theValue;
+
+  if (value) {
+    elements.forEach((theElement, index) => {
+      const element = theElement;
+
+      if (typeof theValue === 'function') {
+        value = theValue(index, element[identifier]);
+      }
+
+      element[identifier] = value;
+    });
+
+    return $elements;
+  }
+
+  elements.forEach((element) => {
+    if (!value) {
+      value = element[identifier];
+    }
+  });
+
+  return value;
+};
+
+const modifyClass = (identifier, $elements, cssClass) => {
+  $elements.elements.forEach((element) => {
+    element.classList[identifier](cssClass);
+  });
+
+  return $elements;
+};
+
+const prependOrAppend = (identifier, $elements, elements) => {
+  const theElements = getElementsFromArgument($elements);
+
+  elements.forEach((element) => {
+    theElements.forEach((elementToInsert) => {
+      if (element !== elementToInsert) {
+        element[identifier](elementToInsert);
+      }
+    });
+  });
+};
+
+const prependToOrAppendTo = (identifier, $elements, elements) => {
+  const theElements = getElementsFromArgument($elements);
+
+  elements.forEach((element) => {
+    theElements.forEach((elementToInsertTo) => {
+      if (element !== elementToInsertTo) {
+        elementToInsertTo[identifier](element);
+      }
+    });
+  });
+};
+
+const insertBeforeOrInsertAfter = (identifier, $elements, elements, type) => {
+  const theElements = getElementsFromArgument($elements);
+
+  elements.forEach((element) => {
+    theElements.forEach((referenceElement) => {
+      if (element !== referenceElement) {
+        if (type === 'insert') {
+          referenceElement.insertAdjacentElement(identifier, element);
+        } else {
+          element.insertAdjacentElement(identifier, referenceElement);
+        }
+      }
+    });
+  });
+};
+
+const getPrevOrNextElements = (identifier, selector, elements) => {
+  const theElements = [];
+
+  if (!selector) {
+    elements.forEach((element) => {
+      const theElement = element[identifier];
+
+      if (theElement && !theElements.includes(theElement)) {
+        theElements.push(theElement);
+      }
+    });
+  } else {
+    const isPrev = identifier === 'previousElementSibling';
+    let theElement;
+
+    elements.forEach((element) => {
+      if (isPrev) {
+        theElement = getPrevMatchingElement(element, selector);
+      } else {
+        theElement = getNextMatchingElement(element, selector);
+      }
+
+      if (theElement && !theElements.includes(theElement)) {
+        theElements.push(theElement);
+      }
+    });
+  }
+
+  return theElements;
+};
+
+const getScrollWidthOrScrollHeight = (identifier, elements) => {
+  let dimension;
+
+  elements.forEach((element) => {
+    if (!dimension) {
+      dimension = element[identifier];
+    }
+  });
+
+  return dimension;
+};
+
+const getOrSetScrollTopOrScrollLeft = (identifier, value, $elements) => {
+  const { elements } = $elements;
+
+  if (value) {
+    elements.forEach((theElement) => {
+      const element = theElement;
+
+      element[identifier] = parseFloat(value, 10);
+    });
+
+    return $elements;
+  }
+
+  let scrollValue;
+
+  elements.forEach((element) => {
+    if (!scrollValue) {
+      scrollValue = element[identifier];
+    }
+  });
+
+  return scrollValue;
+};
+
+const isInView = (boundingBox, offset) => boundingBox.top >= parseFloat(offset.top, 10)
+  && boundingBox.left >= parseFloat(offset.left, 10)
+  && boundingBox.bottom <= (window.innerHeight || document.documentElement.clientHeight)
+    + parseFloat(offset.bottom, 10)
+  && boundingBox.right <= (window.innerWidth || document.documentElement.clientWidth)
+    + parseFloat(offset.right, 10);
+
 const $ = (elements) => ({
   elements,
   length: elements.length,
-  addClass: (cssClass) => {
-    elements.forEach((element) => {
-      element.classList.add(cssClass);
-    });
-
-    return $(elements);
-  },
-  removeClass: (cssClass) => {
-    elements.forEach((element) => {
-      element.classList.remove(cssClass);
-    });
-
-    return $(elements);
-  },
+  addClass: (cssClass) => modifyClass('add', $(elements), cssClass),
+  removeClass: (cssClass) => modifyClass('remove', $(elements), cssClass),
+  toggleClass: (cssClass) => modifyClass('toggle', $(elements), cssClass),
   hasClass: (cssClass) => {
     let hasClass;
 
@@ -254,13 +616,6 @@ const $ = (elements) => ({
     });
 
     return hasClass;
-  },
-  toggleClass: (cssClass) => {
-    elements.forEach((element) => {
-      element.classList.toggle(cssClass);
-    });
-
-    return $(elements);
   },
   css: (property, value) => {
     if (typeof property === 'object' && property !== null) {
@@ -314,9 +669,8 @@ const $ = (elements) => ({
   toggle: () => {
     elements.forEach((theElement) => {
       const element = theElement;
-      const computedStyles = window.getComputedStyle(element);
 
-      if (computedStyles.getPropertyValue('display') === 'none') {
+      if (element.style.display === 'none') {
         element.style.display = '';
       } else {
         element.style.display = 'none';
@@ -326,6 +680,7 @@ const $ = (elements) => ({
     return $(elements);
   },
   on: (type, callbackOrSelector, delegatedCallback) => {
+    // TODO: Refactor event listener functions
     if (typeof callbackOrSelector === 'function' || callbackOrSelector === false) {
       elements.forEach((element) => {
         const callback = (theEvent) => {
@@ -477,10 +832,6 @@ const $ = (elements) => ({
     return $(elements);
   },
   each: (callback) => {
-    if (!callback) {
-      return {};
-    }
-
     elements.forEach((element, index) => {
       callback($([element]), index);
     });
@@ -497,13 +848,7 @@ const $ = (elements) => ({
         }
       });
     } else {
-      let theElements = property;
-
-      if (property.elements) {
-        theElements = property.elements;
-      } else if (theElements instanceof HTMLCollection) {
-        theElements = [...theElements];
-      }
+      const theElements = getElementsFromArgument(property);
 
       theElements.forEach((theElement) => {
         if (elements.includes(theElement)) {
@@ -558,8 +903,6 @@ const $ = (elements) => ({
     return $(elements);
   },
   data: (theKey, value) => {
-    // TODO: Make use of dataset property
-
     if (typeof theKey === 'object' && theKey !== null) {
       elements.forEach((element) => {
         updateJlightElementData(element, { ...theKey });
@@ -569,6 +912,10 @@ const $ = (elements) => ({
     }
 
     const key = dashCaseToCamelCase(theKey);
+
+    if (key === 'jLightInternal') {
+      return {};
+    }
 
     if (value !== undefined) {
       elements.forEach((element) => {
@@ -586,6 +933,12 @@ const $ = (elements) => ({
 
         if (!theKey) {
           data = jLightElementData;
+
+          Object.entries(element.dataset).forEach(([dataKey, dataValue]) => {
+            if (!data[dataKey]) {
+              data[dataKey] = dataValue;
+            }
+          });
         } else {
           data = jLightElementData[key];
 
@@ -596,6 +949,8 @@ const $ = (elements) => ({
         }
       }
     });
+
+    delete data.jLightInternal;
 
     return data;
   },
@@ -610,8 +965,8 @@ const $ = (elements) => ({
   },
   clone: (deep = true) => $(elements.map((element) => element.cloneNode(deep))),
   add: ($elements) => {
-    const addedElements = [];
     const theElements = getElementsFromArgument($elements);
+    const addedElements = [];
 
     theElements.forEach((referenceElement) => {
       if (referenceElement && !elements.includes(referenceElement)) {
@@ -639,12 +994,12 @@ const $ = (elements) => ({
 
       theElements.forEach((referenceElement) => {
         if (element === referenceElement) {
+          wasRemoved = true;
+
           if (removeFromDom) {
             element.remove();
             removeJLightElementData(element);
           }
-
-          wasRemoved = true;
         }
       });
 
@@ -655,153 +1010,45 @@ const $ = (elements) => ({
 
     return $(remainingElements);
   },
-  text: (theText) => {
-    let text = theText;
-
-    if (text) {
-      elements.forEach((theElement, index) => {
-        const element = theElement;
-
-        if (typeof theText === 'function') {
-          text = theText(index, element.textContent);
-        }
-
-        element.textContent = text;
-      });
-
-      return $(elements);
-    }
-
-    elements.forEach((element) => {
-      if (!text) {
-        text = element.textContent;
-      }
-    });
-
-    return text;
-  },
-  html: (theHtml) => {
-    let html = theHtml;
-
-    if (html) {
-      elements.forEach((theElement, index) => {
-        const element = theElement;
-
-        if (typeof theHtml === 'function') {
-          html = theHtml(index, element.innerHTML);
-        }
-
-        element.innerHTML = html;
-      });
-
-      return $(elements);
-    }
-
-    elements.forEach((element) => {
-      if (!html) {
-        html = element.innerHTML;
-      }
-    });
-
-    return html;
-  },
+  text: (text) => getOrSetTextOrHtml('textContent', $(elements), text),
+  html: (html) => getOrSetTextOrHtml('innerHTML', $(elements), html),
   prepend: ($elements) => {
-    const theElements = getElementsFromArgument($elements);
-
-    elements.forEach((element) => {
-      theElements.forEach((elementToPrepend) => {
-        if (element !== elementToPrepend) {
-          element.prepend(elementToPrepend);
-        }
-      });
-    });
+    prependOrAppend('prepend', $elements, elements);
 
     return $(elements);
   },
   append: ($elements) => {
-    const theElements = getElementsFromArgument($elements);
-
-    elements.forEach((element) => {
-      theElements.forEach((elementToAppend) => {
-        if (element !== elementToAppend) {
-          element.append(elementToAppend);
-        }
-      });
-    });
+    prependOrAppend('append', $elements, elements);
 
     return $(elements);
   },
   prependTo: ($elements) => {
-    const theElements = getElementsFromArgument($elements);
-
-    elements.forEach((element) => {
-      theElements.forEach((elementToPrependTo) => {
-        if (element !== elementToPrependTo) {
-          elementToPrependTo.prepend(element);
-        }
-      });
-    });
+    prependToOrAppendTo('prepend', $elements, elements);
 
     return $(elements);
   },
   appendTo: ($elements) => {
-    const theElements = getElementsFromArgument($elements);
-
-    elements.forEach((element) => {
-      theElements.forEach((elementToAppendTo) => {
-        if (element !== elementToAppendTo) {
-          elementToAppendTo.append(element);
-        }
-      });
-    });
+    prependToOrAppendTo('append', $elements, elements);
 
     return $(elements);
   },
   insertBefore: ($elements) => {
-    elements.forEach((element) => {
-      $elements.elements.forEach((referenceElement) => {
-        if (element !== referenceElement) {
-          referenceElement.insertAdjacentElement('beforeBegin', element);
-        }
-      });
-    });
+    insertBeforeOrInsertAfter('beforeBegin', $elements, elements, 'insert');
 
     return $(elements);
   },
   insertAfter: ($elements) => {
-    elements.forEach((element) => {
-      $elements.elements.forEach((referenceElement) => {
-        if (element !== referenceElement) {
-          referenceElement.insertAdjacentElement('afterEnd', element);
-        }
-      });
-    });
+    insertBeforeOrInsertAfter('afterEnd', $elements, elements, 'insert');
 
     return $(elements);
   },
   before: ($elements) => {
-    const theElements = getElementsFromArgument($elements);
-
-    elements.forEach((element) => {
-      theElements.forEach((referenceElement) => {
-        if (element !== referenceElement) {
-          element.insertAdjacentElement('beforeBegin', referenceElement);
-        }
-      });
-    });
+    insertBeforeOrInsertAfter('beforeBegin', $elements, elements);
 
     return $(elements);
   },
   after: ($elements) => {
-    const theElements = getElementsFromArgument($elements);
-
-    elements.forEach((element) => {
-      theElements.forEach((referenceElement) => {
-        if (element !== referenceElement) {
-          element.insertAdjacentElement('afterEnd', referenceElement);
-        }
-      });
-    });
+    insertBeforeOrInsertAfter('afterEnd', $elements, elements);
 
     return $(elements);
   },
@@ -812,87 +1059,34 @@ const $ = (elements) => ({
   parent: () => {
     const parents = [];
 
-    elements.forEach((element) => {
-      parents.push(element.parentElement);
+    elements.forEach(({ parentElement }) => {
+      if (!parents.includes(parentElement)) {
+        parents.push(parentElement);
+      }
     });
 
     return $(parents);
   },
-  children: () => {
-    let children = [];
-
-    elements.forEach((element) => {
-      children = [...children, ...Array.from(element.children)];
-    });
-
-    return $(children);
-  },
+  children: () => $(elements.reduce(
+    (children, element) => [...children, ...Array.from(element.children)], [],
+  )),
   siblings: () => {
-    const siblingGroups = [];
     const siblings = [];
 
     elements.forEach((element) => {
       const { parentElement } = element;
 
-      if (!siblingGroups.includes(parentElement)) {
-        siblingGroups.push(parentElement);
-
-        Array.from(parentElement.children).forEach((child) => {
-          if (!siblings.includes(child) && !elements.includes(child)) {
-            siblings.push(child);
-          }
-        });
-      }
+      Array.from(parentElement.children).forEach((child) => {
+        if (!siblings.includes(child) && !elements.includes(child)) {
+          siblings.push(child);
+        }
+      });
     });
 
     return $(siblings);
   },
-  prev: (selector) => {
-    const prevElements = [];
-
-    if (!selector) {
-      elements.forEach((element) => {
-        const prev = element.previousElementSibling;
-
-        if (prev && !prevElements.includes(prev)) {
-          prevElements.push(prev);
-        }
-      });
-    } else {
-      elements.forEach((element) => {
-        const prev = getPrevMatchingElement(element, selector);
-
-        if (prev && !prevElements.includes(prev)) {
-          prevElements.push(prev);
-        }
-      });
-    }
-
-    return $(prevElements);
-  },
-  next: (selector) => {
-    const nextElements = [];
-
-    if (!selector) {
-      elements.forEach((element) => {
-        const next = element.nextElementSibling;
-
-        if (next && !nextElements.includes(next)) {
-          nextElements.push(next);
-        }
-      });
-    } else {
-      elements.forEach((element) => {
-        const next = getNextMatchingElement(element, selector);
-
-        if (next && !nextElements.includes(next)) {
-          nextElements.push(next);
-        }
-      });
-    }
-
-    return $(nextElements);
-  },
+  prev: (selector) => $(getPrevOrNextElements('previousElementSibling', selector, elements)),
+  next: (selector) => $(getPrevOrNextElements('nextElementSibling', selector, elements)),
   filter: (selectorOrCallback) => {
     const filteredElements = [];
 
@@ -1031,200 +1225,16 @@ const $ = (elements) => ({
 
     return value;
   },
-  width: (value) => {
-    if (value) {
-      elements.forEach((theElement) => {
-        const element = theElement;
-
-        element.style.width = `${value}${typeof value !== 'string' ? 'px' : ''}`;
-      });
-
-      return $(elements);
-    }
-
-    let width;
-
-    elements.forEach((element) => {
-      if (!width) {
-        width = Math.max(
-          element.clientWidth,
-          element.offsetWidth,
-        );
-      }
-    });
-
-    return width;
-  },
-  height: (value) => {
-    if (value) {
-      elements.forEach((theElement) => {
-        const element = theElement;
-
-        element.style.height = `${value}${typeof value !== 'string' ? 'px' : ''}`;
-      });
-
-      return $(elements);
-    }
-
-    let height;
-
-    elements.forEach((element) => {
-      if (!height) {
-        height = Math.max(
-          element.clientHeight,
-          element.offsetHeight,
-        );
-      }
-    });
-
-    return height;
-  },
-  innerWidth: () => {
-    let width;
-
-    elements.forEach((element) => {
-      if (!width) {
-        const computedStyles = window.getComputedStyle(element);
-        const borderLeft = parseFloat(computedStyles.getPropertyValue('border-left'), 10);
-        const borderRight = parseFloat(computedStyles.getPropertyValue('border-right'), 10);
-
-        width = Math.max(
-          element.clientWidth,
-          element.offsetWidth,
-        ) - borderLeft - borderRight;
-      }
-    });
-
-    return width;
-  },
-  innerHeight: () => {
-    let height;
-
-    elements.forEach((element) => {
-      if (!height) {
-        const computedStyles = window.getComputedStyle(element);
-        const borderTop = parseFloat(computedStyles.getPropertyValue('border-top'), 10);
-        const borderBottom = parseFloat(computedStyles.getPropertyValue('border-bottom'), 10);
-
-        height = Math.max(
-          element.clientHeight,
-          element.offsetHeight,
-        ) - borderTop - borderBottom;
-      }
-    });
-
-    return height;
-  },
-  outerWidth: (includeMargins) => {
-    let width;
-
-    elements.forEach((element) => {
-      if (!width) {
-        const computedStyles = window.getComputedStyle(element);
-        let marginLeft = 0;
-        let marginRight = 0;
-
-        if (includeMargins) {
-          marginLeft = parseFloat(computedStyles.getPropertyValue('margin-left'), 10);
-          marginRight = parseFloat(computedStyles.getPropertyValue('margin-right'), 10);
-        }
-
-        width = Math.max(
-          element.clientWidth,
-          element.offsetWidth,
-        ) + marginLeft + marginRight;
-      }
-    });
-
-    return width;
-  },
-  outerHeight: (includeMargins) => {
-    let height;
-
-    elements.forEach((element) => {
-      if (!height) {
-        const computedStyles = window.getComputedStyle(element);
-        let marginTop = 0;
-        let marginBottom = 0;
-
-        if (includeMargins) {
-          marginTop = parseFloat(computedStyles.getPropertyValue('margin-top'), 10);
-          marginBottom = parseFloat(computedStyles.getPropertyValue('margin-bottom'), 10);
-        }
-
-        height = Math.max(
-          element.clientHeight,
-          element.offsetHeight,
-        ) + marginTop + marginBottom;
-      }
-    });
-
-    return height;
-  },
-  scrollWidth: () => {
-    let width;
-
-    elements.forEach((element) => {
-      if (!width) {
-        width = element.scrollWidth;
-      }
-    });
-
-    return width;
-  },
-  scrollHeight: () => {
-    let height;
-
-    elements.forEach((element) => {
-      if (!height) {
-        height = element.scrollHeight;
-      }
-    });
-
-    return height;
-  },
-  scrollTop: (value) => {
-    if (value) {
-      elements.forEach((theElement) => {
-        const element = theElement;
-
-        element.scrollTop = value;
-      });
-
-      return $(elements);
-    }
-
-    let scrollTop;
-
-    elements.forEach((element) => {
-      if (!scrollTop) {
-        scrollTop = element.scrollTop;
-      }
-    });
-
-    return scrollTop;
-  },
-  scrollLeft: (value) => {
-    if (value) {
-      elements.forEach((theElement) => {
-        const element = theElement;
-
-        element.scrollLeft = value;
-      });
-
-      return $(elements);
-    }
-
-    let scrollLeft;
-
-    elements.forEach((element) => {
-      if (!scrollLeft) {
-        scrollLeft = element.scrollLeft;
-      }
-    });
-
-    return scrollLeft;
-  },
+  width: (value) => getOrSetDimension('width', $(elements), value),
+  height: (value) => getOrSetDimension('height', $(elements), value),
+  innerWidth: () => getDimension('innerWidth', elements),
+  innerHeight: () => getDimension('innerHeight', elements),
+  outerWidth: (includeMargins) => getDimension('outerWidth', elements, includeMargins),
+  outerHeight: (includeMargins) => getDimension('outerHeight', elements, includeMargins),
+  scrollWidth: () => getScrollWidthOrScrollHeight('scrollWidth', elements),
+  scrollHeight: () => getScrollWidthOrScrollHeight('scrollHeight', elements),
+  scrollTop: (value) => getOrSetScrollTopOrScrollLeft('scrollTop', value, $(elements)),
+  scrollLeft: (value) => getOrSetScrollTopOrScrollLeft('scrollLeft', value, $(elements)),
   offset: (value, relativeToViewport) => {
     if (value && typeof value !== 'boolean') {
       const { top, left } = value;
@@ -1239,11 +1249,11 @@ const $ = (elements) => ({
         const element = theElement;
         const computedStyles = window.getComputedStyle(element);
 
-        element.style.top = top
+        element.style.top = (top || top === 0)
           ? `${topIsPixelUnit ? parseFloat(top, 10) + offsetTop : top}${unitTop}`
           : `${parseFloat(computedStyles.getPropertyValue('top'), 10)}${offsetTop || ''}${unitTop}`;
 
-        element.style.left = left
+        element.style.left = (left || left === 0)
           ? `${leftIsPixelUnit ? parseFloat(left, 10) + offsetLeft : top}${unitLeft}`
           : `${parseFloat(computedStyles.getPropertyValue('left'), 10)}${offsetLeft || ''}${unitLeft}`;
       });
@@ -1268,24 +1278,76 @@ const $ = (elements) => ({
       left: (offset.left || 0) + (relative ? window.pageXOffset : 0),
     };
   },
-  inView: (theOffset) => {
-    const boundingBox = elements[0].getBoundingClientRect();
-    const offset = {
+  inView: (offsetOrCallback, callbackOrOptions) => {
+    let offset = {
       top: 0,
       bottom: 0,
       left: 0,
       right: 0,
-      ...theOffset,
     };
 
-    return (
-      boundingBox.top >= parseFloat(offset.top, 10)
-        && boundingBox.left >= parseFloat(offset.left, 10)
-        && boundingBox.bottom <= (window.innerHeight
-          || document.documentElement.clientHeight) + parseFloat(offset.bottom, 10)
-        && boundingBox.right <= (window.innerWidth
-          || document.documentElement.clientWidth) + parseFloat(offset.right, 10)
-    );
+    if (typeof offsetOrCallback === 'object' && offsetOrCallback) {
+      offset = {
+        ...offset,
+        ...offsetOrCallback,
+      };
+    }
+
+    const offsetOrCallbackIsFunction = typeof offsetOrCallback === 'function';
+    const callbackOrOptionsIsFunction = typeof callbackOrOptions === 'function';
+
+    if (!offsetOrCallbackIsFunction
+      && !callbackOrOptionsIsFunction
+      && typeof callbackOrOptions !== 'object'
+      && callbackOrOptions !== null) {
+      return isInView(elements[0].getBoundingClientRect(), offset);
+    }
+
+    const options = callbackOrOptions || {};
+    const scrollTimer = options.scrollTimer !== undefined ? options.scrollTimer : 100;
+    let scrollTimeout;
+
+    window.addEventListener('scroll', () => {
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+
+      scrollTimeout = setTimeout(() => {
+        const isElementInView = isInView(elements[0].getBoundingClientRect(), offset);
+
+        if (isElementInView && options.isInView) {
+          options.isInView();
+        }
+
+        if (isElementInView && !getJlightElementData(elements[0]).isInView) {
+          if (options.onEnter) {
+            options.onEnter();
+          } else if (offsetOrCallbackIsFunction) {
+            offsetOrCallback();
+          } else if (callbackOrOptionsIsFunction) {
+            callbackOrOptions();
+          }
+
+          updateJlightElementData(elements[0], {
+            isInView: true,
+          });
+
+          return;
+        }
+
+        if (!isElementInView && getJlightElementData(elements[0]).isInView) {
+          if (options.onExit) {
+            options.onExit();
+          }
+
+          updateJlightElementData(elements[0], {
+            isInView: false,
+          });
+        }
+      }, scrollTimer);
+    });
+
+    return $(elements);
   },
   delay: (delay) => new Promise((resolve) => setTimeout(resolve, delay)),
   when: (condition, callback, ...args) => {
@@ -1301,7 +1363,6 @@ const $ = (elements) => ({
   },
   animate: (properties, speed = 300, callback = noop, easing = 'ease') => {
     elements.forEach((theElement) => {
-      const jLightElementData = getJlightElementData(theElement).jLightInternal || {};
       const element = theElement;
       let transition = '';
 
@@ -1311,9 +1372,9 @@ const $ = (elements) => ({
         transition += `${index === 0 ? '' : ','}${key} ${speed}ms ${easing}`;
 
         if (!element.style[key]) {
-          const computedStyles = window.getComputedStyle(element);
-
-          element.style[key] = computedStyles.getPropertyValue(key);
+          element.style[key] = window
+            .getComputedStyle(element)
+            .getPropertyValue(key);
         }
 
         setTimeout(() => {
@@ -1329,9 +1390,8 @@ const $ = (elements) => ({
 
       updateJlightElementData(element, {
         jLightInternal: {
-          ...jLightElementData,
+          ...(getJlightElementData(element).jLightInternal || {}),
           animatedProperties: Object.keys(properties),
-          animationStopped: false,
         },
       });
 
@@ -1342,9 +1402,7 @@ const $ = (elements) => ({
       elements.forEach((theElement) => {
         const element = theElement;
 
-        if (!getJlightElementData(element).jLightInternal.animationStopped) {
-          element.style.transition = '';
-        }
+        element.style.transition = '';
       });
 
       callback();
@@ -1365,15 +1423,6 @@ const $ = (elements) => ({
         );
       });
 
-      const jLightElementData = getJlightElementData(element).jLightInternal || {};
-
-      updateJlightElementData(element, {
-        jLightInternal: {
-          ...jLightElementData,
-          animationStopped: true,
-        },
-      });
-
       element.style.transition = '';
     });
 
@@ -1382,16 +1431,8 @@ const $ = (elements) => ({
   fadeIn: (speed, callback = noop, easing) => {
     elements.forEach((theElement) => {
       const element = theElement;
-      const jLightElementData = getJlightElementData(element).jLightInternal || {};
-      const animationId = uuid();
 
-      updateJlightElementData(element, {
-        jLightInternal: {
-          ...jLightElementData,
-          currentAnimation: animationId,
-        },
-      });
-
+      getUpdateAnimationId(element);
       element.style.display = '';
       element.style.opacity = 0;
 
@@ -1405,15 +1446,7 @@ const $ = (elements) => ({
   fadeOut: (speed, callback = noop, easing) => {
     elements.forEach((theElement) => {
       const element = theElement;
-      const jLightElementData = getJlightElementData(element).jLightInternal || {};
-      const animationId = uuid();
-
-      updateJlightElementData(element, {
-        jLightInternal: {
-          ...jLightElementData,
-          currentAnimation: animationId,
-        },
-      });
+      const animationId = getUpdateAnimationId(element);
 
       setTimeout(() => {
         $([element]).animate({ opacity: 0 }, speed, () => {
@@ -1445,17 +1478,8 @@ const $ = (elements) => ({
     elements.forEach((theElement) => {
       const element = theElement;
       const startHeight = Math.max(element.clientHeight, element.offsetHeight);
-      const jLightElementData = getJlightElementData(element).jLightInternal || {};
-      const animationId = uuid();
+      const animationId = getUpdateAnimationId(element);
 
-      updateJlightElementData(element, {
-        jLightInternal: {
-          ...jLightElementData,
-          currentAnimation: animationId,
-        },
-      });
-
-      element.style.transition = `height ${speed}ms ${easing}`;
       element.style.overflow = 'hidden';
       element.style.display = '';
       element.style.height = 'auto';
@@ -1480,21 +1504,10 @@ const $ = (elements) => ({
   slideUp: (speed, callback = noop, easing = 'ease') => {
     elements.forEach((theElement) => {
       const element = theElement;
-      const jLightElementData = getJlightElementData(element).jLightInternal || {};
-      const animationId = uuid();
-
-      updateJlightElementData(element, {
-        jLightInternal: {
-          ...jLightElementData,
-          currentAnimation: animationId,
-        },
-      });
-
-      element.style.transition = `height ${speed}ms ${easing}`;
-      element.style.overflow = 'hidden';
-
+      const animationId = getUpdateAnimationId(element);
       const startHeight = Math.max(element.clientHeight, element.offsetHeight);
 
+      element.style.overflow = 'hidden';
       element.style.height = `${startHeight}px`;
 
       setTimeout(() => {
@@ -1561,120 +1574,6 @@ const $ = (elements) => ({
 
     return serializedJson;
   },
-});
-
-export const ajax = (opts = {}) => {
-  const options = {
-    url: window.location.href,
-    method: 'POST',
-    data: {},
-    headers: {},
-    processData: true,
-    crossDomain: false,
-    contentType: 'application/x-www-form-urlencoded',
-    async: true,
-    username: null,
-    password: null,
-    done: noop,
-    fail: noop,
-    always: noop,
-    abort: noop,
-    xhr: () => new XMLHttpRequest(),
-    ...opts,
-  };
-
-  const request = options.xhr();
-  const isJson = options.contentType === 'application/json';
-  const { headers } = options;
-  let { data } = options;
-
-  if (!options.crossDomain && !headers['X-Requested-With']) {
-    headers['X-Requested-With'] = 'XMLHttpRequest';
-  }
-
-  if (!headers['Content-Type']) {
-    headers['Content-Type'] = options.contentType;
-  }
-
-  if (options.processData) {
-    if (isJson) {
-      data = JSON.stringify(data);
-    } else {
-      const params = [];
-
-      Object.entries(options.data).forEach(([theKey, value]) => {
-        const key = theKey;
-
-        if (Array.isArray(value)) {
-          value.forEach((item) => {
-            params.push(`${key}[]=${item}`);
-          });
-        } else {
-          params.push(`${key}=${value}`);
-        }
-      });
-
-      data = params.join('&');
-    }
-  }
-
-  request.open(
-    options.method,
-    `${options.url}${options.method === 'GET' ? `?${data}` : ''}`,
-    options.async,
-    options.username,
-    options.password,
-  );
-
-  Object.entries(headers).forEach(([key, value]) => {
-    request.setRequestHeader(key, value);
-  });
-
-  const fail = () => options.fail(
-    isJson ? JSON.parse(request.response) : request.response,
-    request.status,
-    request,
-  );
-
-  request.onerror = fail;
-  request.ontimeout = fail;
-  request.onabort = options.abort;
-
-  request.onreadystatechange = () => {
-    if (request.readyState === XMLHttpRequest.DONE) {
-      if (request.status && request.status >= 200 && request.status < 300) {
-        options.done(
-          isJson ? JSON.parse(request.response) : request.response,
-          request.status,
-          request,
-        );
-      } else if (request.status) {
-        fail();
-      }
-
-      options.always(
-        isJson ? JSON.parse(request.response) : request.response,
-        request.status,
-        request,
-      );
-    }
-  };
-
-  request.send(options.method === 'POST' ? data : null);
-
-  return request;
-};
-
-export const get = (url, opts = {}) => ajax({
-  method: 'GET',
-  url,
-  ...opts,
-});
-
-export const post = (url, opts = {}) => ajax({
-  method: 'POST',
-  url,
-  ...opts,
 });
 
 const documentAndWindowJLightElement = (argument) => ({
