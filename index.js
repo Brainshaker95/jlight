@@ -234,39 +234,13 @@ const removeJLightElementEventData = (element, type, callback, realCallback) => 
 };
 
 const createElementFromString = (string) => {
-  const tags = string.split('<');
-  const lastTagIndex = tags.length - 1;
-  const openingTag = tags[1];
+  const div = document.createElement('div');
 
-  if (!openingTag || openingTag.indexOf('/') === 0) {
-    return null;
-  }
+  div.innerHTML = string.trim();
 
-  let endOfTagIndex = openingTag.indexOf(' ');
+  const element = div.firstChild;
 
-  if (endOfTagIndex === -1) {
-    endOfTagIndex = openingTag.indexOf('>');
-  }
-
-  if (endOfTagIndex === -1) {
-    return null;
-  }
-
-  const tagName = openingTag.substring(0, endOfTagIndex);
-  const element = document.createElement(tagName);
-  const innerText = openingTag.substring(endOfTagIndex + 1, openingTag.length);
-
-  if (lastTagIndex - 2 > 0) {
-    const innerHtml = tags.splice(2, lastTagIndex - 2).join('<');
-
-    element.append(
-      createElementFromString(`<${innerHtml}`),
-    );
-  } else if (innerText) {
-    element.innerText = innerText;
-  }
-
-  initalizeJLightElementData(element, tagName);
+  initalizeJLightElementData(element, element.tagName.toLowerCase());
 
   return element;
 };
@@ -496,6 +470,8 @@ const prependOrAppend = (identifier, $elements, elements) => {
       }
     });
   });
+
+  return elements;
 };
 
 const prependToOrAppendTo = (identifier, $elements, elements) => {
@@ -508,6 +484,8 @@ const prependToOrAppendTo = (identifier, $elements, elements) => {
       }
     });
   });
+
+  return elements;
 };
 
 const insertBeforeOrInsertAfter = (identifier, $elements, elements, type) => {
@@ -524,6 +502,8 @@ const insertBeforeOrInsertAfter = (identifier, $elements, elements, type) => {
       }
     });
   });
+
+  return elements;
 };
 
 const getPrevOrNextElements = (identifier, selector, elements) => {
@@ -1012,43 +992,25 @@ const $ = (elements) => ({
   },
   text: (text) => getOrSetTextOrHtml('textContent', $(elements), text),
   html: (html) => getOrSetTextOrHtml('innerHTML', $(elements), html),
-  prepend: ($elements) => {
-    prependOrAppend('prepend', $elements, elements);
+  prepend: ($elements) => $(prependOrAppend('prepend', $elements, elements)),
+  append: ($elements) => $(prependOrAppend('append', $elements, elements)),
+  prependTo: ($elements) => $(prependToOrAppendTo('prepend', $elements, elements)),
+  appendTo: ($elements) => $(prependToOrAppendTo('append', $elements, elements)),
+  insertBefore: ($elements) => $(insertBeforeOrInsertAfter('beforeBegin', $elements, elements, 'insert')),
+  insertAfter: ($elements) => $(insertBeforeOrInsertAfter('afterEnd', $elements, elements, 'insert')),
+  before: ($elements) => $(insertBeforeOrInsertAfter('beforeBegin', $elements, elements)),
+  after: ($elements) => $(insertBeforeOrInsertAfter('afterEnd', $elements, elements)),
+  wrap: ($elements) => {
+    const theElements = getElementsFromArgument($elements);
 
-    return $(elements);
-  },
-  append: ($elements) => {
-    prependOrAppend('append', $elements, elements);
-
-    return $(elements);
-  },
-  prependTo: ($elements) => {
-    prependToOrAppendTo('prepend', $elements, elements);
-
-    return $(elements);
-  },
-  appendTo: ($elements) => {
-    prependToOrAppendTo('append', $elements, elements);
-
-    return $(elements);
-  },
-  insertBefore: ($elements) => {
-    insertBeforeOrInsertAfter('beforeBegin', $elements, elements, 'insert');
-
-    return $(elements);
-  },
-  insertAfter: ($elements) => {
-    insertBeforeOrInsertAfter('afterEnd', $elements, elements, 'insert');
-
-    return $(elements);
-  },
-  before: ($elements) => {
-    insertBeforeOrInsertAfter('beforeBegin', $elements, elements);
-
-    return $(elements);
-  },
-  after: ($elements) => {
-    insertBeforeOrInsertAfter('afterEnd', $elements, elements);
+    elements.forEach((element) => {
+      theElements.forEach((referenceElement) => {
+        if (element !== referenceElement) {
+          element.parentNode.insertBefore(referenceElement, element);
+          referenceElement.appendChild(element);
+        }
+      });
+    });
 
     return $(elements);
   },
