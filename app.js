@@ -11,7 +11,7 @@ import $, {
   preventEvent,
   dashCaseToCamelCase,
   camelCaseToDashCase,
-} from './jlight';
+} from './index';
 
 $(() => {
   const $button = $('button');
