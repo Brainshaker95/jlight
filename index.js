@@ -236,7 +236,7 @@ const removeJLightElementEventData = (element, type, callback, realCallback) => 
 const createElementFromString = (string) => {
   const div = document.createElement('div');
 
-  div.innerHTML = string.trim();
+  div.innerHTML = string;
 
   const element = div.firstChild;
 
@@ -251,7 +251,9 @@ const getElementsFromArgument = (argument) => {
   }
 
   if (typeof argument === 'string') {
-    return argument.match(/^<.+>$/) ? [(createElementFromString(argument))] : [...document.querySelectorAll(argument)];
+    const theArgument = argument.trim();
+
+    return theArgument.startsWith('<') ? [(createElementFromString(theArgument))] : [...document.querySelectorAll(theArgument)];
   }
 
   if (argument instanceof HTMLCollection || argument instanceof NodeList) {
@@ -1645,13 +1647,15 @@ export default (argument) => {
   let elements = [];
 
   if (typeof argument === 'string') {
-    if (argument.match(/^<.+>$/)) {
-      elements = [createElementFromString(argument)];
+    const theArgument = argument.trim();
+
+    if (theArgument.startsWith('<')) {
+      elements = [createElementFromString(theArgument)];
     } else {
-      elements = [...document.querySelectorAll(argument)];
+      elements = [...document.querySelectorAll(theArgument)];
 
       elements.forEach((element) => {
-        initalizeJLightElementData(element, argument);
+        initalizeJLightElementData(element, theArgument);
       });
     }
   }
