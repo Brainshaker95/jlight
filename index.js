@@ -236,9 +236,16 @@ const removeJLightElementEventData = (element, type, callback, realCallback) => 
 const createElementFromString = (string) => {
   const div = document.createElement('div');
 
-  div.innerHTML = string;
+  div.innerHTML = string.trim();
 
-  const element = div.firstChild;
+  let element = div.firstChild;
+
+  if (!(element instanceof HTMLElement)) {
+    const fallbackDiv = document.createElement('div');
+
+    fallbackDiv.textContent = element.textContent;
+    element = fallbackDiv;
+  }
 
   initalizeJLightElementData(element, element.tagName.toLowerCase());
 
@@ -251,9 +258,7 @@ const getElementsFromArgument = (argument) => {
   }
 
   if (typeof argument === 'string') {
-    const theArgument = argument.trim();
-
-    return theArgument.startsWith('<') ? [(createElementFromString(theArgument))] : [...document.querySelectorAll(theArgument)];
+    return argument.match(/<.+>/) ? [(createElementFromString(argument))] : [...document.querySelectorAll(argument)];
   }
 
   if (argument instanceof HTMLCollection || argument instanceof NodeList) {
@@ -1647,15 +1652,13 @@ export default (argument) => {
   let elements = [];
 
   if (typeof argument === 'string') {
-    const theArgument = argument.trim();
-
-    if (theArgument.startsWith('<')) {
-      elements = [createElementFromString(theArgument)];
+    if (argument.match(/<.+>/)) {
+      elements = [createElementFromString(argument)];
     } else {
-      elements = [...document.querySelectorAll(theArgument)];
+      elements = [...document.querySelectorAll(argument)];
 
       elements.forEach((element) => {
-        initalizeJLightElementData(element, theArgument);
+        initalizeJLightElementData(element, argument);
       });
     }
   }
