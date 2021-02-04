@@ -54,6 +54,10 @@ export const ajax = (opts = {}) => {
 
   if (!headers['Content-Type']) {
     headers['Content-Type'] = options.contentType;
+
+    if (headers['Content-Type'] === false) {
+      headers['Content-Type'] = 'multipart/form-data';
+    }
   }
 
   if (options.processData) {
@@ -91,7 +95,7 @@ export const ajax = (opts = {}) => {
   });
 
   const fail = () => options.fail(
-    isJson ? JSON.parse(request.response) : request.response,
+    request.response,
     request.status,
     request,
   );
@@ -113,7 +117,7 @@ export const ajax = (opts = {}) => {
       }
 
       options.always(
-        isJson ? JSON.parse(request.response) : request.response,
+        request.response,
         request.status,
         request,
       );
@@ -1624,6 +1628,41 @@ const documentAndWindowJLightElement = (argument) => ({
     }
 
     return window.pageXOffset;
+  },
+  scrollTo: (theArgument, duration = 300, callback) => {
+    const elements = getElementsFromArgument(theArgument);
+    const { offsetTop } = elements[0];
+    const { innerHeight } = window;
+    const { scrollHeight } = document.body;
+    const targetY = scrollHeight - offsetTop < innerHeight
+      ? scrollHeight - innerHeight
+      : offsetTop;
+    const startPositionY = window.pageYOffset;
+    const difference = targetY - startPositionY;
+    let start;
+
+    const easing = (t) => (t < 0.5
+      ? 4 * t * t * t
+      : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1);
+
+    const step = (timestamp) => {
+      if (!start) {
+        start = timestamp;
+      }
+
+      const time = timestamp - start;
+      const percent = easing(Math.min(time / duration, 1));
+
+      window.scrollTo(0, startPositionY + difference * percent);
+
+      if (time < duration) {
+        window.requestAnimationFrame(step);
+      } else if (callback) {
+        callback();
+      }
+    };
+
+    window.requestAnimationFrame(step);
   },
 });
 
