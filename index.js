@@ -639,11 +639,11 @@ const $ = (elements) => ({
 
     return computedStyles;
   },
-  show: (type) => {
+  show: (type = 'block') => {
     elements.forEach((theElement) => {
       const element = theElement;
 
-      element.style.display = type || '';
+      element.style.display = type;
     });
 
     return $(elements);
@@ -657,13 +657,13 @@ const $ = (elements) => ({
 
     return $(elements);
   },
-  toggle: (type) => {
+  toggle: (type = 'block') => {
     elements.forEach((theElement) => {
       const element = theElement;
       const computedStyles = window.getComputedStyle(element);
 
       if (computedStyles.getPropertyValue('display') === 'none') {
-        element.style.display = type || '';
+        element.style.display = type;
       } else {
         element.style.display = 'none';
       }
@@ -1402,7 +1402,7 @@ const $ = (elements) => ({
 
     return $(elements);
   },
-  fadeIn: (duration = 300, callback = noop, easing, type = 'block') => {
+  fadeIn: (duration = 300, callback = noop, type = 'block', easing) => {
     elements.forEach((theElement) => {
       const element = theElement;
 
@@ -1435,13 +1435,13 @@ const $ = (elements) => ({
 
     return $(elements);
   },
-  fadeToggle: (duration = 300, callback, easing, type) => {
+  fadeToggle: (duration = 300, callback, type, easing) => {
     elements.forEach((theElement) => {
       const element = theElement;
       const computedStyles = window.getComputedStyle(element);
 
       if (computedStyles.getPropertyValue('display') === 'none') {
-        $([element]).fadeIn(duration, callback, easing, type);
+        $([element]).fadeIn(duration, callback, type, easing);
       } else {
         $([element]).fadeOut(duration, callback, easing);
       }
@@ -1449,7 +1449,7 @@ const $ = (elements) => ({
 
     return $(elements);
   },
-  slideDown: (duration = 300, callback = noop, easing = 'ease', type = 'block') => {
+  slideDown: (duration = 300, callback = noop, height = 'auto', type = 'block', easing = 'ease') => {
     elements.forEach((theElement) => {
       const element = theElement;
       const startHeight = Math.max(element.clientHeight, element.offsetHeight);
@@ -1457,7 +1457,7 @@ const $ = (elements) => ({
 
       element.style.overflow = 'hidden';
       element.style.display = type;
-      element.style.height = 'auto';
+      element.style.height = height;
 
       const targetHeight = Math.max(element.clientHeight, element.offsetHeight);
 
@@ -1499,13 +1499,13 @@ const $ = (elements) => ({
 
     return $(elements);
   },
-  slideToggle: (duration = 300, easing, callback, type) => {
+  slideToggle: (duration = 300, callback, height, type, easing) => {
     elements.forEach((theElement) => {
       const element = theElement;
       const computedStyles = window.getComputedStyle(element);
 
       if (computedStyles.getPropertyValue('display') === 'none') {
-        $([element]).slideDown(duration, callback, easing, type);
+        $([element]).slideDown(duration, callback, height, type, easing);
       } else {
         $([element]).slideUp(duration, callback, easing);
       }
@@ -1632,14 +1632,14 @@ const documentAndWindowJLightElement = (argument) => ({
 
     return window.pageXOffset;
   },
-  scrollTo: (theArgument, duration = 300, callback) => {
+  scrollTo: (theArgument, duration = 300, offset = 0, callback) => {
     const elements = getElementsFromArgument(theArgument);
     const { offsetTop } = elements[0];
     const { innerHeight } = window;
     const { scrollHeight } = document.body;
     const targetY = scrollHeight - offsetTop < innerHeight
-      ? scrollHeight - innerHeight
-      : offsetTop;
+      ? scrollHeight - innerHeight - offset
+      : offsetTop - offset;
     const startPositionY = window.pageYOffset;
     const difference = targetY - startPositionY;
     let start;
