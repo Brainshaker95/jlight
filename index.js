@@ -657,12 +657,13 @@ const $ = (elements) => ({
 
     return $(elements);
   },
-  toggle: () => {
+  toggle: (type) => {
     elements.forEach((theElement) => {
       const element = theElement;
+      const computedStyles = window.getComputedStyle(element);
 
-      if (element.style.display === 'none') {
-        element.style.display = '';
+      if (computedStyles.getPropertyValue('display') === 'none') {
+        element.style.display = type || '';
       } else {
         element.style.display = 'none';
       }
@@ -1401,13 +1402,13 @@ const $ = (elements) => ({
 
     return $(elements);
   },
-  fadeIn: (duration = 300, callback = noop, easing) => {
+  fadeIn: (duration = 300, callback = noop, easing, type = 'block') => {
     elements.forEach((theElement) => {
       const element = theElement;
 
       getUpdateAnimationId(element);
       element.style.opacity = 0;
-      element.style.display = 'block';
+      element.style.display = type;
 
       setTimeout(() => {
         $([element]).animate({ opacity: 1 }, duration, callback, easing);
@@ -1434,12 +1435,13 @@ const $ = (elements) => ({
 
     return $(elements);
   },
-  fadeToggle: (duration = 300, callback, easing) => {
+  fadeToggle: (duration = 300, callback, easing, type) => {
     elements.forEach((theElement) => {
       const element = theElement;
+      const computedStyles = window.getComputedStyle(element);
 
-      if (element.style.display === 'none') {
-        $([element]).fadeIn(duration, callback, easing);
+      if (computedStyles.getPropertyValue('display') === 'none') {
+        $([element]).fadeIn(duration, callback, easing, type);
       } else {
         $([element]).fadeOut(duration, callback, easing);
       }
@@ -1447,14 +1449,14 @@ const $ = (elements) => ({
 
     return $(elements);
   },
-  slideDown: (duration = 300, callback = noop, easing = 'ease') => {
+  slideDown: (duration = 300, callback = noop, easing = 'ease', type = 'block') => {
     elements.forEach((theElement) => {
       const element = theElement;
       const startHeight = Math.max(element.clientHeight, element.offsetHeight);
       const animationId = getUpdateAnimationId(element);
 
       element.style.overflow = 'hidden';
-      element.style.display = 'block';
+      element.style.display = type;
       element.style.height = 'auto';
 
       const targetHeight = Math.max(element.clientHeight, element.offsetHeight);
@@ -1497,12 +1499,13 @@ const $ = (elements) => ({
 
     return $(elements);
   },
-  slideToggle: (duration = 300, easing, callback) => {
+  slideToggle: (duration = 300, easing, callback, type) => {
     elements.forEach((theElement) => {
       const element = theElement;
+      const computedStyles = window.getComputedStyle(element);
 
-      if (element.style.display === 'none') {
-        $([element]).slideDown(duration, callback, easing);
+      if (computedStyles.getPropertyValue('display') === 'none') {
+        $([element]).slideDown(duration, callback, easing, type);
       } else {
         $([element]).slideUp(duration, callback, easing);
       }
