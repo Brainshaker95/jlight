@@ -1334,7 +1334,7 @@ const $ = (elements) => ({
 
     return $(elements);
   },
-  animate: (properties, speed = 300, callback = noop, easing = 'ease') => {
+  animate: (properties, duration = 300, callback = noop, easing = 'ease') => {
     elements.forEach((theElement) => {
       const element = theElement;
       let transition = '';
@@ -1342,7 +1342,7 @@ const $ = (elements) => ({
       Object.entries(properties).forEach(([theKey, value], index) => {
         const key = camelCaseToDashCase(theKey);
 
-        transition += `${index === 0 ? '' : ','}${key} ${speed}ms ${easing}`;
+        transition += `${index === 0 ? '' : ','}${key} ${duration}ms ${easing}`;
 
         if (!element.style[key]) {
           element.style[key] = window
@@ -1379,7 +1379,7 @@ const $ = (elements) => ({
       });
 
       callback();
-    }, speed);
+    }, duration);
 
     return $(elements);
   },
@@ -1401,28 +1401,28 @@ const $ = (elements) => ({
 
     return $(elements);
   },
-  fadeIn: (speed, callback = noop, easing) => {
+  fadeIn: (duration = 300, callback = noop, easing) => {
     elements.forEach((theElement) => {
       const element = theElement;
 
       getUpdateAnimationId(element);
-      element.style.display = '';
       element.style.opacity = 0;
+      element.style.display = 'block';
 
       setTimeout(() => {
-        $([element]).animate({ opacity: 1 }, speed, callback, easing);
+        $([element]).animate({ opacity: 1 }, duration, callback, easing);
       }, 1);
     });
 
     return $(elements);
   },
-  fadeOut: (speed, callback = noop, easing) => {
+  fadeOut: (duration = 300, callback = noop, easing) => {
     elements.forEach((theElement) => {
       const element = theElement;
       const animationId = getUpdateAnimationId(element);
 
       setTimeout(() => {
-        $([element]).animate({ opacity: 0 }, speed, () => {
+        $([element]).animate({ opacity: 0 }, duration, () => {
           if (getJlightElementData(element).jLightInternal.currentAnimation === animationId) {
             element.style.display = 'none';
           }
@@ -1434,27 +1434,27 @@ const $ = (elements) => ({
 
     return $(elements);
   },
-  fadeToggle: (speed, callback, easing) => {
+  fadeToggle: (duration = 300, callback, easing) => {
     elements.forEach((theElement) => {
       const element = theElement;
 
       if (element.style.display === 'none') {
-        $([element]).fadeIn(speed, callback, easing);
+        $([element]).fadeIn(duration, callback, easing);
       } else {
-        $([element]).fadeOut(speed, callback, easing);
+        $([element]).fadeOut(duration, callback, easing);
       }
     });
 
     return $(elements);
   },
-  slideDown: (speed, callback = noop, easing = 'ease') => {
+  slideDown: (duration = 300, callback = noop, easing = 'ease') => {
     elements.forEach((theElement) => {
       const element = theElement;
       const startHeight = Math.max(element.clientHeight, element.offsetHeight);
       const animationId = getUpdateAnimationId(element);
 
       element.style.overflow = 'hidden';
-      element.style.display = '';
+      element.style.display = 'block';
       element.style.height = 'auto';
 
       const targetHeight = Math.max(element.clientHeight, element.offsetHeight);
@@ -1462,7 +1462,7 @@ const $ = (elements) => ({
       element.style.height = `${startHeight}px`;
 
       setTimeout(() => {
-        $([element]).animate({ height: targetHeight }, speed, () => {
+        $([element]).animate({ height: targetHeight }, duration, () => {
           if (getJlightElementData(element).jLightInternal.currentAnimation === animationId) {
             element.style.overflow = '';
           }
@@ -1474,7 +1474,7 @@ const $ = (elements) => ({
 
     return $(elements);
   },
-  slideUp: (speed, callback = noop, easing = 'ease') => {
+  slideUp: (duration = 300, callback = noop, easing = 'ease') => {
     elements.forEach((theElement) => {
       const element = theElement;
       const animationId = getUpdateAnimationId(element);
@@ -1484,7 +1484,7 @@ const $ = (elements) => ({
       element.style.height = `${startHeight}px`;
 
       setTimeout(() => {
-        $([element]).animate({ height: 0 }, speed, () => {
+        $([element]).animate({ height: 0 }, duration, () => {
           if (getJlightElementData(element).jLightInternal.currentAnimation === animationId) {
             element.style.overflow = '';
             element.style.display = 'none';
@@ -1497,14 +1497,14 @@ const $ = (elements) => ({
 
     return $(elements);
   },
-  slideToggle: (speed, easing, callback) => {
+  slideToggle: (duration = 300, easing, callback) => {
     elements.forEach((theElement) => {
       const element = theElement;
 
       if (element.style.display === 'none') {
-        $([element]).slideDown(speed, callback, easing);
+        $([element]).slideDown(duration, callback, easing);
       } else {
-        $([element]).slideUp(speed, callback, easing);
+        $([element]).slideUp(duration, callback, easing);
       }
     });
 
