@@ -44,9 +44,10 @@ export const ajax = (opts = {}) => {
   };
 
   const request = options.xhr();
-  const isJson = options.contentType === 'application/json';
   const { headers } = options;
   let { data } = options;
+
+  options.method = options.method.toUpperCase();
 
   if (!options.crossDomain && !headers['X-Requested-With']) {
     headers['X-Requested-With'] = 'XMLHttpRequest';
@@ -54,16 +55,16 @@ export const ajax = (opts = {}) => {
 
   if (!headers['Content-Type']) {
     headers['Content-Type'] = options.contentType;
+  }
 
-    if (headers['Content-Type'] === false) {
-      headers['Content-Type'] = 'multipart/form-data';
-    }
+  if (headers['Content-Type'] === false) {
+    delete headers['Content-Type'];
   }
 
   if (options.processData) {
-    if (isJson) {
+    if (headers['Content-Type'] === 'application/json') {
       data = JSON.stringify(data);
-    } else {
+    } else if (data && typeof data === 'object') {
       const params = [];
 
       Object.entries(options.data).forEach(([theKey, value]) => {
@@ -108,7 +109,9 @@ export const ajax = (opts = {}) => {
     if (request.readyState === XMLHttpRequest.DONE) {
       if (request.status && request.status >= 200 && request.status < 300) {
         options.done(
-          isJson ? JSON.parse(request.response) : request.response,
+          request.getResponseHeader('content-type') === 'application/json'
+            ? JSON.parse(request.response)
+            : request.response,
           request.status,
           request,
         );
@@ -237,23 +240,27 @@ const removeJLightElementEventData = (element, type, callback, realCallback) => 
   });
 };
 
-const createElementFromString = (string) => {
+const createElementsFromString = (string) => {
   const div = document.createElement('div');
 
   div.innerHTML = string.trim();
 
-  let element = div.firstChild;
+  const { children } = div;
 
-  if (!(element instanceof HTMLElement)) {
-    const fallbackDiv = document.createElement('div');
+  Array.from(children).forEach((theChild) => {
+    let child = theChild;
 
-    fallbackDiv.textContent = element.textContent;
-    element = fallbackDiv;
-  }
+    if (!(child instanceof HTMLElement)) {
+      const fallbackDiv = document.createElement('div');
 
-  initalizeJLightElementData(element, element.tagName.toLowerCase());
+      fallbackDiv.textContent = child.textContent;
+      child = fallbackDiv;
+    }
 
-  return element;
+    initalizeJLightElementData(child, child.tagName.toLowerCase());
+  });
+
+  return children;
 };
 
 const getElementsFromArgument = (argument) => {
@@ -262,7 +269,7 @@ const getElementsFromArgument = (argument) => {
   }
 
   if (typeof argument === 'string') {
-    return argument.match(/<.+>/) ? [(createElementFromString(argument))] : [...document.querySelectorAll(argument)];
+    return argument.match(/<(.|\n)+>/) ? [...createElementsFromString(argument)] : [...document.querySelectorAll(argument)];
   }
 
   if (argument instanceof HTMLCollection || argument instanceof NodeList) {
@@ -350,7 +357,7 @@ const getUpdateAnimationId = (element) => {
 const getOrSetDimension = (identifier, $elements, value) => {
   const { elements } = $elements;
 
-  if (value) {
+  if (value !== undefined) {
     elements.forEach((theElement) => {
       const element = theElement;
 
@@ -364,7 +371,7 @@ const getOrSetDimension = (identifier, $elements, value) => {
   let dimension;
 
   elements.forEach((element) => {
-    if (!dimension) {
+    if (dimension === undefined) {
       dimension = Math.max(
         element[`client${upperIdentifier}`],
         element[`offset${upperIdentifier}`],
@@ -440,11 +447,11 @@ const getOrSetTextOrHtml = (identifier, $elements, theValue) => {
   const { elements } = $elements;
   let value = theValue;
 
-  if (value) {
+  if (typeof value === 'string' || typeof value === 'function') {
     elements.forEach((theElement, index) => {
       const element = theElement;
 
-      if (typeof theValue === 'function') {
+      if (typeof value === 'function') {
         value = theValue(index, element[identifier]);
       }
 
@@ -455,7 +462,7 @@ const getOrSetTextOrHtml = (identifier, $elements, theValue) => {
   }
 
   elements.forEach((element) => {
-    if (!value) {
+    if (value === undefined) {
       value = element[identifier];
     }
   });
@@ -464,6 +471,7 @@ const getOrSetTextOrHtml = (identifier, $elements, theValue) => {
 };
 
 const modifyClass = (identifier, $elements, cssClass) => {
+  // TODO: Add support for multiple classes
   $elements.elements.forEach((element) => {
     element.classList[identifier](cssClass);
   });
@@ -552,7 +560,7 @@ const getScrollWidthOrScrollHeight = (identifier, elements) => {
   let dimension;
 
   elements.forEach((element) => {
-    if (!dimension) {
+    if (dimension === undefined) {
       dimension = element[identifier];
     }
   });
@@ -563,7 +571,7 @@ const getScrollWidthOrScrollHeight = (identifier, elements) => {
 const getOrSetScrollTopOrScrollLeft = (identifier, value, $elements) => {
   const { elements } = $elements;
 
-  if (value) {
+  if (value !== undefined) {
     elements.forEach((theElement) => {
       const element = theElement;
 
@@ -576,7 +584,7 @@ const getOrSetScrollTopOrScrollLeft = (identifier, value, $elements) => {
   let scrollValue;
 
   elements.forEach((element) => {
-    if (!scrollValue) {
+    if (scrollValue === undefined) {
       scrollValue = element[identifier];
     }
   });
@@ -593,7 +601,7 @@ const isInView = (boundingBox, offset) => boundingBox.top >= parseFloat(offset.t
 
 const $ = (elements) => ({
   elements,
-  length: elements.length,
+  length: elements.filter((element) => element).length,
   addClass: (cssClass) => modifyClass('add', $(elements), cssClass),
   removeClass: (cssClass) => modifyClass('remove', $(elements), cssClass),
   toggleClass: (cssClass) => modifyClass('toggle', $(elements), cssClass),
@@ -601,7 +609,7 @@ const $ = (elements) => ({
     let hasClass;
 
     elements.forEach((element) => {
-      if (!hasClass) {
+      if (hasClass === undefined) {
         hasClass = element.classList.contains(cssClass);
       }
     });
@@ -621,7 +629,7 @@ const $ = (elements) => ({
       return $(elements);
     }
 
-    if (value) {
+    if (value !== undefined) {
       elements.forEach((theElement) => {
         const element = theElement;
 
@@ -812,6 +820,7 @@ const $ = (elements) => ({
     return $(elements);
   },
   trigger: (type, jLightEventData) => {
+    // TODO: Add support for click, focus, blur
     const theEvent = document.createEvent('Event');
 
     theEvent.jLightEventData = jLightEventData;
@@ -873,7 +882,7 @@ const $ = (elements) => ({
       let attr;
 
       elements.forEach((element) => {
-        if (!attr) {
+        if (attr === undefined) {
           attr = element.getAttribute(attribute);
         }
       });
@@ -942,7 +951,9 @@ const $ = (elements) => ({
       }
     });
 
-    delete data.jLightInternal;
+    if (data && data.jLightInternal) {
+      delete data.jLightInternal;
+    }
 
     return data;
   },
@@ -1188,7 +1199,7 @@ const $ = (elements) => ({
     let value;
 
     elements.forEach((element) => {
-      if (!value) {
+      if (value === undefined) {
         if (element.type === 'checkbox') {
           value = element.checked;
         } else {
@@ -1209,6 +1220,43 @@ const $ = (elements) => ({
   scrollHeight: () => getScrollWidthOrScrollHeight('scrollHeight', elements),
   scrollTop: (value) => getOrSetScrollTopOrScrollLeft('scrollTop', value, $(elements)),
   scrollLeft: (value) => getOrSetScrollTopOrScrollLeft('scrollLeft', value, $(elements)),
+  scrollTo: (theArgument, duration = 300, offset = 0, callback) => {
+    // TODO: refactor window and element scrollTo
+    const [element] = elements;
+    const targets = getElementsFromArgument(theArgument);
+    const top = targets[0].offsetTop - element.getBoundingClientRect().top;
+    const innerHeight = Math.max(element.clientHeight, element.offsetHeight);
+    const { scrollHeight } = element;
+    const targetY = scrollHeight - top < innerHeight
+      ? scrollHeight - innerHeight - offset
+      : top - offset;
+    const startPositionY = element.scrollTop;
+    const difference = targetY - startPositionY;
+    let start;
+
+    const easing = (t) => (t < 0.5
+      ? 4 * t * t * t
+      : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1);
+
+    const step = (timestamp) => {
+      if (!start) {
+        start = timestamp;
+      }
+
+      const time = timestamp - start;
+      const percent = easing(Math.min(time / duration, 1));
+
+      element.scrollTop = startPositionY + difference * percent;
+
+      if (time < duration) {
+        window.requestAnimationFrame(step);
+      } else if (callback) {
+        callback();
+      }
+    };
+
+    window.requestAnimationFrame(step);
+  },
   offset: (value, relativeToViewport) => {
     if (value && typeof value !== 'boolean') {
       const { top, left } = value;
@@ -1240,7 +1288,7 @@ const $ = (elements) => ({
     elements.forEach((element) => {
       const boundingBox = element.getBoundingClientRect();
 
-      if (!offset) {
+      if (offset === undefined) {
         offset = boundingBox;
       }
     });
@@ -1336,7 +1384,7 @@ const $ = (elements) => ({
     return $(elements);
   },
   animate: (properties, duration = 300, callback = noop, easing = 'ease') => {
-    elements.forEach((theElement) => {
+    elements.forEach((theElement, elementIndex) => {
       const element = theElement;
       let transition = '';
 
@@ -1345,7 +1393,7 @@ const $ = (elements) => ({
 
         transition += `${index === 0 ? '' : ','}${key} ${duration}ms ${easing}`;
 
-        if (!element.style[key]) {
+        if (element.style[key] === undefined) {
           element.style[key] = window
             .getComputedStyle(element)
             .getPropertyValue(key);
@@ -1370,17 +1418,19 @@ const $ = (elements) => ({
       });
 
       element.style.transition = transition;
+
+      setTimeout(() => {
+        if (elementIndex === elements.length - 1) {
+          elements.forEach((elementToReset) => {
+            const theElementToReset = elementToReset;
+
+            theElementToReset.style.transition = '';
+          });
+
+          callback();
+        }
+      }, duration);
     });
-
-    setTimeout(() => {
-      elements.forEach((theElement) => {
-        const element = theElement;
-
-        element.style.transition = '';
-      });
-
-      callback();
-    }, duration);
 
     return $(elements);
   },
@@ -1456,12 +1506,14 @@ const $ = (elements) => ({
       const animationId = getUpdateAnimationId(element);
 
       element.style.overflow = 'hidden';
+      element.style.visibility = 'hidden';
       element.style.display = type;
       element.style.height = height;
 
       const targetHeight = Math.max(element.clientHeight, element.offsetHeight);
 
       element.style.height = `${startHeight}px`;
+      element.style.visibility = '';
 
       setTimeout(() => {
         $([element]).animate({ height: targetHeight }, duration, () => {
@@ -1553,6 +1605,7 @@ const $ = (elements) => ({
 });
 
 const documentAndWindowJLightElement = (argument) => ({
+  // TODO: add support for multiple types in one call
   on: (type, callbackOrSelector, delegatedCallback) => {
     if (typeof callbackOrSelector === 'function' || callbackOrSelector === false) {
       const callback = (theEvent) => {
@@ -1615,7 +1668,7 @@ const documentAndWindowJLightElement = (argument) => ({
   outerWidth: () => window.outerWidth,
   outerHeight: () => window.outerHeight,
   scrollTop: (value) => {
-    if (value) {
+    if (value !== undefined) {
       window.scrollTo(0, value);
 
       return $(argument);
@@ -1624,7 +1677,7 @@ const documentAndWindowJLightElement = (argument) => ({
     return window.pageYOffset;
   },
   scrollLeft: (value) => {
-    if (value) {
+    if (value !== undefined) {
       window.scrollTo(value, 0);
 
       return $(argument);
@@ -1634,12 +1687,12 @@ const documentAndWindowJLightElement = (argument) => ({
   },
   scrollTo: (theArgument, duration = 300, offset = 0, callback) => {
     const elements = getElementsFromArgument(theArgument);
-    const { offsetTop } = elements[0];
+    const top = elements[0].getBoundingClientRect().top + window.pageYOffset;
     const { innerHeight } = window;
     const { scrollHeight } = document.body;
-    const targetY = scrollHeight - offsetTop < innerHeight
+    const targetY = scrollHeight - top < innerHeight
       ? scrollHeight - innerHeight - offset
-      : offsetTop - offset;
+      : top - offset;
     const startPositionY = window.pageYOffset;
     const difference = targetY - startPositionY;
     let start;
@@ -1694,8 +1747,8 @@ export default (argument) => {
   let elements = [];
 
   if (typeof argument === 'string') {
-    if (argument.match(/<.+>/)) {
-      elements = [createElementFromString(argument)];
+    if (argument.match(/<(.|\n)+>/)) {
+      elements = [...createElementsFromString(argument)];
     } else {
       elements = [...document.querySelectorAll(argument)];
 
