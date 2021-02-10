@@ -331,7 +331,7 @@ const canBeSeralized = (element) => (element.name
 const addValueToJson = (element, theSerializedJson) => {
   const serializedJson = theSerializedJson;
 
-  if (element.type === 'checkbox') {
+  if (element.getAttribute('type') === 'checkbox') {
     serializedJson[element.name] = element.checked;
   } else {
     serializedJson[element.name] = element.value;
@@ -352,6 +352,32 @@ const getUpdateAnimationId = (element) => {
   });
 
   return animationId;
+};
+
+const doScroll = (duration, callback, onStep) => {
+  let start;
+
+  const easing = (t) => (t < 0.5
+    ? 4 * t * t * t
+    : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1);
+
+  const step = (timestamp) => {
+    if (!start) {
+      start = timestamp;
+    }
+
+    const time = timestamp - start;
+
+    onStep(easing(Math.min(time / duration, 1)));
+
+    if (time < duration) {
+      window.requestAnimationFrame(step);
+    } else if (callback) {
+      callback();
+    }
+  };
+
+  window.requestAnimationFrame(step);
 };
 
 const getOrSetDimension = (identifier, $elements, value) => {
@@ -447,7 +473,7 @@ const getOrSetTextOrHtml = (identifier, $elements, theValue) => {
   const { elements } = $elements;
   let value = theValue;
 
-  if (typeof value === 'string' || typeof value === 'function') {
+  if (value || typeof value === 'number' || typeof value === 'string' || value === null) {
     elements.forEach((theElement, index) => {
       const element = theElement;
 
@@ -455,7 +481,7 @@ const getOrSetTextOrHtml = (identifier, $elements, theValue) => {
         value = theValue(index, element[identifier]);
       }
 
-      element[identifier] = value;
+      element[identifier] = value === 0 ? '0' : (value || '');
     });
 
     return $elements;
@@ -470,10 +496,17 @@ const getOrSetTextOrHtml = (identifier, $elements, theValue) => {
   return value;
 };
 
-const modifyClass = (identifier, $elements, cssClass) => {
-  // TODO: Add support for multiple classes
+const modifyClasses = (identifier, $elements, cssString) => {
+  let cssClasses = [cssString];
+
+  if (cssString.indexOf(' ') > -1) {
+    cssClasses = cssString.split(' ');
+  }
+
   $elements.elements.forEach((element) => {
-    element.classList[identifier](cssClass);
+    cssClasses.forEach((cssClass) => {
+      element.classList[identifier](cssClass);
+    });
   });
 
   return $elements;
@@ -602,9 +635,9 @@ const isInView = (boundingBox, offset) => boundingBox.top >= parseFloat(offset.t
 const $ = (elements) => ({
   elements,
   length: elements.filter((element) => element).length,
-  addClass: (cssClass) => modifyClass('add', $(elements), cssClass),
-  removeClass: (cssClass) => modifyClass('remove', $(elements), cssClass),
-  toggleClass: (cssClass) => modifyClass('toggle', $(elements), cssClass),
+  addClass: (cssClass) => modifyClasses('add', $(elements), cssClass),
+  removeClass: (cssClass) => modifyClasses('remove', $(elements), cssClass),
+  toggleClass: (cssClass) => modifyClasses('toggle', $(elements), cssClass),
   hasClass: (cssClass) => {
     let hasClass;
 
@@ -679,8 +712,14 @@ const $ = (elements) => ({
 
     return $(elements);
   },
-  on: (type, callbackOrSelector, delegatedCallback) => {
+  on: (theTypes, callbackOrSelector, delegatedCallback) => {
     // TODO: Refactor event listener functions
+    let types = [theTypes];
+
+    if (types[0].indexOf(' ') > -1) {
+      types = types[0].split(' ');
+    }
+
     if (typeof callbackOrSelector === 'function' || callbackOrSelector === false) {
       elements.forEach((element) => {
         const callback = (theEvent) => {
@@ -696,32 +735,42 @@ const $ = (elements) => ({
           }
         };
 
-        addJLightElementEventData(element, type, callbackOrSelector, callback);
-        element.addEventListener(type, callback);
+        types.forEach((type) => {
+          addJLightElementEventData(element, type, callbackOrSelector, callback);
+          element.addEventListener(type, callback);
+        });
       });
     } else {
-      elements.forEach((element) => {
-        const callback = (theEvent) => {
-          const event = theEvent;
+      types.forEach((type) => {
+        elements.forEach((element) => {
+          const callback = (theEvent) => {
+            const event = theEvent;
 
-          if (element.contains(event.target) && event.target.matches(callbackOrSelector)) {
-            event.$target = $([event.target]);
-            event.$currentTarget = $([event.currentTarget]);
+            if (element.contains(event.target) && event.target.matches(callbackOrSelector)) {
+              event.$target = $([event.target]);
+              event.$currentTarget = $([event.currentTarget]);
 
-            if (delegatedCallback === false
-              || delegatedCallback(event, event.jLightEventData) === false) {
-              preventEvent(event);
+              if (delegatedCallback === false
+                || delegatedCallback(event, event.jLightEventData) === false) {
+                preventEvent(event);
+              }
             }
-          }
-        };
+          };
 
-        document.addEventListener(type, callback);
+          document.addEventListener(type, callback);
+        });
       });
     }
 
     return $(elements);
   },
-  once: (type, callbackOrSelector, delegatedCallback) => {
+  once: (theTypes, callbackOrSelector, delegatedCallback) => {
+    let types = [theTypes];
+
+    if (types[0].indexOf(' ') > -1) {
+      types = types[0].split(' ');
+    }
+
     if (typeof callbackOrSelector === 'function' || callbackOrSelector === false) {
       elements.forEach((element) => {
         const callback = (theEvent) => {
@@ -736,10 +785,14 @@ const $ = (elements) => ({
             preventEvent(event);
           }
 
-          element.removeEventListener(type, callback);
+          types.forEach((type) => {
+            element.removeEventListener(type, callback);
+          });
         };
 
-        element.addEventListener(type, callback);
+        types.forEach((type) => {
+          element.addEventListener(type, callback);
+        });
       });
     } else {
       elements.forEach((element) => {
@@ -755,32 +808,50 @@ const $ = (elements) => ({
               preventEvent(event);
             }
 
-            document.removeEventListener(type, callback);
+            types.forEach((type) => {
+              document.removeEventListener(type, callback);
+            });
           }
         };
 
-        document.addEventListener(type, callback);
+        types.forEach((type) => {
+          document.addEventListener(type, callback);
+        });
       });
     }
 
     return $(elements);
   },
-  off: (type, callback) => {
+  off: (theTypes, callback) => {
+    let types = [theTypes];
+
+    if (types[0].indexOf(' ') > -1) {
+      types = types[0].split(' ');
+    }
+
     elements.forEach((element) => {
       const jLightElementData = getJlightElementData(element);
       const events = jLightElementData.jLightInternal.events || [];
 
-      events.forEach((event) => {
-        if (event.type === type && event.callback === callback) {
-          removeJLightElementEventData(element, type, callback, event.realCallback);
-          element.removeEventListener(type, event.realCallback);
-        }
+      types.forEach((type) => {
+        events.forEach((event) => {
+          if (event.type === type && event.callback === callback) {
+            removeJLightElementEventData(element, type, callback, event.realCallback);
+            element.removeEventListener(type, event.realCallback);
+          }
+        });
       });
     });
 
     return $(elements);
   },
-  delegate: (type, callback) => {
+  delegate: (theTypes, callback) => {
+    let types = [theTypes];
+
+    if (types[0].indexOf(' ') > -1) {
+      types = types[0].split(' ');
+    }
+
     const realCallback = (theEvent) => {
       const event = theEvent;
       const jLightElementData = getJlightElementData(elements[0]);
@@ -801,44 +872,67 @@ const $ = (elements) => ({
       }
     };
 
-    addJLightElementEventData(document, type, callback, realCallback);
-    document.addEventListener(type, realCallback);
+    types.forEach((type) => {
+      addJLightElementEventData(document, type, callback, realCallback);
+      document.addEventListener(type, realCallback);
+    });
 
     return $(elements);
   },
-  undelegate: (type, callback) => {
+  undelegate: (theTypes, callback) => {
     const jLightElementData = getJlightElementData(document);
     const events = jLightElementData.jLightInternal.events || [];
+    let types = [theTypes];
 
-    events.forEach((event) => {
-      if (event.type === type && event.callback === callback) {
-        removeJLightElementEventData(document, type, callback, event.realCallback);
-        document.removeEventListener(type, event.realCallback);
+    if (types[0].indexOf(' ') > -1) {
+      types = types[0].split(' ');
+    }
+
+    types.forEach((type) => {
+      events.forEach((event) => {
+        if (event.type === type && event.callback === callback) {
+          removeJLightElementEventData(document, type, callback, event.realCallback);
+          document.removeEventListener(type, event.realCallback);
+        }
+      });
+    });
+
+    return $(elements);
+  },
+  trigger: (theTypes, jLightEventData) => {
+    let types = [theTypes];
+
+    if (types[0].indexOf(' ') > -1) {
+      types = types[0].split(' ');
+    }
+
+    types.forEach((type) => {
+      const event = document.createEvent('Event');
+
+      event.jLightEventData = jLightEventData;
+      event.initEvent(type, true, true);
+
+      elements.forEach((element) => {
+        element.dispatchEvent(event);
+      });
+
+      if (type === 'focus') {
+        elements[0].focus();
+      } else if (type === 'blur' || type === 'focusout') {
+        elements[0].blur();
       }
     });
 
     return $(elements);
   },
-  trigger: (type, jLightEventData) => {
-    // TODO: Add support for click, focus, blur
-    const theEvent = document.createEvent('Event');
-
-    theEvent.jLightEventData = jLightEventData;
-    theEvent.initEvent(type, true, true);
-
-    elements.forEach((element) => {
-      element.dispatchEvent(theEvent);
-    });
-
-    return $(elements);
-  },
-  each: (callback) => {
+  forEach: (callback) => {
     elements.forEach((element, index) => {
       callback($([element]), index);
     });
 
     return $(elements);
   },
+  each: (callback) => $(elements).forEach(callback),
   is: (property) => {
     let is;
 
@@ -937,7 +1031,9 @@ const $ = (elements) => ({
 
           Object.entries(element.dataset).forEach(([dataKey, dataValue]) => {
             if (!data[dataKey]) {
-              data[dataKey] = dataValue;
+              data[dataKey] = Number.isNaN(Number(dataValue))
+                ? dataValue
+                : parseFloat(dataValue, 0);
             }
           });
         } else {
@@ -946,6 +1042,10 @@ const $ = (elements) => ({
           if (data === undefined) {
             data = element.getAttribute(`data-${theKey}`)
               || element.getAttribute(`data-${key}`);
+
+            if (!Number.isNaN(Number(data))) {
+              data = parseFloat(data, 10);
+            }
           }
         }
       }
@@ -1104,32 +1204,8 @@ const $ = (elements) => ({
 
     return $(remainingElements);
   },
-  slice: (startIndex, stopIndex) => {
-    const slicedElements = [];
-
-    elements.forEach((element, index) => {
-      if (index >= startIndex) {
-        if (!stopIndex || index <= stopIndex) {
-          slicedElements.push(element);
-        }
-      }
-    });
-
-    return $(slicedElements);
-  },
-  splice: (startIndex, stopIndex) => {
-    const splicedElements = [];
-
-    elements.forEach((element, index) => {
-      if (index <= startIndex) {
-        splicedElements.push(element);
-      } if (index >= stopIndex) {
-        splicedElements.push(element);
-      }
-    });
-
-    return $(splicedElements);
-  },
+  slice: (start, end) => $(elements.slice(start, end)),
+  splice: (start, deleteCount) => $(elements.splice(start, deleteCount)),
   find: (selector) => {
     let foundElements = [];
 
@@ -1185,12 +1261,43 @@ const $ = (elements) => ({
 
     return $(closestElements);
   },
-  val: (theValue) => {
-    if (theValue !== undefined) {
+  val: (valueOrFunction) => {
+    if (valueOrFunction !== undefined) {
+      const isFunction = typeof valueOrFunction === 'function';
+
       elements.forEach((theElement) => {
         const element = theElement;
 
-        element.value = theValue;
+        if (element.getAttribute('type') === 'checkbox') {
+          element.checked = isFunction
+            ? valueOrFunction()
+            : !!valueOrFunction;
+        } else if (element.tagName === 'SELECT' && element.multiple) {
+          Array.from(element.querySelectorAll('option')).forEach((theOption, index) => {
+            const option = theOption;
+            let selected = false;
+
+            if (Array.isArray(valueOrFunction)) {
+              selected = !!valueOrFunction[index];
+            } else if (isFunction) {
+              selected = !!valueOrFunction($(getElementsFromArgument(option)), index);
+            } else {
+              selected = !!valueOrFunction;
+            }
+
+            if (selected) {
+              option.setAttribute('selected', 'selected');
+            } else {
+              option.removeAttribute('selected');
+            }
+
+            option.selected = selected;
+          });
+        } else {
+          element.value = isFunction
+            ? valueOrFunction()
+            : valueOrFunction;
+        }
       });
 
       return $(elements);
@@ -1200,8 +1307,16 @@ const $ = (elements) => ({
 
     elements.forEach((element) => {
       if (value === undefined) {
-        if (element.type === 'checkbox') {
+        if (element.getAttribute('type') === 'checkbox') {
           value = element.checked;
+        } else if (element.tagName === 'SELECT' && element.multiple) {
+          value = Array.from(element.querySelectorAll('option'))
+            .map((option) => (option.selected ? option.value : null))
+            .filter((theValue) => !!theValue);
+
+          if (!value.length) {
+            value = '';
+          }
         } else {
           value = element.value;
         }
@@ -1221,41 +1336,24 @@ const $ = (elements) => ({
   scrollTop: (value) => getOrSetScrollTopOrScrollLeft('scrollTop', value, $(elements)),
   scrollLeft: (value) => getOrSetScrollTopOrScrollLeft('scrollLeft', value, $(elements)),
   scrollTo: (theArgument, duration = 300, offset = 0, callback) => {
-    // TODO: refactor window and element scrollTo
     const [element] = elements;
     const targets = getElementsFromArgument(theArgument);
-    const top = targets[0].offsetTop - element.getBoundingClientRect().top;
+    const top = targets[0].offsetTop
+      - element.getBoundingClientRect().top
+      - window.pageYOffset;
     const innerHeight = Math.max(element.clientHeight, element.offsetHeight);
     const { scrollHeight } = element;
+    const startPositionY = element.scrollTop;
     const targetY = scrollHeight - top < innerHeight
       ? scrollHeight - innerHeight - offset
       : top - offset;
-    const startPositionY = element.scrollTop;
     const difference = targetY - startPositionY;
-    let start;
 
-    const easing = (t) => (t < 0.5
-      ? 4 * t * t * t
-      : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1);
-
-    const step = (timestamp) => {
-      if (!start) {
-        start = timestamp;
-      }
-
-      const time = timestamp - start;
-      const percent = easing(Math.min(time / duration, 1));
-
+    doScroll(duration, callback, (percent) => {
       element.scrollTop = startPositionY + difference * percent;
+    });
 
-      if (time < duration) {
-        window.requestAnimationFrame(step);
-      } else if (callback) {
-        callback();
-      }
-    };
-
-    window.requestAnimationFrame(step);
+    return $(elements);
   },
   offset: (value, relativeToViewport) => {
     if (value && typeof value !== 'boolean') {
@@ -1503,27 +1601,34 @@ const $ = (elements) => ({
     elements.forEach((theElement) => {
       const element = theElement;
       const startHeight = Math.max(element.clientHeight, element.offsetHeight);
+      const computedStyles = window.getComputedStyle(element);
       const animationId = getUpdateAnimationId(element);
+      const paddingTop = parseFloat(computedStyles.getPropertyValue('padding-top'), 10);
+      const paddingBottom = parseFloat(computedStyles.getPropertyValue('padding-bottom'), 10);
 
       element.style.overflow = 'hidden';
       element.style.visibility = 'hidden';
       element.style.display = type;
       element.style.height = height;
 
-      const targetHeight = Math.max(element.clientHeight, element.offsetHeight);
+      const targetHeight = Math.max(element.clientHeight, element.offsetHeight)
+        + parseFloat(computedStyles.getPropertyValue('border-top'), 10)
+        + parseFloat(computedStyles.getPropertyValue('border-bottom'), 10);
 
       element.style.height = `${startHeight}px`;
       element.style.visibility = '';
+      element.style.paddingTop = 0;
+      element.style.paddingBottom = 0;
 
       setTimeout(() => {
-        $([element]).animate({ height: targetHeight }, duration, () => {
+        $([element]).animate({ height: targetHeight, paddingTop, paddingBottom }, duration, () => {
           if (getJlightElementData(element).jLightInternal.currentAnimation === animationId) {
             element.style.overflow = '';
           }
 
           callback();
         }, easing);
-      }, 1);
+      }, 10);
     });
 
     return $(elements);
@@ -1536,12 +1641,16 @@ const $ = (elements) => ({
 
       element.style.overflow = 'hidden';
       element.style.height = `${startHeight}px`;
+      element.style.minHeight = 'auto';
 
       setTimeout(() => {
-        $([element]).animate({ height: 0 }, duration, () => {
+        $([element]).animate({ height: 0, paddingTop: 0, paddingBottom: 0 }, duration, () => {
           if (getJlightElementData(element).jLightInternal.currentAnimation === animationId) {
-            element.style.overflow = '';
             element.style.display = 'none';
+            element.style.overflow = '';
+            element.style.minHeight = '';
+            element.style.paddingTop = '';
+            element.style.paddingBottom = '';
           }
 
           callback();
@@ -1575,7 +1684,7 @@ const $ = (elements) => ({
       } else if (canBeSeralized(element)) {
         let { value } = element;
 
-        if (element.type === 'checkbox') {
+        if (element.getAttribute('type') === 'checkbox') {
           value = element.checked;
         }
 
@@ -1605,8 +1714,13 @@ const $ = (elements) => ({
 });
 
 const documentAndWindowJLightElement = (argument) => ({
-  // TODO: add support for multiple types in one call
-  on: (type, callbackOrSelector, delegatedCallback) => {
+  on: (theTypes, callbackOrSelector, delegatedCallback) => {
+    let types = [theTypes];
+
+    if (types[0].indexOf(' ') > -1) {
+      types = types[0].split(' ');
+    }
+
     if (typeof callbackOrSelector === 'function' || callbackOrSelector === false) {
       const callback = (theEvent) => {
         const event = theEvent;
@@ -1621,45 +1735,64 @@ const documentAndWindowJLightElement = (argument) => ({
         }
       };
 
-      addJLightElementEventData(argument, type, callbackOrSelector, callback);
-      argument.addEventListener(type, callback);
+      types.forEach((type) => {
+        addJLightElementEventData(argument, type, callbackOrSelector, callback);
+        argument.addEventListener(type, callback);
+      });
     } else {
-      argument.addEventListener(type, (theEvent) => {
-        const event = theEvent;
+      types.forEach((type) => {
+        argument.addEventListener(type, (theEvent) => {
+          const event = theEvent;
 
-        if (event.target.matches(callbackOrSelector)) {
-          event.$target = $([event.target]);
-          event.$currentTarget = $([event.currentTarget]);
+          if (event.target.matches(callbackOrSelector)) {
+            event.$target = $([event.target]);
+            event.$currentTarget = $([event.currentTarget]);
 
-          if (delegatedCallback === false
-            || delegatedCallback(event, event.jLightEventData) === false) {
-            preventEvent(event);
+            if (delegatedCallback === false
+              || delegatedCallback(event, event.jLightEventData) === false) {
+              preventEvent(event);
+            }
           }
-        }
+        });
       });
     }
 
     return documentAndWindowJLightElement(argument);
   },
-  off: (type, callback) => {
+  off: (theTypes, callback) => {
     const jLightElementData = getJlightElementData(argument);
     const events = jLightElementData.jLightInternal.events || [];
+    let types = [theTypes];
 
-    events.forEach((event) => {
-      if (event.type === type && event.callback === callback) {
-        removeJLightElementEventData(argument, type, callback, event.realCallback);
-        argument.removeEventListener(type, event.realCallback);
-      }
+    if (types[0].indexOf(' ') > -1) {
+      types = types[0].split(' ');
+    }
+
+    types.forEach((type) => {
+      events.forEach((event) => {
+        if (event.type === type && event.callback === callback) {
+          removeJLightElementEventData(argument, type, callback, event.realCallback);
+          argument.removeEventListener(type, event.realCallback);
+        }
+      });
     });
 
     return documentAndWindowJLightElement(argument);
   },
-  trigger: (type, jLightEventData) => {
-    const theEvent = document.createEvent('Event');
+  trigger: (theTypes, jLightEventData) => {
+    let types = [theTypes];
 
-    theEvent.jLightEventData = jLightEventData;
-    theEvent.initEvent(type, true, true);
-    argument.dispatchEvent(theEvent);
+    if (types[0].indexOf(' ') > -1) {
+      types = types[0].split(' ');
+    }
+
+    const event = document.createEvent('Event');
+
+    types.forEach((type) => {
+      event.jLightEventData = jLightEventData;
+      event.initEvent(type, true, true);
+      argument.dispatchEvent(event);
+    });
 
     return documentAndWindowJLightElement(argument);
   },
@@ -1695,30 +1828,12 @@ const documentAndWindowJLightElement = (argument) => ({
       : top - offset;
     const startPositionY = window.pageYOffset;
     const difference = targetY - startPositionY;
-    let start;
 
-    const easing = (t) => (t < 0.5
-      ? 4 * t * t * t
-      : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1);
-
-    const step = (timestamp) => {
-      if (!start) {
-        start = timestamp;
-      }
-
-      const time = timestamp - start;
-      const percent = easing(Math.min(time / duration, 1));
-
+    doScroll(duration, callback, (percent) => {
       window.scrollTo(0, startPositionY + difference * percent);
+    });
 
-      if (time < duration) {
-        window.requestAnimationFrame(step);
-      } else if (callback) {
-        callback();
-      }
-    };
-
-    window.requestAnimationFrame(step);
+    return documentAndWindowJLightElement(argument);
   },
 });
 
