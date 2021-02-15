@@ -1043,7 +1043,11 @@ const $ = (elements) => ({
             data = element.getAttribute(`data-${theKey}`)
               || element.getAttribute(`data-${key}`);
 
-            if (!Number.isNaN(Number(data))) {
+            if (!data
+              && (element.hasAttribute(`data-${theKey}`)
+                || element.hasAttribute(`data-${key}`))) {
+              data = true;
+            } else if (!Number.isNaN(Number(data))) {
               data = parseFloat(data, 10);
             }
           }
@@ -1052,7 +1056,15 @@ const $ = (elements) => ({
     });
 
     if (data && data.jLightInternal) {
-      delete data.jLightInternal;
+      const newData = {};
+
+      Object.entries(data).forEach(([dataKey, dataValue]) => {
+        if (dataKey !== 'jLightInternal') {
+          newData[dataKey] = dataValue;
+        }
+      });
+
+      data = newData;
     }
 
     return data;
@@ -1498,13 +1510,7 @@ const $ = (elements) => ({
         }
 
         setTimeout(() => {
-          if (key === 'opacity') {
-            element.style.opacity = value;
-
-            return;
-          }
-
-          element.style[key] = `${value}${typeof value === 'number' ? 'px' : ''}`;
+          element.style[key] = value;
         }, 0);
       });
 
