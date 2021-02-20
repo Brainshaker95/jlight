@@ -999,8 +999,14 @@ const $ = (elements) => ({
   },
   data: (theKey, value) => {
     if (typeof theKey === 'object' && theKey !== null) {
+      const newData = theKey;
+
+      if (newData.jLightInternal) {
+        delete newData.jLightInternal;
+      }
+
       elements.forEach((element) => {
-        updateJlightElementData(element, { ...theKey });
+        updateJlightElementData(element, { ...newData });
       });
 
       return $(elements);
