@@ -144,6 +144,32 @@ export const post = (url, opts = {}) => ajax({
   ...opts,
 });
 
+export const doEasing = (duration, callback, onStep) => {
+  let start;
+
+  const easing = (t) => (t < 0.5
+    ? 4 * t * t * t
+    : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1);
+
+  const step = (timestamp) => {
+    if (!start) {
+      start = timestamp;
+    }
+
+    const time = timestamp - start;
+
+    onStep(easing(Math.min(time / duration, 1)));
+
+    if (time < duration) {
+      window.requestAnimationFrame(step);
+    } else if (callback) {
+      callback();
+    }
+  };
+
+  window.requestAnimationFrame(step);
+};
+
 const initalizeJLightElementData = (element, selector) => {
   if (jLightGlobalElements.indexOf(element) > -1) {
     return;
@@ -352,32 +378,6 @@ const getUpdateAnimationId = (element) => {
   });
 
   return animationId;
-};
-
-const doScroll = (duration, callback, onStep) => {
-  let start;
-
-  const easing = (t) => (t < 0.5
-    ? 4 * t * t * t
-    : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1);
-
-  const step = (timestamp) => {
-    if (!start) {
-      start = timestamp;
-    }
-
-    const time = timestamp - start;
-
-    onStep(easing(Math.min(time / duration, 1)));
-
-    if (time < duration) {
-      window.requestAnimationFrame(step);
-    } else if (callback) {
-      callback();
-    }
-  };
-
-  window.requestAnimationFrame(step);
 };
 
 const getOrSetDimension = (identifier, $elements, value) => {
@@ -972,6 +972,30 @@ const $ = (elements) => ({
     return $(elements);
   },
   attr: (attribute, value) => {
+    if (typeof attribute === 'object' && attribute !== null) {
+      Object.entries(attribute).forEach(([key, theValue]) => {
+        elements.forEach((element) => {
+          element.setAttribute(camelCaseToDashCase(key), `${theValue}`);
+        });
+      });
+
+      return $(elements);
+    }
+
+    if (attribute === undefined) {
+      const attrs = {};
+
+      elements.forEach((element) => {
+        Array.from(element.attributes).forEach((attr) => {
+          if (!attrs[attr]) {
+            attrs[attr.name] = attr.value;
+          }
+        });
+      });
+
+      return attrs;
+    }
+
     if (value === undefined) {
       let attr;
 
@@ -985,7 +1009,7 @@ const $ = (elements) => ({
     }
 
     elements.forEach((element) => {
-      element.setAttribute(attribute, value);
+      element.setAttribute(attribute, `${value}`);
     });
 
     return $(elements);
@@ -1055,6 +1079,10 @@ const $ = (elements) => ({
               data = true;
             } else if (!Number.isNaN(Number(data))) {
               data = parseFloat(data, 10);
+
+              if (Number.isNaN(data)) {
+                data = undefined;
+              }
             }
           }
         }
@@ -1356,19 +1384,30 @@ const $ = (elements) => ({
   scrollTo: (theArgument, duration = 300, offset = 0, callback) => {
     const [element] = elements;
     const targets = getElementsFromArgument(theArgument);
+    const boundingBox = element.getBoundingClientRect();
+    const left = targets[0].offsetLeft
+      - boundingBox.left
+      - window.pageXOffset;
     const top = targets[0].offsetTop
-      - element.getBoundingClientRect().top
+      - boundingBox.top
       - window.pageYOffset;
+    const innerWidth = Math.max(element.clientWidth, element.offsetWidth);
     const innerHeight = Math.max(element.clientHeight, element.offsetHeight);
-    const { scrollHeight } = element;
+    const { scrollWidth, scrollHeight } = element;
+    const startPositionX = element.scrollLeft;
     const startPositionY = element.scrollTop;
+    const targetX = scrollWidth - left < innerWidth
+      ? scrollWidth - innerWidth - offset
+      : left - offset;
     const targetY = scrollHeight - top < innerHeight
       ? scrollHeight - innerHeight - offset
       : top - offset;
-    const difference = targetY - startPositionY;
+    const differenceX = targetX - startPositionX;
+    const differenceY = targetY - startPositionY;
 
-    doScroll(duration, callback, (percent) => {
-      element.scrollTop = startPositionY + difference * percent;
+    doEasing(duration, callback, (percent) => {
+      element.scrollLeft = startPositionX + differenceX * percent;
+      element.scrollTop = startPositionY + differenceY * percent;
     });
 
     return $(elements);
@@ -1500,6 +1539,8 @@ const $ = (elements) => ({
     return $(elements);
   },
   animate: (properties, duration = 300, callback = noop, easing = 'ease') => {
+    const animationId = getUpdateAnimationId(elements[0]);
+
     elements.forEach((theElement, elementIndex) => {
       const element = theElement;
       let transition = '';
@@ -1530,6 +1571,10 @@ const $ = (elements) => ({
       element.style.transition = transition;
 
       setTimeout(() => {
+        if (getJlightElementData(elements[0]).jLightInternal.currentAnimation !== animationId) {
+          return;
+        }
+
         if (elementIndex === elements.length - 1) {
           elements.forEach((elementToReset) => {
             const theElementToReset = elementToReset;
@@ -1548,8 +1593,16 @@ const $ = (elements) => ({
     elements.forEach((theElement) => {
       const element = theElement;
       const computedStyles = window.getComputedStyle(element);
-      const animatedProperties = getJlightElementData(element).jLightInternal.animatedProperties
+      const jLightInternalData = getJlightElementData(element).jLightInternal;
+      const animatedProperties = jLightInternalData.animatedProperties
         || [];
+
+      updateJlightElementData(element, {
+        jLightInternal: {
+          ...jLightInternalData,
+          currentAnimation: null,
+        },
+      });
 
       animatedProperties.forEach((key) => {
         element.style[key] = computedStyles.getPropertyValue(
@@ -1832,17 +1885,28 @@ const documentAndWindowJLightElement = (argument) => ({
   },
   scrollTo: (theArgument, duration = 300, offset = 0, callback) => {
     const elements = getElementsFromArgument(theArgument);
-    const top = elements[0].getBoundingClientRect().top + window.pageYOffset;
-    const { innerHeight } = window;
-    const { scrollHeight } = document.body;
+    const boundingBox = elements[0].getBoundingClientRect();
+    const top = boundingBox.top + window.pageYOffset;
+    const left = boundingBox.left + window.pageXOffset;
+    const { innerWidth, innerHeight } = window;
+    const { scrollWidth, scrollHeight } = document.body;
+    const targetX = scrollWidth - left < innerWidth
+      ? scrollWidth - innerWidth - offset
+      : left - offset;
+
     const targetY = scrollHeight - top < innerHeight
       ? scrollHeight - innerHeight - offset
       : top - offset;
+    const startPositionX = window.pageXOffset;
     const startPositionY = window.pageYOffset;
-    const difference = targetY - startPositionY;
+    const differenceX = targetX - startPositionX;
+    const differenceY = targetY - startPositionY;
 
-    doScroll(duration, callback, (percent) => {
-      window.scrollTo(0, startPositionY + difference * percent);
+    doEasing(duration, callback, (percent) => {
+      window.scrollTo(
+        startPositionX + differenceX * percent,
+        startPositionY + differenceY * percent,
+      );
     });
 
     return documentAndWindowJLightElement(argument);
@@ -1851,7 +1915,11 @@ const documentAndWindowJLightElement = (argument) => ({
 
 export default (argument) => {
   if (typeof argument === 'function') {
-    document.addEventListener('DOMContentLoaded', argument);
+    if (document.readyState !== 'loading') {
+      argument();
+    } else {
+      document.addEventListener('DOMContentLoaded', argument);
+    }
 
     return {};
   }
