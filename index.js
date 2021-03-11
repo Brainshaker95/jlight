@@ -1,3 +1,5 @@
+/* eslint-disable no-bitwise */
+
 const jLightGlobalElements = [];
 const jLightGlobalData = [];
 
@@ -22,6 +24,12 @@ export const dashCaseToCamelCase = (string) => (typeof string === 'string'
 export const camelCaseToDashCase = (string) => (typeof string === 'string'
   ? string.replace(/([a-z][A-Z])/g, (char) => `${char[0]}-${char[1].toLowerCase()}`)
   : '');
+
+export const generateHash = (string) => Math.abs(string.split('').reduce((hash, b) => {
+  const a = ((hash << 5) - hash) + b.charCodeAt(0);
+
+  return a & a;
+}, 0));
 
 export const ajax = (opts = {}) => {
   const options = {
@@ -1061,9 +1069,15 @@ const $ = (elements) => ({
 
           Object.entries(element.dataset).forEach(([dataKey, dataValue]) => {
             if (!data[dataKey]) {
-              data[dataKey] = Number.isNaN(Number(dataValue))
-                ? dataValue
-                : parseFloat(dataValue, 0);
+              if (!Number.isNaN(Number(dataValue))) {
+                data[dataKey] = parseFloat(dataValue, 10);
+
+                if (Number.isNaN(data[dataKey])) {
+                  data[dataKey] = undefined;
+                }
+              } else {
+                data[dataKey] = dataValue;
+              }
             }
           });
         } else {
@@ -1869,7 +1883,7 @@ const documentAndWindowJLightElement = (argument) => ({
     if (value !== undefined) {
       window.scrollTo(0, value);
 
-      return $(argument);
+      return documentAndWindowJLightElement(argument);
     }
 
     return window.pageYOffset;
@@ -1878,7 +1892,7 @@ const documentAndWindowJLightElement = (argument) => ({
     if (value !== undefined) {
       window.scrollTo(value, 0);
 
-      return $(argument);
+      return documentAndWindowJLightElement(argument);
     }
 
     return window.pageXOffset;
