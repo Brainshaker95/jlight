@@ -117,7 +117,7 @@ export const ajax = (opts = {}) => {
     if (request.readyState === XMLHttpRequest.DONE) {
       if (request.status && request.status >= 200 && request.status < 300) {
         options.done(
-          request.getResponseHeader('content-type') === 'application/json'
+          request.getResponseHeader('content-type').includes('application/json')
             ? JSON.parse(request.response)
             : request.response,
           request.status,
@@ -908,6 +908,7 @@ const $ = (elements) => ({
     return $(elements);
   },
   trigger: (theTypes, jLightEventData) => {
+    const firstElement = elements[0];
     let types = [theTypes];
 
     if (types[0].indexOf(' ') > -1) {
@@ -915,6 +916,26 @@ const $ = (elements) => ({
     }
 
     types.forEach((type) => {
+      if (!jLightEventData && firstElement) {
+        if (type === 'click') {
+          firstElement.click();
+
+          return;
+        }
+
+        if (type === 'focus' || type === 'focusin') {
+          firstElement.focus();
+
+          return;
+        }
+
+        if (type === 'blur' || type === 'focusout') {
+          firstElement.blur();
+
+          return;
+        }
+      }
+
       const event = document.createEvent('Event');
 
       event.jLightEventData = jLightEventData;
@@ -923,12 +944,6 @@ const $ = (elements) => ({
       elements.forEach((element) => {
         element.dispatchEvent(event);
       });
-
-      if (type === 'focus') {
-        elements[0].focus();
-      } else if (type === 'blur' || type === 'focusout') {
-        elements[0].blur();
-      }
     });
 
     return $(elements);
@@ -1559,10 +1574,10 @@ const $ = (elements) => ({
       const element = theElement;
       let transition = '';
 
-      Object.entries(properties).forEach(([theKey, value], index) => {
-        const key = camelCaseToDashCase(theKey);
+      Object.entries(properties).forEach(([key, value], index) => {
+        const theKey = camelCaseToDashCase(key);
 
-        transition += `${index === 0 ? '' : ','}${key} ${duration}ms ${easing}`;
+        transition += `${index === 0 ? '' : ','}${theKey} ${duration}ms ${easing}`;
 
         if (element.style[key] === undefined) {
           element.style[key] = window
@@ -1647,13 +1662,10 @@ const $ = (elements) => ({
   fadeOut: (duration = 300, callback = noop, easing) => {
     elements.forEach((theElement) => {
       const element = theElement;
-      const animationId = getUpdateAnimationId(element);
 
       setTimeout(() => {
         $([element]).animate({ opacity: 0 }, duration, () => {
-          if (getJlightElementData(element).jLightInternal.currentAnimation === animationId) {
-            element.style.display = 'none';
-          }
+          element.style.display = 'none';
 
           callback();
         }, easing);
@@ -1681,7 +1693,6 @@ const $ = (elements) => ({
       const element = theElement;
       const startHeight = Math.max(element.clientHeight, element.offsetHeight);
       const computedStyles = window.getComputedStyle(element);
-      const animationId = getUpdateAnimationId(element);
       const paddingTop = parseFloat(computedStyles.getPropertyValue('padding-top'), 10);
       const paddingBottom = parseFloat(computedStyles.getPropertyValue('padding-bottom'), 10);
 
@@ -1700,10 +1711,8 @@ const $ = (elements) => ({
       element.style.paddingBottom = 0;
 
       setTimeout(() => {
-        $([element]).animate({ height: targetHeight, paddingTop, paddingBottom }, duration, () => {
-          if (getJlightElementData(element).jLightInternal.currentAnimation === animationId) {
-            element.style.overflow = '';
-          }
+        $([element]).animate({ height: `${targetHeight}px`, paddingTop, paddingBottom }, duration, () => {
+          element.style.overflow = '';
 
           callback();
         }, easing);
@@ -1715,7 +1724,6 @@ const $ = (elements) => ({
   slideUp: (duration = 300, callback = noop, easing = 'ease') => {
     elements.forEach((theElement) => {
       const element = theElement;
-      const animationId = getUpdateAnimationId(element);
       const startHeight = Math.max(element.clientHeight, element.offsetHeight);
 
       element.style.overflow = 'hidden';
@@ -1724,13 +1732,11 @@ const $ = (elements) => ({
 
       setTimeout(() => {
         $([element]).animate({ height: 0, paddingTop: 0, paddingBottom: 0 }, duration, () => {
-          if (getJlightElementData(element).jLightInternal.currentAnimation === animationId) {
-            element.style.display = 'none';
-            element.style.overflow = '';
-            element.style.minHeight = '';
-            element.style.paddingTop = '';
-            element.style.paddingBottom = '';
-          }
+          element.style.display = 'none';
+          element.style.overflow = '';
+          element.style.minHeight = '';
+          element.style.paddingTop = '';
+          element.style.paddingBottom = '';
 
           callback();
         }, easing);
@@ -1959,11 +1965,15 @@ export default (argument) => {
     if (argument.match(/<(.|\n)+>/)) {
       elements = [...createElementsFromString(argument)];
     } else {
-      elements = [...document.querySelectorAll(argument)];
+      try {
+        elements = [...document.querySelectorAll(argument)];
 
-      elements.forEach((element) => {
-        initalizeJLightElementData(element, argument);
-      });
+        elements.forEach((element) => {
+          initalizeJLightElementData(element, argument);
+        });
+      } catch (e) {
+        return $([]);
+      }
     }
   }
 
