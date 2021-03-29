@@ -116,8 +116,11 @@ export const ajax = (opts = {}) => {
   request.onreadystatechange = () => {
     if (request.readyState === XMLHttpRequest.DONE) {
       if (request.status && request.status >= 200 && request.status < 300) {
+        const isJsonResponse = (request.getResponseHeader('content-type') || '')
+          .includes('application/json');
+
         options.done(
-          request.getResponseHeader('content-type').includes('application/json')
+          isJsonResponse
             ? JSON.parse(request.response)
             : request.response,
           request.status,
@@ -1011,7 +1014,7 @@ const $ = (elements) => ({
       elements.forEach((element) => {
         Array.from(element.attributes).forEach((attr) => {
           if (!attrs[attr]) {
-            attrs[attr.name] = attr.value;
+            attrs[attr.name] = attr.value || true;
           }
         });
       });
@@ -1023,8 +1026,8 @@ const $ = (elements) => ({
       let attr;
 
       elements.forEach((element) => {
-        if (attr === undefined) {
-          attr = element.getAttribute(attribute);
+        if (attr === undefined && element.hasAttribute(attribute)) {
+          attr = element.getAttribute(attribute) || true;
         }
       });
 
@@ -1702,7 +1705,6 @@ const $ = (elements) => ({
       element.style.height = height;
 
       const targetHeight = Math.max(element.clientHeight, element.offsetHeight)
-        + parseFloat(computedStyles.getPropertyValue('border-top'), 10)
         + parseFloat(computedStyles.getPropertyValue('border-bottom'), 10);
 
       element.style.height = `${startHeight}px`;
@@ -1711,7 +1713,12 @@ const $ = (elements) => ({
       element.style.paddingBottom = 0;
 
       setTimeout(() => {
-        $([element]).animate({ height: `${targetHeight}px`, paddingTop, paddingBottom }, duration, () => {
+        $([element]).animate({
+          height: `${targetHeight}px`,
+          paddingTop: `${paddingTop}px`,
+          paddingBottom: `${paddingBottom}px`,
+        }, duration, () => {
+          element.style.height = '';
           element.style.overflow = '';
 
           callback();
@@ -1733,6 +1740,7 @@ const $ = (elements) => ({
       setTimeout(() => {
         $([element]).animate({ height: 0, paddingTop: 0, paddingBottom: 0 }, duration, () => {
           element.style.display = 'none';
+          element.style.height = '';
           element.style.overflow = '';
           element.style.minHeight = '';
           element.style.paddingTop = '';
