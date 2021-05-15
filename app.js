@@ -7,10 +7,15 @@ import $, {
   noop,
   uuid,
   ucfirst,
+  isEmptyObject,
   isSameObject,
   preventEvent,
-  dashCaseToCamelCase,
-  camelCaseToDashCase,
+  camelToKebab,
+  camelToSnake,
+  kebabToCamel,
+  kebabToSnake,
+  snakeToCamel,
+  snakeToKebab,
 } from './index';
 
 $(() => {
@@ -21,6 +26,4 @@ $(() => {
   const $link = $('a');
 
   window.$ = $;
-
-  // Try something
 });

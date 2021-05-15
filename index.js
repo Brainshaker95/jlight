@@ -7,9 +7,19 @@ export const noop = () => {};
 
 export const uuid = () => Math.random().toString(36).substr(2, 9);
 
+export const lcfirst = (string) => string.charAt(0).toLowerCase() + string.slice(1);
+
 export const ucfirst = (string) => string.charAt(0).toUpperCase() + string.slice(1);
 
-export const isSameObject = (obj1, obj2) => JSON.stringify(obj1) === JSON.stringify(obj2);
+export const isEmptyObject = (obj) => obj
+  && obj.constructor === Object
+  && !Object.keys(obj).length;
+
+export const isSameObject = (obj1, obj2) => obj1
+  && obj2
+  && obj1.constructor === Object
+  && obj2.constructor === Object
+  && JSON.stringify(obj1) === JSON.stringify(obj2);
 
 export const preventEvent = (event) => {
   event.preventDefault();
@@ -17,12 +27,28 @@ export const preventEvent = (event) => {
   event.stopImmediatePropagation();
 };
 
-export const dashCaseToCamelCase = (string) => (typeof string === 'string'
-  ? string.replace(/-([a-z])/g, (chars) => chars[1].toUpperCase())
+export const camelToKebab = (string) => (typeof string === 'string'
+  ? string.replace(/([a-z][A-Z])/g, (chars) => `${chars[0]}-${chars[1].toLowerCase()}`).toLowerCase()
   : '');
 
-export const camelCaseToDashCase = (string) => (typeof string === 'string'
-  ? string.replace(/([a-z][A-Z])/g, (char) => `${char[0]}-${char[1].toLowerCase()}`)
+export const camelToSnake = (string) => (typeof string === 'string'
+  ? lcfirst(string).replace(/[A-Z]/g, (char) => `_${char.toLowerCase()}`).toLowerCase()
+  : '');
+
+export const kebabToCamel = (string) => (typeof string === 'string'
+  ? lcfirst(string.replace(/-([a-zA-Z])/g, (chars) => chars[1].toUpperCase()))
+  : '');
+
+export const kebabToSnake = (string) => (typeof string === 'string'
+  ? string.replace(/-/g, '_').toLowerCase()
+  : '');
+
+export const snakeToCamel = (string) => (typeof string === 'string'
+  ? lcfirst(string.replace(/(_[a-zA-Z])/g, (chars) => chars[1].toUpperCase()))
+  : '');
+
+export const snakeToKebab = (string) => (typeof string === 'string'
+  ? string.replace(/_/g, '-').toLowerCase()
   : '');
 
 export const generateHash = (string) => Math.abs(string.split('').reduce((hash, b) => {
@@ -1001,7 +1027,7 @@ const $ = (elements) => ({
     if (typeof attribute === 'object' && attribute !== null) {
       Object.entries(attribute).forEach(([key, theValue]) => {
         elements.forEach((element) => {
-          element.setAttribute(camelCaseToDashCase(key), `${theValue}`);
+          element.setAttribute(camelToKebab(key), `${theValue}`);
         });
       });
 
@@ -1062,7 +1088,7 @@ const $ = (elements) => ({
       return $(elements);
     }
 
-    const key = dashCaseToCamelCase(theKey);
+    const key = kebabToCamel(theKey);
 
     if (key === 'jLightInternal') {
       return {};
@@ -1578,7 +1604,7 @@ const $ = (elements) => ({
       let transition = '';
 
       Object.entries(properties).forEach(([key, value], index) => {
-        const theKey = camelCaseToDashCase(key);
+        const theKey = camelToKebab(key);
 
         transition += `${index === 0 ? '' : ','}${theKey} ${duration}ms ${easing}`;
 
@@ -1638,7 +1664,7 @@ const $ = (elements) => ({
 
       animatedProperties.forEach((key) => {
         element.style[key] = computedStyles.getPropertyValue(
-          camelCaseToDashCase(key),
+          camelToKebab(key),
         );
       });
 
@@ -1719,6 +1745,8 @@ const $ = (elements) => ({
           paddingBottom: `${paddingBottom}px`,
         }, duration, () => {
           element.style.height = '';
+          element.style.paddingTop = '';
+          element.style.paddingBottom = '';
           element.style.overflow = '';
 
           callback();
@@ -1732,10 +1760,13 @@ const $ = (elements) => ({
     elements.forEach((theElement) => {
       const element = theElement;
       const startHeight = Math.max(element.clientHeight, element.offsetHeight);
+      const computedStyles = window.getComputedStyle(element);
 
       element.style.overflow = 'hidden';
       element.style.height = `${startHeight}px`;
       element.style.minHeight = 'auto';
+      element.style.paddingTop = computedStyles.getPropertyValue('padding-top');
+      element.style.paddingBottom = computedStyles.getPropertyValue('padding-bottom');
 
       setTimeout(() => {
         $([element]).animate({ height: 0, paddingTop: 0, paddingBottom: 0 }, duration, () => {
