@@ -32,6 +32,8 @@
     "url": "git+https://github.com/Brainshaker95/jlight.git"
   },
   "files": [
-    "index.js"
+    "index.js",
+    "docs",
+    "tutorials"
   ]
 }
