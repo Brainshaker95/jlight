@@ -5,12 +5,20 @@ import $, {
   get,
   post,
   noop,
-  uuid,
+  uniqid,
+  lcfirst,
   ucfirst,
+  doEasing,
+  isEmptyObject,
   isSameObject,
   preventEvent,
-  dashCaseToCamelCase,
-  camelCaseToDashCase,
+  generateHash,
+  camelToKebab,
+  camelToSnake,
+  kebabToCamel,
+  kebabToSnake,
+  snakeToCamel,
+  snakeToKebab,
 } from './index';
 
 $(() => {
