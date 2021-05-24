@@ -1,0 +1,33 @@
+{
+  "source": {
+    "include": [
+      "index.js"
+    ],
+    "includePattern": ".js$",
+    "excludePattern": "(node_modules/|docs)"
+  },
+  "opts": {
+    "encoding": "utf8",
+    "readme": "./readme.md",
+    "tutorials": "./tutorials",
+    "destination": "docs/html",
+    "recurse": true,
+    "verbose": true,
+    "template": "./node_modules/clean-jsdoc-theme",
+    "theme_opts": {
+      "version": "1.1.0",
+      "title": "jLight Docs",
+      "include_css": true,
+      "overlay_scrollbar": true,
+      "menu" : [{
+        "title": "GitHub",
+        "link": "https://github.com/Brainshaker95/jlight",
+        "target": "_blank"
+      }, {
+        "title": "jLightbox",
+        "link": "https://github.com/Brainshaker95/jlightbox",
+        "target": "_blank"
+      }]
+    }
+  }
+}

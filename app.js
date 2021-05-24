@@ -5,11 +5,14 @@ import $, {
   get,
   post,
   noop,
-  uuid,
+  uniqid,
+  lcfirst,
   ucfirst,
+  doEasing,
   isEmptyObject,
   isSameObject,
   preventEvent,
+  generateHash,
   camelToKebab,
   camelToSnake,
   kebabToCamel,
@@ -26,4 +29,6 @@ $(() => {
   const $link = $('a');
 
   window.$ = $;
+
+  // Try something
 });

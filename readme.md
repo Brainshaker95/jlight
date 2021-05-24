@@ -1,13 +1,19 @@
-# JLight
-
+# jLight
 ## Table of contents
 
 Getting Started
+- [Documentation](#documentation)
 - [Prerequisites](#prerequisites)
 - [Installing](#installing)
 - [Commands](#commands)
 
 ___
+
+## Documentation
+
+A markdown version of the documentation can be found [here](./docs/docs.md)
+
+To view the HTML version you have to clone the repository since it is not hosted anywhere. It is located in `./docs/html`.
 
 ## Prerequisites
 
@@ -34,4 +40,7 @@ ___
 
   # Start dev server
   yarn serve
+
+  # Generate documentation
+  yarn docs
 ```

@@ -1,0 +1,226 @@
+::selection {
+    background: #3f3f3f;
+}
+
+body {
+    background-color: #121216;
+    color: #f8f8f9;
+}
+
+a,
+a:active {
+    color: #00ae2d;
+}
+
+hr {
+    border: 1px solid #333;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #f8f8f9;
+}
+
+h1,
+h2 {
+    border-bottom: 0.0625rem solid #333;
+}
+
+.navbar {
+    background: #000;
+}
+
+.navbar-ham {
+    background: #444;
+}
+
+.navbar-ham .first,
+.navbar-ham .second,
+.navbar-ham .third {
+    background: #fff;
+}
+
+.navbar-resize {
+    background: #222;
+}
+
+.resize-dots-container .dots {
+    background-color: #fff;
+}
+
+.search-box-input-container {
+    background: #2a2b2c;
+}
+
+.search-icon {
+    fill: #aeaeae;
+}
+
+.search-box-input {
+    color: #fff;
+}
+
+.search-box-input::placeholder {
+    color: #aeaeae;
+}
+
+.search-box-input:focus + .search-icon {
+    fill: #fff;
+}
+
+.search-item-ul {
+    background: #333;
+}
+
+.search-item-ul li:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.search-item-ul a,
+.search-item-ul li {
+    color: #fff;
+}
+
+.accordion-heading {
+    color: #fff;
+    fill: #fff;
+}
+
+.accordion-content {
+    background: #1E1E1E;
+}
+
+.accordion-content a {
+    color: #fff;
+}
+
+.methods.accordion-content {
+    background: #2a2b2c;
+}
+
+.menu-link {
+    color: #fff;
+}
+
+tt,
+code,
+kbd,
+samp {
+    background: #222;
+}
+
+.signature-attributes {
+    color: #676867;
+}
+
+.signature-bracket {
+    color: #C5C8C6;
+}
+
+.ancestors {
+    color: #999;
+}
+
+.ancestors a {
+    color: #999 !important;
+}
+
+.important {
+    color: #950b02;
+}
+
+.type-signature,
+.type-signature a {
+    color: #C7444A;
+}
+
+.name {
+    color: #f7f7f7;
+}
+
+.details {
+    background: #1E1E1E;
+    color: #fff;
+}
+
+.member-item-container strong,
+.method-member-container strong {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: #fff;
+}
+
+.pre-top-bar-container {
+    background: #090909;
+}
+
+table .name,
+.params .name,
+.props .name,
+.name code {
+    color: #6089b4;
+}
+
+.name code {
+    padding: 0.2rem 0.5rem;
+}
+
+table td,
+.params td {
+    background-color: #1E1E1E;
+    border-top: 1px solid #676867;
+}
+
+table thead tr,
+.params thead tr,
+.props thead tr {
+    background-color: #1E1E1E;
+    color: #fff;
+}
+
+/* stylelint-disable */
+table .params thead tr,
+.params .params thead tr,
+.props .props thead tr {
+    background-color: #1E1E1E;
+    color: #fff;
+}
+
+.disabled {
+    color: #aaaaaa;
+}
+
+.icon-container {
+    fill: #fff;
+}
+
+.icon-container:hover {
+    background-color: #333;
+}
+
+.code-lang-name {
+    color: #CE6700;
+}
+
+.tooltip {
+    background: #2a2b2c;
+    color: #f8f8f9;
+}
+
+blockquote {
+    background: #2a2b2c;
+    color: #fff;
+}
+
+code {
+    background: #000;
+    color: #fff;
+}
+
+.os-scrollbar-handle { 
+    background-color: #2a2b2c !important; 
+}
