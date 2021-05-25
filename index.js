@@ -1410,7 +1410,9 @@ const attachListener = (
   callbackOrSelector,
   delegatedCallbackOrOptions,
   theOptions = {},
+  jlightConstructor,
 ) => {
+  const jLight = jlightConstructor || $;
   let types = [eventNames];
 
   if (types[0].indexOf(' ') > -1) {
@@ -1420,13 +1422,15 @@ const attachListener = (
   const hasDelegatedCallback = typeof delegatedCallbackOrOptions === 'function';
   const options = (hasDelegatedCallback ? theOptions : delegatedCallbackOrOptions) || {};
   const delegatedCallback = hasDelegatedCallback ? delegatedCallbackOrOptions : noop;
+  const isDocumentOrWindow = elements[0]
+    && (elements[0] === document || elements[0] === window);
 
   if (typeof callbackOrSelector === 'function' || callbackOrSelector === false) {
     elements.forEach((element) => {
       const callback = (theEvent) => {
         const event = theEvent;
 
-        event.$target = $([event.target]);
+        event.$target = jLight([event.target]);
         event.$currentTarget = $([event.currentTarget]);
 
         if (callbackOrSelector === false
@@ -1453,9 +1457,10 @@ const attachListener = (
       elements.forEach((element) => {
         const callback = (theEvent) => {
           const event = theEvent;
+          const contains = isDocumentOrWindow || element.contains(event.target);
 
-          if (element.contains(event.target) && event.target.matches(callbackOrSelector)) {
-            event.$target = $([event.target]);
+          if (contains && event.target.matches(callbackOrSelector)) {
+            event.$target = jLight([event.target]);
             event.$currentTarget = $([event.currentTarget]);
 
             if (delegatedCallback === false
@@ -1474,6 +1479,76 @@ const attachListener = (
       });
     });
   }
+
+  return $(elements);
+};
+
+const removeListener = ($, elements, eventNames, callback) => {
+  let types = [eventNames];
+
+  if (types[0].indexOf(' ') > -1) {
+    types = types[0].split(' ');
+  }
+
+  elements.forEach((element) => {
+    const jLightElementData = getJLightElementData(element);
+    const events = jLightElementData.jLightInternal.events || [];
+
+    types.forEach((type) => {
+      events.forEach((event) => {
+        if (event.type === type && (!callback || event.callback === callback)) {
+          removeJLightElementEventData(element, type, callback, event.realCallback);
+          element.removeEventListener(type, event.realCallback);
+        }
+      });
+    });
+  });
+
+  return $(elements);
+};
+
+const triggerListener = ($, elements, eventNames, jLightEventData) => {
+  const nativeTypes = ['click', 'focus', 'focusin', 'blur', 'focusout'];
+  let types = [eventNames];
+
+  if (types[0].indexOf(' ') > -1) {
+    types = types[0].split(' ');
+  }
+
+  types.forEach((type) => {
+    if (!jLightEventData && nativeTypes.includes(type)) {
+      let hasFired;
+
+      elements.forEach((element) => {
+        if (type === 'click' && element.click) {
+          element.click();
+
+          hasFired = true;
+        } else if ((type === 'focus' || type === 'focusin') && element.focus) {
+          element.focus();
+
+          hasFired = true;
+        } else if ((type === 'blur' || type === 'focusout') && element.blur) {
+          element.blur();
+
+          hasFired = true;
+        }
+      });
+
+      if (hasFired) {
+        return;
+      }
+    }
+
+    const event = document.createEvent('Event');
+
+    event.jLightEventData = jLightEventData;
+    event.initEvent(type, true, true);
+
+    elements.forEach((element) => {
+      element.dispatchEvent(event);
+    });
+  });
 
   return $(elements);
 };
@@ -2022,7 +2097,7 @@ const $ = (elements) => ({
    * The options to apply to the listener
    * @returns {jLight} jLight collection
    */
-  once: (eventNames, callbackOrSelector, delegatedCallbackOrOptions, options) => attachListener(
+  once: (eventNames, callbackOrSelector, delegatedCallbackOrOptions, options = {}) => attachListener(
     $,
     elements,
     eventNames,
@@ -2045,29 +2120,12 @@ const $ = (elements) => ({
    * @param {Function} [callback] The function to remove from being executed when the event occurs
    * @returns {jLight} jLight collection
    */
-  off: (eventNames, callback) => {
-    let types = [eventNames];
-
-    if (types[0].indexOf(' ') > -1) {
-      types = types[0].split(' ');
-    }
-
-    elements.forEach((element) => {
-      const jLightElementData = getJLightElementData(element);
-      const events = jLightElementData.jLightInternal.events || [];
-
-      types.forEach((type) => {
-        events.forEach((event) => {
-          if (event.type === type && (!callback || event.callback === callback)) {
-            removeJLightElementEventData(element, type, callback, event.realCallback);
-            element.removeEventListener(type, event.realCallback);
-          }
-        });
-      });
-    });
-
-    return $(elements);
-  },
+  off: (eventNames, callback) => removeListener(
+    $,
+    elements,
+    eventNames,
+    callback,
+  ),
 
   /**
    * [DEPRECATED] Delegates event handlers to elements.
@@ -2164,41 +2222,12 @@ const $ = (elements) => ({
    * @param {*} [jLightEventData] Custom data passed to the event
    * @returns {jLight} jLight collection
    */
-  trigger: (eventNames, jLightEventData) => {
-    const nativeTypes = ['click', 'focus', 'focusin', 'blur', 'focusout'];
-    let types = [eventNames];
-
-    if (types[0].indexOf(' ') > -1) {
-      types = types[0].split(' ');
-    }
-
-    types.forEach((type) => {
-      if (!jLightEventData && nativeTypes.includes(type)) {
-        elements.forEach((element) => {
-          if (type === 'click') {
-            element.click();
-          } else if (type === 'focus' || type === 'focusin') {
-            element.focus();
-          } else if (type === 'blur' || type === 'focusout') {
-            element.blur();
-          }
-        });
-
-        return;
-      }
-
-      const event = document.createEvent('Event');
-
-      event.jLightEventData = jLightEventData;
-      event.initEvent(type, true, true);
-
-      elements.forEach((element) => {
-        element.dispatchEvent(event);
-      });
-    });
-
-    return $(elements);
-  },
+  trigger: (eventNames, jLightEventData) => triggerListener(
+    $,
+    elements,
+    eventNames,
+    jLightEventData,
+  ),
 
   /**
    * @module ElementData
@@ -4007,92 +4036,57 @@ const $ = (elements) => ({
 });
 
 const documentAndWindowJLightElement = (argument) => ({
-  on: (theTypes, callbackOrSelector, delegatedCallback) => {
-    let types = [theTypes];
+  ...argument,
 
-    if (types[0].indexOf(' ') > -1) {
-      types = types[0].split(' ');
-    }
+  on: (eventNames, callbackOrSelector, delegatedCallbackOrOptions, options) => attachListener(
+    documentAndWindowJLightElement,
+    [argument],
+    eventNames,
+    callbackOrSelector,
+    delegatedCallbackOrOptions,
+    options,
+    $,
+  ),
 
-    if (typeof callbackOrSelector === 'function' || callbackOrSelector === false) {
-      const callback = (theEvent) => {
-        const event = theEvent;
+  /* eslint-disable max-len */
 
-        event.$target = $([event.target]);
-        event.$currentTarget = $([event.currentTarget]);
+  once: (eventNames, callbackOrSelector, delegatedCallbackOrOptions, options = {}) => attachListener(
+    documentAndWindowJLightElement,
+    [argument],
+    eventNames,
+    callbackOrSelector,
+    delegatedCallbackOrOptions,
+    {
+      ...options,
+      once: true,
+    },
+    $,
+  ),
 
-        if (callbackOrSelector === false
-          || callbackOrSelector(event, event.jLightEventData) === false
-          || delegatedCallback === false) {
-          preventEvent(event);
-        }
-      };
+  /* eslint-enable max-len */
 
-      types.forEach((type) => {
-        addJLightElementEventData(argument, type, callbackOrSelector, callback);
-        argument.addEventListener(type, callback);
-      });
-    } else {
-      types.forEach((type) => {
-        argument.addEventListener(type, (theEvent) => {
-          const event = theEvent;
+  off: (eventNames, callback) => removeListener(
+    documentAndWindowJLightElement,
+    [argument],
+    eventNames,
+    callback,
+  ),
 
-          if (event.target.matches(callbackOrSelector)) {
-            event.$target = $([event.target]);
-            event.$currentTarget = $([event.currentTarget]);
+  trigger: (eventNames, jLightEventData) => triggerListener(
+    documentAndWindowJLightElement,
+    [argument],
+    eventNames,
+    jLightEventData,
+  ),
 
-            if (delegatedCallback === false
-              || delegatedCallback(event, event.jLightEventData) === false) {
-              preventEvent(event);
-            }
-          }
-        });
-      });
-    }
-
-    return documentAndWindowJLightElement(argument);
-  },
-  off: (theTypes, callback) => {
-    const jLightElementData = getJLightElementData(argument);
-    const events = jLightElementData.jLightInternal.events || [];
-    let types = [theTypes];
-
-    if (types[0].indexOf(' ') > -1) {
-      types = types[0].split(' ');
-    }
-
-    types.forEach((type) => {
-      events.forEach((event) => {
-        if (event.type === type && event.callback === callback) {
-          removeJLightElementEventData(argument, type, callback, event.realCallback);
-          argument.removeEventListener(type, event.realCallback);
-        }
-      });
-    });
-
-    return documentAndWindowJLightElement(argument);
-  },
-  trigger: (theTypes, jLightEventData) => {
-    let types = [theTypes];
-
-    if (types[0].indexOf(' ') > -1) {
-      types = types[0].split(' ');
-    }
-
-    const event = document.createEvent('Event');
-
-    types.forEach((type) => {
-      event.jLightEventData = jLightEventData;
-      event.initEvent(type, true, true);
-      argument.dispatchEvent(event);
-    });
-
-    return documentAndWindowJLightElement(argument);
-  },
   innerWidth: () => window.innerWidth,
+
   innerHeight: () => window.innerHeight,
+
   outerWidth: () => window.outerWidth,
+
   outerHeight: () => window.outerHeight,
+
   scrollTop: (value) => {
     if (value !== undefined) {
       window.scrollTo(0, value);
@@ -4102,6 +4096,7 @@ const documentAndWindowJLightElement = (argument) => ({
 
     return window.pageYOffset;
   },
+
   scrollLeft: (value) => {
     if (value !== undefined) {
       window.scrollTo(value, 0);
@@ -4111,6 +4106,7 @@ const documentAndWindowJLightElement = (argument) => ({
 
     return window.pageXOffset;
   },
+
   scrollTo: (theArgument, duration = 300, theOffset = {}, callback) => {
     const offset = {
       x: 0,
