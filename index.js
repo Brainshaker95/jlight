@@ -344,7 +344,7 @@
 
 /**
  * @callback cssCallback
- * @param {string|Object.<string, string>} property The property name or the properties to set
+ * @param {string|Object.<string, string>} [property] The property name or the properties to set
  * @param {string} [value] The value to set the supplied property to
  * @returns {jLight|string|CSSStyleDeclaration}
  * jLight collection, property value or elements CSSStyleDeclaration
@@ -1608,18 +1608,22 @@ const getOrSetTextOrHtml = (identifier, $elements, theValue) => {
   return value;
 };
 
-const modifyClasses = (identifier, $elements, cssString, force) => {
+const modifyClasses = (identifier, $elements, cssString = '', force) => {
+  const { elements } = $elements;
   const isToggle = identifier === 'toggle';
+  const removeAll = identifier === 'remove' && !cssString.trim();
   let cssClasses = [cssString];
 
   if (cssString.indexOf(' ') > -1) {
     cssClasses = cssString.split(' ');
   }
 
-  $elements.elements.forEach((element) => {
+  elements.forEach((element) => {
     cssClasses.forEach((cssClass) => {
       if (isToggle) {
-        element.classList[identifier](cssClass, force);
+        element.classList.toggle(cssClass, force);
+      } else if (removeAll) {
+        element.classList.remove(...element.classList);
       } else {
         element.classList[identifier](cssClass);
       }
@@ -1867,7 +1871,7 @@ const $ = (elements) => ({
    *
    * @function
    * @tutorial css
-   * @param {string|Object.<string, string>} property The property name or the properties to set
+   * @param {string|Object.<string, string>} [property] The property name or the properties to set
    * @param {string} [value] The value to set the supplied property to
    * @returns {jLight|string|CSSStyleDeclaration}
    * jLight collection, property value or elements CSSStyleDeclaration
@@ -1895,13 +1899,15 @@ const $ = (elements) => ({
       return $(elements);
     }
 
-    const computedStyles = window.getComputedStyle(elements[0]);
+    const computedStyles = elements[0]
+      ? window.getComputedStyle(elements[0])
+      : null;
 
     if (property) {
       return computedStyles.getPropertyValue(property);
     }
 
-    return computedStyles;
+    return computedStyles || $(elements);
   },
 
   /**
