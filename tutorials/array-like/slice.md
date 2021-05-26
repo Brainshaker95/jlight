@@ -1,3 +1,3 @@
-{@link module:ArrayLike~slice Go to definition}
+[Go to definitition]{@link module:ArrayLike~slice}
 
 TODO

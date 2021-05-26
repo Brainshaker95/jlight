@@ -1,3 +1,3 @@
-{@link module:Utility.preventEvent Go to definition}
+[Go to definitition]{@link module:Utility.preventEvent}
 
 TODO

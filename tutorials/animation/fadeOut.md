@@ -1,3 +1,3 @@
-{@link module:Animation~fadeOut Go to definition}
+[Go to definitition]{@link module:Animation~fadeOut}
 
 TODO

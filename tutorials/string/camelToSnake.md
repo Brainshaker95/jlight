@@ -1,3 +1,3 @@
-{@link module:String.camelToSnake Go to definition}
+[Go to definitition]{@link module:String.camelToSnake}
 
 TODO

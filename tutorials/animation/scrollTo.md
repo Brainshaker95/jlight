@@ -1,3 +1,3 @@
-{@link module:Animation~scrollTo Go to definition}
+[Go to definitition]{@link module:Animation~scrollTo}
 
 TODO

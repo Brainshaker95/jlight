@@ -1,3 +1,3 @@
-{@link module:String.lcfirst Go to definition}
+[Go to definitition]{@link module:String.lcfirst}
 
 TODO

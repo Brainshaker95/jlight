@@ -1,3 +1,3 @@
-{@link module:Dimensions~scrollHeight Go to definition}
+[Go to definitition]{@link module:Dimensions~scrollHeight}
 
 TODO

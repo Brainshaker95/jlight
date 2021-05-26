@@ -1,3 +1,3 @@
-{@link module:Dimensions~outerWidth Go to definition}
+[Go to definitition]{@link module:Dimensions~outerWidth}
 
 TODO

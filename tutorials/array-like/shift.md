@@ -1,3 +1,3 @@
-{@link module:ArrayLike~shift Go to definition}
+[Go to definitition]{@link module:ArrayLike~shift}
 
 TODO

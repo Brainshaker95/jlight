@@ -1,3 +1,3 @@
-{@link module:Selection~siblings Go to definition}
+[Go to definitition]{@link module:Selection~siblings}
 
 TODO

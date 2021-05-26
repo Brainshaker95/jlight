@@ -1,3 +1,3 @@
-{@link module:ArrayLike~reverse Go to definition}
+[Go to definitition]{@link module:ArrayLike~reverse}
 
 TODO

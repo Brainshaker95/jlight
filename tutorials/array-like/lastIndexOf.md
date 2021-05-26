@@ -1,3 +1,3 @@
-{@link module:ArrayLike~lastIndexOf Go to definition}
+[Go to definitition]{@link module:ArrayLike~lastIndexOf}
 
 TODO

@@ -1,3 +1,3 @@
-{@link module:Selection~last Go to definition}
+[Go to definitition]{@link module:Selection~last}
 
 TODO

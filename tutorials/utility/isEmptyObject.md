@@ -1,3 +1,3 @@
-{@link module:Utility.isEmptyObject Go to definition}
+[Go to definitition]{@link module:Utility.isEmptyObject}
 
 TODO

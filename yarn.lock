@@ -918,9 +918,10 @@ clean-css@4.2.x:
 
 "clean-jsdoc-theme@git+https://github.com/Brainshaker95/clean-jsdoc-theme.git":
   version "3.2.6"
-  resolved "git+https://github.com/Brainshaker95/clean-jsdoc-theme.git#10db47edc918e939a372f5114e9bb31bcaac58d2"
+  resolved "git+https://github.com/Brainshaker95/clean-jsdoc-theme.git#4ab5121726c8fcf876bca78218f7740e64e16b8f"
   dependencies:
     fs-extra "^9.1.0"
+    seedrandom "^3.0.5"
 
 cliui@^5.0.0:
   version "5.0.0"
@@ -4404,6 +4405,11 @@ schema-utils@^1.0.0:
     ajv "^6.1.0"
     ajv-errors "^1.0.0"
     ajv-keywords "^3.1.0"
+
+seedrandom@^3.0.5:
+  version "3.0.5"
+  resolved "https://registry.yarnpkg.com/seedrandom/-/seedrandom-3.0.5.tgz#54edc85c95222525b0c7a6f6b3543d8e0b3aa0a7"
+  integrity sha512-8OwmbklUNzwezjGInmZ+2clQmExQPvomqjL7LFqOYqtmuxRgQYqOD3mHaU+MvZn5FLUeVxVfQjwLZW/n/JFuqg==
 
 select-hose@^2.0.0:
   version "2.0.0"

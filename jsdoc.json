@@ -19,6 +19,7 @@
       "title": "jLight Docs",
       "include_css": true,
       "overlay_scrollbar": true,
+      "accordion_id_seed": "jLight",
       "menu" : [{
         "title": "GitHub",
         "link": "https://github.com/Brainshaker95/jlight",

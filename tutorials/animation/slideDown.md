@@ -1,3 +1,3 @@
-{@link module:Animation~slideDown Go to definition}
+[Go to definitition]{@link module:Animation~slideDown}
 
 TODO

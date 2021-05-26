@@ -1,3 +1,3 @@
-{@link module:Selection~parents Go to definition}
+[Go to definitition]{@link module:Selection~parents}
 
 TODO

@@ -1,3 +1,3 @@
-{@link module:ArrayLike~sort Go to definition}
+[Go to definitition]{@link module:ArrayLike~sort}
 
 TODO

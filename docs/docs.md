@@ -472,8 +472,8 @@ Handles asynchronous HTTP requests.
 | Param | Type | Description |
 | --- | --- | --- |
 | opts | <code>object</code> | The options for the request |
-| [opts.url] | <code>string</code> | The url to send the request to |
-| [opts.method] | <code>string</code> | The HTTP method to use |
+| opts.url | <code>string</code> | The url to send the request to |
+| [opts.method] | <code>string</code> | The HTTP method to use (default: 'POST') |
 | [opts.data] | <code>Object.&lt;string, \*&gt;</code> \| <code>string</code> | The data to send |
 | [opts.headers] | <code>Object.&lt;string, string&gt;</code> | The headers to send |
 | [opts.processData] | <code>boolean</code> | Whether to process the data or not |
@@ -576,7 +576,7 @@ The collections first elements tag name.
     * [~removeClass(cssClasses)](#module_CSS..removeClass) ⇒ [<code>jLight</code>](#jLight)
     * [~toggleClass(cssClasses, [force])](#module_CSS..toggleClass) ⇒ [<code>jLight</code>](#jLight)
     * [~hasClass(cssClasses)](#module_CSS..hasClass) ⇒ <code>boolean</code>
-    * [~css(property, [value])](#module_CSS..css) ⇒ [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>CSSStyleDeclaration</code>
+    * [~css([property], [value])](#module_CSS..css) ⇒ [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>CSSStyleDeclaration</code>
     * [~show([type])](#module_CSS..show) ⇒ [<code>jLight</code>](#jLight)
     * [~hide()](#module_CSS..hide) ⇒ [<code>jLight</code>](#jLight)
     * [~toggle([type], [force])](#module_CSS..toggle) ⇒ [<code>jLight</code>](#jLight)
@@ -632,7 +632,7 @@ Whether at least one of the collections elements has all of the provided classes
 
 <a name="module_CSS..css"></a>
 
-### CSS~css(property, [value]) ⇒ [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>CSSStyleDeclaration</code>
+### CSS~css([property], [value]) ⇒ [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>CSSStyleDeclaration</code>
 Applies style rules to the collections elements, gets the current style rules or
 gets the current value for a specific style property.
 
@@ -641,7 +641,7 @@ gets the current value for a specific style property.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| property | <code>string</code> \| <code>Object.&lt;string, string&gt;</code> | The property name or the properties to set |
+| [property] | <code>string</code> \| <code>Object.&lt;string, string&gt;</code> | The property name or the properties to set |
 | [value] | <code>string</code> | The value to set the supplied property to |
 
 <a name="module_CSS..show"></a>
@@ -1911,6 +1911,29 @@ jLights default export
 | --- | --- | --- |
 | argument | [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>function</code> \| <code>HTMLElement</code> \| <code>HTMLCollection</code> \| <code>NodeList</code> \| <code>document</code> \| <code>window</code> | The argument to initialize jLight on |
 
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| noop | <code>function</code> | [Go to definition](#module_Utility.noop) |
+| uniqid | <code>function</code> | [Go to definition](#module_Utility.uniqid) |
+| generateHash | <code>function</code> | [Go to definition](#module_Utility.generateHash) |
+| isEmptyObject | <code>function</code> | [Go to definition](#module_Utility.isEmptyObject) |
+| isSameObject | <code>function</code> | [Go to definition](#module_Utility.isSameObject) |
+| preventEvent | <code>function</code> | [Go to definition](#module_Utility.preventEvent) |
+| doEasing | <code>function</code> | [Go to definition](#module_Utility.doEasing) |
+| lcfirst | <code>function</code> | [Go to definition](#module_String.lcfirst) |
+| ucfirst | <code>function</code> | [Go to definition](#module_String.ucfirst) |
+| camelToKebab | <code>function</code> | [Go to definition](#module_String.camelToKebab) |
+| camelToSnake | <code>function</code> | [Go to definition](#module_String.camelToSnake) |
+| kebabToCamel | <code>function</code> | [Go to definition](#module_String.kebabToCamel) |
+| kebabToSnake | <code>function</code> | [Go to definition](#module_String.kebabToSnake) |
+| snakeToCamel | <code>function</code> | [Go to definition](#module_String.snakeToCamel) |
+| snakeToKebab | <code>function</code> | [Go to definition](#module_String.snakeToKebab) |
+| ajax | <code>function</code> | [Go to definition](#module_Ajax.ajax) |
+| get | <code>function</code> | [Go to definition](#module_Ajax.get) |
+| post | <code>function</code> | [Go to definition](#module_Ajax.post) |
+
 <a name="jLight"></a>
 
 ## jLight : <code>Object</code>
@@ -2093,7 +2116,7 @@ jLights default export
 
 | Param | Type | Description |
 | --- | --- | --- |
-| property | <code>string</code> \| <code>Object.&lt;string, string&gt;</code> | The property name or the properties to set |
+| [property] | <code>string</code> \| <code>Object.&lt;string, string&gt;</code> | The property name or the properties to set |
 | [value] | <code>string</code> | The value to set the supplied property to |
 
 <a name="visibilityCallback"></a>

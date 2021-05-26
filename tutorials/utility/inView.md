@@ -1,3 +1,3 @@
-{@link module:Utility~inView Go to definition}
+[Go to definitition]{@link module:Utility~inView}
 
 TODO

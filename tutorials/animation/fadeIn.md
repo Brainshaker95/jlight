@@ -1,3 +1,3 @@
-{@link module:Animation~fadeIn Go to definition}
+[Go to definitition]{@link module:Animation~fadeIn}
 
 TODO

@@ -1,3 +1,3 @@
-{@link module:CSS~hide Go to definition}
+[Go to definitition]{@link module:CSS~hide}
 
 TODO

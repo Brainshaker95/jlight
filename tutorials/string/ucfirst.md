@@ -1,3 +1,3 @@
-{@link module:String.ucfirst Go to definition}
+[Go to definitition]{@link module:String.ucfirst}
 
 TODO

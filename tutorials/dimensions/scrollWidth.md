@@ -1,3 +1,3 @@
-{@link module:Dimensions~scrollWidth Go to definition}
+[Go to definitition]{@link module:Dimensions~scrollWidth}
 
 TODO

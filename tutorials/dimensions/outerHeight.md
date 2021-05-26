@@ -1,3 +1,3 @@
-{@link module:Dimensions~outerHeight Go to definition}
+[Go to definitition]{@link module:Dimensions~outerHeight}
 
 TODO

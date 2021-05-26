@@ -1,3 +1,3 @@
-{@link module:Selection~eq Go to definition}
+[Go to definitition]{@link module:Selection~eq}
 
 TODO

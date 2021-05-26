@@ -1,3 +1,3 @@
-{@link module:ElementData~removeAttr Go to definition}
+[Go to definitition]{@link module:ElementData~removeAttr}
 
 TODO

@@ -1,3 +1,3 @@
-{@link module:Utility~delay Go to definition}
+[Go to definitition]{@link module:Utility~delay}
 
 TODO

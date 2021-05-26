@@ -1,4 +1,4 @@
-{@link $ Go to definition}
+[Go to definition]{@link $}
 
 A jLight collection can be constructed using a variety of inputs.
 
@@ -33,15 +33,15 @@ let $foo; // All jLight collections in this tutorial are prefixed with the $ sym
 
 $foo = $('div'); // #one, #two
 $foo = $('#one'); // #one
+$foo = $('#one, #two'); // #one, #two
 $foo = $('.class-name'); // #one, #two
 $foo = $('[data-type]'); // #one, #two
-$foo = $('[data-type="my-type"]'); // #one
+$foo = $('[data-type="one"]'); // #one
 $foo = $('section div'); // #two
 $foo = $('.my-section .class-name'); // #two
 ```
 
 &nbsp;
-
 ___
 
 ### Element creation
@@ -87,7 +87,6 @@ $foo = $(window);
 ```
 
 &nbsp;
-
 ___
 
 ### DOM ready
@@ -110,7 +109,6 @@ $(myFunction);
 ```
 
 &nbsp;
-
 ___
 
 ### Monadic structure

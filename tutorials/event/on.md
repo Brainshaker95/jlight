@@ -1,3 +1,3 @@
-{@link module:Event~on Go to definition}
+[Go to definitition]{@link module:Event~on}
 
 TODO

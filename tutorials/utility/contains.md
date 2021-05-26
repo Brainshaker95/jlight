@@ -1,3 +1,3 @@
-{@link module:Utility~contains Go to definition}
+[Go to definitition]{@link module:Utility~contains}
 
 TODO

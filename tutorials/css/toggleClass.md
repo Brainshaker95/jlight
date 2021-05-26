@@ -1,3 +1,3 @@
-{@link module:CSS~toggleClass Go to definition}
+[Go to definitition]{@link module:CSS~toggleClass}
 
 TODO

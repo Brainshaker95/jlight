@@ -1,3 +1,3 @@
-{@link module:Selection~closest Go to definition}
+[Go to definitition]{@link module:Selection~closest}
 
 TODO

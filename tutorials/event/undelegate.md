@@ -1,3 +1,3 @@
-{@link module:Event~undelegate Go to definition}
+[Go to definitition]{@link module:Event~undelegate}
 
 TODO

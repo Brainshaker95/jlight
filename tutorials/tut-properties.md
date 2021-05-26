@@ -2,9 +2,9 @@ $collection[0];
 
 <!-- TODO -->
 
-{@link module:Properties~elements Go to definition}
+[Go to definition]{@link module:Properties~elements}
 
-{@link module:Properties~length Go to definition}
+[Go to definition]{@link module:Properties~length}
 
-{@link module:Properties~tagName Go to definition}
+[Go to definition]{@link module:Properties~tagName}
 

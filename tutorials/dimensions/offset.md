@@ -1,3 +1,3 @@
-{@link module:Dimensions~offset Go to definition}
+[Go to definitition]{@link module:Dimensions~offset}
 
 TODO

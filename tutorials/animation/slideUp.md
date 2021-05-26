@@ -1,3 +1,3 @@
-{@link module:Animation~slideUp Go to definition}
+[Go to definitition]{@link module:Animation~slideUp}
 
 TODO

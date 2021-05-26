@@ -1,3 +1,3 @@
-{@link module:ArrayLike~splice Go to definition}
+[Go to definitition]{@link module:ArrayLike~splice}
 
 TODO

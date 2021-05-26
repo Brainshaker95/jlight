@@ -1,3 +1,3 @@
-{@link module:Utility.noop Go to definition}
+[Go to definitition]{@link module:Utility.noop}
 
 TODO

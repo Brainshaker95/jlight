@@ -1,3 +1,3 @@
-{@link module:ArrayLike~unshift Go to definition}
+[Go to definitition]{@link module:ArrayLike~unshift}
 
 TODO

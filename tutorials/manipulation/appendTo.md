@@ -1,3 +1,3 @@
-{@link module:Manipulation~appendTo Go to definition}
+[Go to definitition]{@link module:Manipulation~appendTo}
 
 TODO

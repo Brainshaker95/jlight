@@ -1,3 +1,3 @@
-{@link module:ElementData~html Go to definition}
+[Go to definitition]{@link module:ElementData~html}
 
 TODO

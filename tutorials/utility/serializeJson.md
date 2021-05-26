@@ -1,3 +1,3 @@
-{@link module:Utility~serializeJson Go to definition}
+[Go to definitition]{@link module:Utility~serializeJson}
 
 TODO

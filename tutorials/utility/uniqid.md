@@ -1,3 +1,3 @@
-{@link module:Utility.uniqid Go to definition}
+[Go to definitition]{@link module:Utility.uniqid}
 
 TODO

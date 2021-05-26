@@ -1,3 +1,3 @@
-{@link module:Dimensions~innerHeight Go to definition}
+[Go to definitition]{@link module:Dimensions~innerHeight}
 
 TODO

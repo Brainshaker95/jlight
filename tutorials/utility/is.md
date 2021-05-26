@@ -1,3 +1,3 @@
-{@link module:Utility~is Go to definition}
+[Go to definitition]{@link module:Utility~is}
 
 TODO

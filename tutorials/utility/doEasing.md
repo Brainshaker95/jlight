@@ -1,3 +1,3 @@
-{@link module:Utility.doEasing Go to definition}
+[Go to definitition]{@link module:Utility.doEasing}
 
 TODO

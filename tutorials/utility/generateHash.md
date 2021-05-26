@@ -1,3 +1,3 @@
-{@link module:Utility.generateHash Go to definition}
+[Go to definitition]{@link module:Utility.generateHash}
 
 TODO

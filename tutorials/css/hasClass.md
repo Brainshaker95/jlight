@@ -1,3 +1,3 @@
-{@link module:CSS~hasClass Go to definition}
+[Go to definitition]{@link module:CSS~hasClass}
 
 TODO

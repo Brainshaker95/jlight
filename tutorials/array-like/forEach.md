@@ -1,3 +1,3 @@
-{@link module:ArrayLike~forEach Go to definition}
+[Go to definitition]{@link module:ArrayLike~forEach}
 
 TODO

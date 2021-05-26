@@ -1,3 +1,3 @@
-{@link module:String.kebabToSnake Go to definition}
+[Go to definitition]{@link module:String.kebabToSnake}
 
 TODO

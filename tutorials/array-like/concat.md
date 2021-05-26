@@ -1,3 +1,3 @@
-{@link module:ArrayLike~concat Go to definition}
+[Go to definitition]{@link module:ArrayLike~concat}
 
 TODO

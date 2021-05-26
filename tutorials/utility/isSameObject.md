@@ -1,3 +1,3 @@
-{@link module:Utility.isSameObject Go to definition}
+[Go to definitition]{@link module:Utility.isSameObject}
 
 TODO
