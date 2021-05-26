@@ -1,4 +1,5 @@
 /* eslint-disable jsdoc/check-types */
+/* eslint-disable jsdoc/tag-lines */
 
 /**
  * @typedef {Object} jLight
@@ -296,6 +297,8 @@
  * @property {stringObjectCallback} serializeJson
  * Serializes the collections elements values to a JSON object.
  */
+
+/* eslint-enable jsdoc/tag-lines */
 
 /**
  * @callback defaultCallback
@@ -769,32 +772,35 @@ const jLightGlobalData = [];
 /**
  * Provides an empty function.
  *
+ * @static
  * @function
  * @tutorial noop
  * @returns {void} void
  */
-export const noop = () => { };
+const noop = () => { };
 
 /**
  * Generates a semi-random string of length 9.
  *
+ * @static
  * @function
  * @tutorial uniqid
  * @returns {string} The generated string
  */
-export const uniqid = () => Math.random().toString(36).substr(2, 9);
+const uniqid = () => Math.random().toString(36).substr(2, 9);
 
 /* eslint-disable no-bitwise */
 
 /**
  * Generates a unique number hash from a string.
  *
+ * @static
  * @function
  * @tutorial generateHash
  * @param {string} string The string to hash
  * @returns {number} The converted string
  */
-export const generateHash = (string) => Math.abs(string.split('').reduce((hash, b) => {
+const generateHash = (string) => Math.abs(string.split('').reduce((hash, b) => {
   const a = ((hash << 5) - hash) + b.charCodeAt(0);
 
   return a & a;
@@ -803,25 +809,27 @@ export const generateHash = (string) => Math.abs(string.split('').reduce((hash, 
 /**
  * Checks if an object is empty.
  *
+ * @static
  * @function
  * @tutorial isEmptyObject
  * @param {object} object The object to check
  * @returns {boolean} If the object is empty
  */
-export const isEmptyObject = (object) => object
+const isEmptyObject = (object) => object
   && object.constructor === Object
   && !Object.keys(object).length;
 
 /**
  * Checks if two objects are the same.
  *
+ * @static
  * @function
  * @tutorial isSameObject
  * @param {object} object1 The object to compare
  * @param {object} object2 The object to compare to
  * @returns {boolean} If the objects are the same
  */
-export const isSameObject = (object1, object2) => object1
+const isSameObject = (object1, object2) => object1
   && object2
   && object1.constructor === Object
   && object2.constructor === Object
@@ -830,12 +838,13 @@ export const isSameObject = (object1, object2) => object1
 /**
  * Prevents the events default beheavior, propagation and immediate propagation
  *
+ * @static
  * @function
  * @tutorial preventEvent
  * @param {Event} event The event to prevent
  * @returns {void} void
  */
-export const preventEvent = (event) => {
+const preventEvent = (event) => {
   event.preventDefault();
   event.stopPropagation();
   event.stopImmediatePropagation();
@@ -844,6 +853,7 @@ export const preventEvent = (event) => {
 /**
  * Provides easing functionality using easeInOutCubic.
  *
+ * @static
  * @function
  * @tutorial doEasing
  * @param {number} duration The duration over which to apply the easing
@@ -851,7 +861,7 @@ export const preventEvent = (event) => {
  * @param {Function} [callback] The function to run after the easing is complete
  * @returns {void} void
  */
-export const doEasing = (duration, onStep, callback) => {
+const doEasing = (duration, onStep, callback) => {
   let start;
 
   const easing = (t) => (t < 0.5
@@ -885,92 +895,100 @@ export const doEasing = (duration, onStep, callback) => {
 /**
  * Converts the first character of a string to lowercase.
  *
+ * @static
  * @function
  * @tutorial lcfirst
  * @param {string} string The string to convert
  * @returns {string} The converted string
  */
-export const lcfirst = (string) => string.charAt(0).toLowerCase() + string.slice(1);
+const lcfirst = (string) => string.charAt(0).toLowerCase() + string.slice(1);
 
 /**
  * Converts the first character of a string to uppercase.
  *
+ * @static
  * @function
  * @tutorial ucfirst
  * @param {string} string The string to convert
  * @returns {string} The converted string
  */
-export const ucfirst = (string) => string.charAt(0).toUpperCase() + string.slice(1);
+const ucfirst = (string) => string.charAt(0).toUpperCase() + string.slice(1);
 
 /**
  * Converts a string from camel case to kebap case.
  *
+ * @static
  * @function
  * @tutorial camelToKebab
  * @param {string} string The string to convert
  * @returns {string} The converted string
  */
-export const camelToKebab = (string) => (typeof string === 'string'
+const camelToKebab = (string) => (typeof string === 'string'
   ? string.replace(/([a-z][A-Z])/g, (chars) => `${chars[0]}-${chars[1].toLowerCase()}`).toLowerCase()
   : '');
 
 /**
  * Converts a string from camel case to snake case.
  *
+ * @static
  * @function
  * @tutorial camelToSnake
  * @param {string} string The string to convert
  * @returns {string} The converted string
  */
-export const camelToSnake = (string) => (typeof string === 'string'
+const camelToSnake = (string) => (typeof string === 'string'
   ? lcfirst(string).replace(/[A-Z]/g, (char) => `_${char.toLowerCase()}`).toLowerCase()
   : '');
 
 /**
  * Converts a string from kebap case to camel case.
  *
+ * @static
  * @function
  * @tutorial kebabToCamel
  * @param {string} string The string to convert
  * @returns {string} The converted string
  */
-export const kebabToCamel = (string) => (typeof string === 'string'
+const kebabToCamel = (string) => (typeof string === 'string'
   ? lcfirst(string.replace(/-([a-zA-Z])/g, (chars) => chars[1].toUpperCase()))
   : '');
 
 /**
  * Converts a string from kebap case to snake case.
  *
+ * @static
  * @function
  * @tutorial kebabToSnake
  * @param {string} string The string to convert
  * @returns {string} The converted string
  */
-export const kebabToSnake = (string) => (typeof string === 'string'
+const kebabToSnake = (string) => (typeof string === 'string'
   ? string.replace(/-/g, '_').toLowerCase()
   : '');
 
 /**
  * Converts a string from snake case to camel case.
  *
+ * @static
  * @function
  * @tutorial snakeToCamel
  * @param {string} string The string to convert
  * @returns {string} The converted string
  */
-export const snakeToCamel = (string) => (typeof string === 'string'
+const snakeToCamel = (string) => (typeof string === 'string'
   ? lcfirst(string.replace(/(_[a-zA-Z])/g, (chars) => chars[1].toUpperCase()))
   : '');
 
 /**
  * Converts a string from snake case to kebap case.
  *
+ * @static
  * @function
  * @tutorial snakeToKebab
  * @param {string} string The string to convert
  * @returns {string} The converted string
  */
-export const snakeToKebab = (string) => (typeof string === 'string'
+const snakeToKebab = (string) => (typeof string === 'string'
   ? string.replace(/_/g, '-').toLowerCase()
   : '');
 
@@ -984,11 +1002,12 @@ export const snakeToKebab = (string) => (typeof string === 'string'
 /**
  * Handles asynchronous HTTP requests.
  *
+ * @static
  * @function
  * @tutorial ajax
  * @param {object} opts The options for the request
- * @param {string} [opts.url] The url to send the request to
- * @param {string} [opts.method] The HTTP method to use
+ * @param {string} opts.url The url to send the request to
+ * @param {string} [opts.method] The HTTP method to use (default: 'POST')
  * @param {Object.<string, *>|string} [opts.data] The data to send
  * @param {Object.<string, string>} [opts.headers] The headers to send
  * @param {boolean} [opts.processData] Whether to process the data or not
@@ -1004,7 +1023,7 @@ export const snakeToKebab = (string) => (typeof string === 'string'
  * @param {xhrCallback} [opts.xhr] The callback to modify the XMLHttpRequest object before sending
  * @returns {XMLHttpRequest} The corresponding XMLHttpRequest object
  */
-export const ajax = (opts = {}) => {
+const ajax = (opts = {}) => {
   const options = {
     url: window.location.href,
     method: 'POST',
@@ -1119,6 +1138,7 @@ export const ajax = (opts = {}) => {
 /**
  * Handles asynchronous GET requests.
  *
+ * @static
  * @function
  * @tutorial ajax-get
  * @param {string} url The url for the request
@@ -1138,7 +1158,7 @@ export const ajax = (opts = {}) => {
  * @param {xhrCallback} [opts.xhr] The callback to modify the XMLHttpRequest object before sending
  * @returns {XMLHttpRequest} The corresponding XMLHttpRequest object
  */
-export const get = (url, opts = {}) => ajax({
+const get = (url, opts = {}) => ajax({
   ...opts,
   method: 'GET',
   url,
@@ -1147,6 +1167,7 @@ export const get = (url, opts = {}) => ajax({
 /**
  * Handles asynchronous POST requests.
  *
+ * @static
  * @function
  * @tutorial ajax-post
  * @param {string} url The url for the request
@@ -1166,7 +1187,7 @@ export const get = (url, opts = {}) => ajax({
  * @param {xhrCallback} [opts.xhr] The callback to modify the XMLHttpRequest object before sending
  * @returns {XMLHttpRequest} The corresponding XMLHttpRequest object
  */
-export const post = (url, opts = {}) => ajax({
+const post = (url, opts = {}) => ajax({
   method: 'POST',
   url,
   ...opts,
@@ -1404,15 +1425,15 @@ const getUpdateAnimationId = (element) => {
 };
 
 const attachListener = (
-  $,
+  jLight,
   elements,
   eventNames,
   callbackOrSelector,
   delegatedCallbackOrOptions,
   theOptions = {},
-  jlightConstructor,
+  theJLightConstructor,
 ) => {
-  const jLight = jlightConstructor || $;
+  const jlightConstructor = theJLightConstructor || jLight;
   let types = [eventNames];
 
   if (types[0].indexOf(' ') > -1) {
@@ -1430,8 +1451,8 @@ const attachListener = (
       const callback = (theEvent) => {
         const event = theEvent;
 
-        event.$target = jLight([event.target]);
-        event.$currentTarget = $([event.currentTarget]);
+        event.$target = jlightConstructor([event.target]);
+        event.$currentTarget = jLight([event.currentTarget]);
 
         if (callbackOrSelector === false
           || callbackOrSelector(event, event.jLightEventData) === false
@@ -1460,8 +1481,8 @@ const attachListener = (
           const contains = isDocumentOrWindow || element.contains(event.target);
 
           if (contains && event.target.matches(callbackOrSelector)) {
-            event.$target = jLight([event.target]);
-            event.$currentTarget = $([event.currentTarget]);
+            event.$target = jlightConstructor([event.target]);
+            event.$currentTarget = jLight([event.currentTarget]);
 
             if (delegatedCallback === false
               || delegatedCallback(event, event.jLightEventData) === false) {
@@ -1480,10 +1501,10 @@ const attachListener = (
     });
   }
 
-  return $(elements);
+  return jLight(elements);
 };
 
-const removeListener = ($, elements, eventNames, callback) => {
+const removeListener = (jLight, elements, eventNames, callback) => {
   let types = [eventNames];
 
   if (types[0].indexOf(' ') > -1) {
@@ -1504,10 +1525,10 @@ const removeListener = ($, elements, eventNames, callback) => {
     });
   });
 
-  return $(elements);
+  return jLight(elements);
 };
 
-const triggerListener = ($, elements, eventNames, jLightEventData) => {
+const triggerListener = (jLight, elements, eventNames, jLightEventData) => {
   const nativeTypes = ['click', 'focus', 'focusin', 'blur', 'focusout'];
   let types = [eventNames];
 
@@ -1550,7 +1571,7 @@ const triggerListener = ($, elements, eventNames, jLightEventData) => {
     });
   });
 
-  return $(elements);
+  return jLight(elements);
 };
 
 const indexOfOfLastIndexOf = (identifier, elements, $elements) => {
@@ -1828,7 +1849,7 @@ const isInView = (boundingBox, offset) => boundingBox.top >= parseFloat(offset.t
   && boundingBox.right <= (window.innerWidth || document.documentElement.clientWidth)
   + parseFloat(offset.right, 10);
 
-const $ = (elements) => ({
+const jLight = (elements) => ({
   ...(() => {
     const theElements = {};
 
@@ -1881,7 +1902,7 @@ const $ = (elements) => ({
    * @param {string} cssClasses Space sepearated classes to add
    * @returns {jLight} jLight collection
    */
-  addClass: (cssClasses) => modifyClasses('add', $(elements), cssClasses),
+  addClass: (cssClasses) => modifyClasses('add', jLight(elements), cssClasses),
 
   /**
    * Removes css classes to the collections elements.
@@ -1891,7 +1912,7 @@ const $ = (elements) => ({
    * @param {string} cssClasses Space sepearated classes to remove
    * @returns {jLight} jLight collection
    */
-  removeClass: (cssClasses) => modifyClasses('remove', $(elements), cssClasses),
+  removeClass: (cssClasses) => modifyClasses('remove', jLight(elements), cssClasses),
 
   /**
    * Toggles css classes of the collections elements.
@@ -1902,7 +1923,7 @@ const $ = (elements) => ({
    * @param {boolean} [force] Force whether to add or remove classes
    * @returns {jLight} jLight collection
    */
-  toggleClass: (cssClasses, force) => modifyClasses('toggle', $(elements), cssClasses, force),
+  toggleClass: (cssClasses, force) => modifyClasses('toggle', jLight(elements), cssClasses, force),
 
   /**
    * Whether at least one of the collections elements has all of the provided classes.
@@ -1961,7 +1982,7 @@ const $ = (elements) => ({
         });
       });
 
-      return $(elements);
+      return jLight(elements);
     }
 
     if (value !== undefined) {
@@ -1971,7 +1992,7 @@ const $ = (elements) => ({
         element.style[property] = value;
       });
 
-      return $(elements);
+      return jLight(elements);
     }
 
     const computedStyles = elements[0]
@@ -1982,7 +2003,7 @@ const $ = (elements) => ({
       return computedStyles.getPropertyValue(property);
     }
 
-    return computedStyles || $(elements);
+    return computedStyles || jLight(elements);
   },
 
   /**
@@ -2001,7 +2022,7 @@ const $ = (elements) => ({
       element.style.display = type;
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -2018,7 +2039,7 @@ const $ = (elements) => ({
       element.style.display = 'none';
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -2046,7 +2067,7 @@ const $ = (elements) => ({
       }
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -2073,7 +2094,7 @@ const $ = (elements) => ({
    * @returns {jLight} jLight collection
    */
   on: (eventNames, callbackOrSelector, delegatedCallbackOrOptions, options) => attachListener(
-    $,
+    jLight,
     elements,
     eventNames,
     callbackOrSelector,
@@ -2098,7 +2119,7 @@ const $ = (elements) => ({
    * @returns {jLight} jLight collection
    */
   once: (eventNames, callbackOrSelector, delegatedCallbackOrOptions, options = {}) => attachListener(
-    $,
+    jLight,
     elements,
     eventNames,
     callbackOrSelector,
@@ -2121,7 +2142,7 @@ const $ = (elements) => ({
    * @returns {jLight} jLight collection
    */
   off: (eventNames, callback) => removeListener(
-    $,
+    jLight,
     elements,
     eventNames,
     callback,
@@ -2132,7 +2153,7 @@ const $ = (elements) => ({
    *
    * @deprecated
    * Will be removed in version 1.2.0,
-   * use {@link jLight jLight}.{@link module:Event~on on} instead
+   * use [jLight]{@link jLight}.[on]{@link module:Event~on} instead
    * @function
    * @tutorial delegate
    * @param {string} eventNames Space separated list of event names
@@ -2159,8 +2180,8 @@ const $ = (elements) => ({
       }
 
       if (event.target.matches(selector)) {
-        event.$target = $([event.target]);
-        event.$currentTarget = $([event.currentTarget]);
+        event.$target = jLight([event.target]);
+        event.$currentTarget = jLight([event.currentTarget]);
 
         if (callback === false
           || callback(event, event.jLightEventData) === false) {
@@ -2174,7 +2195,7 @@ const $ = (elements) => ({
       document.addEventListener(type, realCallback);
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -2182,7 +2203,7 @@ const $ = (elements) => ({
    *
    * @deprecated
    * Will be removed in version 1.2.0,
-   * use {@link jLight jLight}.{@link module:Event~off off} instead
+   * use [jLight]{@link jLight}.[off]{@link module:Event~off} instead
    * @function
    * @tutorial delegate
    * @param {string} eventNames Space separated list of event names
@@ -2210,7 +2231,7 @@ const $ = (elements) => ({
       });
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -2223,7 +2244,7 @@ const $ = (elements) => ({
    * @returns {jLight} jLight collection
    */
   trigger: (eventNames, jLightEventData) => triggerListener(
-    $,
+    jLight,
     elements,
     eventNames,
     jLightEventData,
@@ -2257,7 +2278,7 @@ const $ = (elements) => ({
       }
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -2280,7 +2301,7 @@ const $ = (elements) => ({
         });
       });
 
-      return $(elements);
+      return jLight(elements);
     }
 
     if (attribute === undefined) {
@@ -2313,7 +2334,7 @@ const $ = (elements) => ({
       element.setAttribute(attribute, `${value}`);
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -2335,7 +2356,7 @@ const $ = (elements) => ({
       }
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -2346,7 +2367,7 @@ const $ = (elements) => ({
    * @param {string} [text] The text to supply to the function
    * @returns {jLight|string} jLight collection or the text content
    */
-  text: (text) => getOrSetTextOrHtml('textContent', $(elements), text),
+  text: (text) => getOrSetTextOrHtml('textContent', jLight(elements), text),
 
   /**
    * Gets or sets the HTML content of the collections elements.
@@ -2356,7 +2377,7 @@ const $ = (elements) => ({
    * @param {string} [html] The html to supply to the function
    * @returns {jLight|string} jLight collection or the html content
    */
-  html: (html) => getOrSetTextOrHtml('innerHTML', $(elements), html),
+  html: (html) => getOrSetTextOrHtml('innerHTML', jLight(elements), html),
 
   /**
    * Gets or sets the collections elements values.
@@ -2390,7 +2411,7 @@ const $ = (elements) => ({
             if (Array.isArray(valueOrFunction)) {
               selected = !!valueOrFunction[index];
             } else if (isFunction) {
-              selected = !!valueOrFunction($(getElementsFromArgument(option)), index);
+              selected = !!valueOrFunction(jLight(getElementsFromArgument(option)), index);
             } else {
               selected = !!valueOrFunction;
             }
@@ -2410,7 +2431,7 @@ const $ = (elements) => ({
         }
       });
 
-      return $(elements);
+      return jLight(elements);
     }
 
     let value;
@@ -2458,7 +2479,7 @@ const $ = (elements) => ({
         updateJLightElementData(element, { ...newData });
       });
 
-      return $(elements);
+      return jLight(elements);
     }
 
     const key = kebabToCamel(keyOrData);
@@ -2472,7 +2493,7 @@ const $ = (elements) => ({
         setJLightElementData(element, key, value);
       });
 
-      return $(elements);
+      return jLight(elements);
     }
 
     let data;
@@ -2554,7 +2575,7 @@ const $ = (elements) => ({
       element.innerHTML = '';
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -2565,7 +2586,7 @@ const $ = (elements) => ({
    * @param {boolean} [deep] Whether to apply deep cloning of the affected nodes (default: true)
    * @returns {jLight} jLight collection
    */
-  clone: (deep = true) => $(elements.map((element) => element.cloneNode(deep))),
+  clone: (deep = true) => jLight(elements.map((element) => element.cloneNode(deep))),
 
   /**
    * Adds elements to the collection.
@@ -2586,7 +2607,7 @@ const $ = (elements) => ({
       }
     });
 
-    return $([...elements, ...addedElements]);
+    return jLight([...elements, ...addedElements]);
   },
 
   /**
@@ -2631,7 +2652,7 @@ const $ = (elements) => ({
       }
     });
 
-    return $(remainingElements);
+    return jLight(remainingElements);
   },
 
   /**
@@ -2643,7 +2664,7 @@ const $ = (elements) => ({
    * The elements to apply the function to
    * @returns {jLight} jLight collection
    */
-  prepend: ($elements) => $(prependOrAppend('prepend', $elements, elements)),
+  prepend: ($elements) => jLight(prependOrAppend('prepend', $elements, elements)),
 
   /**
    * Appends elements to the collections elements.
@@ -2654,7 +2675,7 @@ const $ = (elements) => ({
    * The elements to apply the function to
    * @returns {jLight} jLight collection
    */
-  append: ($elements) => $(prependOrAppend('append', $elements, elements)),
+  append: ($elements) => jLight(prependOrAppend('append', $elements, elements)),
 
   /**
    * Prepends the collections elements to elements.
@@ -2665,7 +2686,7 @@ const $ = (elements) => ({
    * The elements to apply the function to
    * @returns {jLight} jLight collection
    */
-  prependTo: ($elements) => $(prependToOrAppendTo('prepend', $elements, elements)),
+  prependTo: ($elements) => jLight(prependToOrAppendTo('prepend', $elements, elements)),
 
   /**
    * Appends the collections elements to elements.
@@ -2676,7 +2697,7 @@ const $ = (elements) => ({
    * The elements to apply the function to
    * @returns {jLight} jLight collection
    */
-  appendTo: ($elements) => $(prependToOrAppendTo('append', $elements, elements)),
+  appendTo: ($elements) => jLight(prependToOrAppendTo('append', $elements, elements)),
 
   /**
    * Inserts the collections elements before elements.
@@ -2687,7 +2708,7 @@ const $ = (elements) => ({
    * The elements to apply the function to
    * @returns {jLight} jLight collection
    */
-  insertBefore: ($elements) => $(insertBeforeOrInsertAfter('beforeBegin', $elements, elements, 'insert')),
+  insertBefore: ($elements) => jLight(insertBeforeOrInsertAfter('beforeBegin', $elements, elements, 'insert')),
 
   /**
    * Inserts the collections elements after elements.
@@ -2698,7 +2719,7 @@ const $ = (elements) => ({
    * The elements to apply the function to
    * @returns {jLight} jLight collection
    */
-  insertAfter: ($elements) => $(insertBeforeOrInsertAfter('afterEnd', $elements, elements, 'insert')),
+  insertAfter: ($elements) => jLight(insertBeforeOrInsertAfter('afterEnd', $elements, elements, 'insert')),
 
   /**
    * Inserts elements before the collections elements.
@@ -2709,7 +2730,7 @@ const $ = (elements) => ({
    * The elements to apply the function to
    * @returns {jLight} jLight collection
    */
-  before: ($elements) => $(insertBeforeOrInsertAfter('beforeBegin', $elements, elements)),
+  before: ($elements) => jLight(insertBeforeOrInsertAfter('beforeBegin', $elements, elements)),
 
   /**
    * Inserts elements after the collections elements.
@@ -2720,7 +2741,7 @@ const $ = (elements) => ({
    * The elements to apply the function to
    * @returns {jLight} jLight collection
    */
-  after: ($elements) => $(insertBeforeOrInsertAfter('afterEnd', $elements, elements)),
+  after: ($elements) => jLight(insertBeforeOrInsertAfter('afterEnd', $elements, elements)),
 
   /**
    * Wraps the collections elements in elements.
@@ -2743,7 +2764,7 @@ const $ = (elements) => ({
       });
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -2769,7 +2790,7 @@ const $ = (elements) => ({
    * @param {number} index The index to supply to the function
    * @returns {jLight} jLight collection
    */
-  eq: (index) => $(elements[index] ? [elements[index]] : []),
+  eq: (index) => jLight(elements[index] ? [elements[index]] : []),
 
   /**
    * Gets the first jLight element from the collection.
@@ -2778,7 +2799,7 @@ const $ = (elements) => ({
    * @tutorial first
    * @returns {jLight} jLight collection
    */
-  first: () => $(elements[0] ? [elements[0]] : []),
+  first: () => jLight(elements[0] ? [elements[0]] : []),
 
   /**
    * Gets the last jLight element from the collection.
@@ -2787,7 +2808,7 @@ const $ = (elements) => ({
    * @tutorial last
    * @returns {jLight} jLight collection
    */
-  last: () => $(elements.length ? [elements[elements.length - 1]] : []),
+  last: () => jLight(elements.length ? [elements[elements.length - 1]] : []),
 
   /**
    * Gets a jLight collection from the collections parent elements.
@@ -2796,7 +2817,7 @@ const $ = (elements) => ({
    * @tutorial parent
    * @returns {jLight} jLight collection
    */
-  parent: () => $(getParents(elements)),
+  parent: () => jLight(getParents(elements)),
 
   /**
    * Gets a jLight collection from all the collections parent elements.
@@ -2805,7 +2826,7 @@ const $ = (elements) => ({
    * @tutorial parents
    * @returns {jLight} jLight collection
    */
-  parents: () => $(getParents(elements, true)),
+  parents: () => jLight(getParents(elements, true)),
 
   /**
    * Gets a jLight collection from the collections children elements.
@@ -2814,7 +2835,7 @@ const $ = (elements) => ({
    * @tutorial children
    * @returns {jLight} jLight collection
    */
-  children: () => $(elements.reduce(
+  children: () => jLight(elements.reduce(
     (children, element) => [...children, ...element.children], [],
   )),
 
@@ -2838,7 +2859,7 @@ const $ = (elements) => ({
       });
     });
 
-    return $(siblings);
+    return jLight(siblings);
   },
 
   /**
@@ -2849,7 +2870,7 @@ const $ = (elements) => ({
    * @param {string} [selector] The selector to use for matching elements
    * @returns {jLight} jLight collection
    */
-  prev: (selector) => $(getPrevOrNextElements('previousElementSibling', selector, elements)),
+  prev: (selector) => jLight(getPrevOrNextElements('previousElementSibling', selector, elements)),
 
   /**
    * Gets a jLight collection from the collections next sibling elements.
@@ -2859,7 +2880,7 @@ const $ = (elements) => ({
    * @param {string} [selector] The selector to use for matching elements
    * @returns {jLight} jLight collection
    */
-  next: (selector) => $(getPrevOrNextElements('nextElementSibling', selector, elements)),
+  next: (selector) => jLight(getPrevOrNextElements('nextElementSibling', selector, elements)),
 
   /**
    * Gets a jLight collection from all the collections parent elements matching the selector.
@@ -2880,7 +2901,7 @@ const $ = (elements) => ({
       }
     });
 
-    return $(closestElements);
+    return jLight(closestElements);
   },
 
   /**
@@ -2907,7 +2928,7 @@ const $ = (elements) => ({
       return keepElement;
     });
 
-    return $(remainingElements);
+    return jLight(remainingElements);
   },
 
   /**
@@ -2936,7 +2957,7 @@ const $ = (elements) => ({
       return hasElement;
     });
 
-    return $(filteredElements);
+    return jLight(filteredElements);
   },
 
   /**
@@ -2959,7 +2980,7 @@ const $ = (elements) => ({
 
     elements.forEach((element, index) => {
       if (typeof callbackOrSelector === 'function') {
-        if (callbackOrSelector($([element]), index)) {
+        if (callbackOrSelector(jLight([element]), index)) {
           filteredElements.push(element);
         }
       } else if (element.matches(callbackOrSelector)) {
@@ -2967,7 +2988,7 @@ const $ = (elements) => ({
       }
     });
 
-    return $(filteredElements);
+    return jLight(filteredElements);
   },
 
   /**
@@ -2980,10 +3001,10 @@ const $ = (elements) => ({
    */
   forEach: (callback) => {
     elements.forEach((element, index) => {
-      callback($([element]), index);
+      callback(jLight([element]), index);
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -2991,7 +3012,7 @@ const $ = (elements) => ({
    *
    * @deprecated
    * Will be removed in version 1.2.0,
-   * use {@link jLight jLight}.{@link module:ArrayLike~forEach forEach} instead
+   * use [jLight]{@link jLight}.[forEach]{@link module:ArrayLike~forEach} instead
    * @function
    * @tutorial each
    * @param {iteratorCallback} callback The function to apply to each element
@@ -3001,7 +3022,7 @@ const $ = (elements) => ({
     // eslint-disable-next-line no-console
     console.warn('jLight.each is deprecated an will be removed in version 1.2.0, use jLight.forEach instead');
 
-    return $(elements).forEach(callback);
+    return jLight(elements).forEach(callback);
   },
 
   /**
@@ -3013,7 +3034,7 @@ const $ = (elements) => ({
    * @param {number} [end] The index to end the slicing
    * @returns {jLight} jLight collection
    */
-  slice: (start, end) => $(elements.slice(start, end)),
+  slice: (start, end) => jLight(elements.slice(start, end)),
 
   /**
    * Splices the collection
@@ -3024,7 +3045,7 @@ const $ = (elements) => ({
    * @param {number} [deleteCount] The count of elements to delete
    * @returns {jLight} jLight collection
    */
-  splice: (start, deleteCount) => $(elements.splice(start, deleteCount)),
+  splice: (start, deleteCount) => jLight(elements.splice(start, deleteCount)),
 
   /**
    * Pushes elements to the collection.
@@ -3050,7 +3071,7 @@ const $ = (elements) => ({
    * @tutorial pop
    * @returns {jLight} jLight collection
    */
-  pop: () => $([elements.pop()]),
+  pop: () => jLight([elements.pop()]),
 
   /**
    * Reverses a collection.
@@ -3059,7 +3080,7 @@ const $ = (elements) => ({
    * @tutorial reverse
    * @returns {jLight} jLight collection
    */
-  reverse: () => $(elements.reverse()),
+  reverse: () => jLight(elements.reverse()),
 
   /**
    * Shifts a collection.
@@ -3068,7 +3089,7 @@ const $ = (elements) => ({
    * @tutorial shift
    * @returns {jLight} jLight collection
    */
-  shift: () => $([elements.shift()]),
+  shift: () => jLight([elements.shift()]),
 
   /**
    * Unshifts a collection.
@@ -3099,8 +3120,8 @@ const $ = (elements) => ({
    * @param {compareCallback} compareFunction The function used for sorting
    * @returns {jLight} jLight collection
    */
-  sort: (compareFunction = noop) => $(
-    elements.sort((element1, element2) => compareFunction($([element1]), $([element2]))),
+  sort: (compareFunction = noop) => jLight(
+    elements.sort((element1, element2) => compareFunction(jLight([element1]), jLight([element2]))),
   ),
 
   /**
@@ -3113,7 +3134,7 @@ const $ = (elements) => ({
    * @returns {*} The reduction result
    */
   reduce: (callback, initialValue) => elements.reduce(
-    (accumulator, element, index) => callback(accumulator, $([element]), index),
+    (accumulator, element, index) => callback(accumulator, jLight([element]), index),
     initialValue,
   ),
 
@@ -3125,8 +3146,8 @@ const $ = (elements) => ({
    * @param {mapInnerCallback} callback The function used for mapping
    * @returns {jLight} jLight collection
    */
-  map: (callback) => $(elements.map((element, index) => {
-    const argument = callback($([element]), index);
+  map: (callback) => jLight(elements.map((element, index) => {
+    const argument = callback(jLight([element]), index);
 
     return getElementsFromArgument(argument)[0];
   })),
@@ -3154,7 +3175,7 @@ const $ = (elements) => ({
       }
     });
 
-    return $(elements.concat(theElements));
+    return jLight(elements.concat(theElements));
   },
 
   /**
@@ -3196,7 +3217,7 @@ const $ = (elements) => ({
     let isMet;
 
     elements.forEach((element, index) => {
-      if (!isMet && callback($([element]), index)) {
+      if (!isMet && callback(jLight([element]), index)) {
         isMet = true;
       }
     });
@@ -3217,7 +3238,7 @@ const $ = (elements) => ({
     let matchCount = 0;
 
     elements.forEach((element, index) => {
-      if (callback($([element]), index)) {
+      if (callback(jLight([element]), index)) {
         matchCount += 1;
       }
     });
@@ -3262,7 +3283,7 @@ const $ = (elements) => ({
       foundElements = [...foundElements, ...element.querySelectorAll(selector)];
     });
 
-    return $(foundElements);
+    return jLight(foundElements);
   },
 
   /**
@@ -3278,7 +3299,7 @@ const $ = (elements) => ({
    * @param {number} [width] The width to supply to the function
    * @returns {jLight|number} jLight collection or the width
    */
-  width: (width) => getOrSetDimension('width', $(elements), width),
+  width: (width) => getOrSetDimension('width', jLight(elements), width),
 
   /**
    * Gets or sets the height of the collections elements.
@@ -3288,7 +3309,7 @@ const $ = (elements) => ({
    * @param {number} [height] The height to supply to the function
    * @returns {jLight|number} jLight collection or the height
    */
-  height: (height) => getOrSetDimension('height', $(elements), height),
+  height: (height) => getOrSetDimension('height', jLight(elements), height),
 
   /**
    * Gets the inner width of the collections elements.
@@ -3354,7 +3375,7 @@ const $ = (elements) => ({
    * @param {number} [value] The value to supply to the function
    * @returns {jLight|number} jLight collection or the value
    */
-  scrollTop: (value) => getOrSetScrollTopOrScrollLeft('scrollTop', value, $(elements)),
+  scrollTop: (value) => getOrSetScrollTopOrScrollLeft('scrollTop', value, jLight(elements)),
 
   /**
    * Gets or sets the scrollLeft of the collections elements.
@@ -3364,7 +3385,7 @@ const $ = (elements) => ({
    * @param {number} [value] The value to supply to the function
    * @returns {jLight|number} jLight collection or the value
    */
-  scrollLeft: (value) => getOrSetScrollTopOrScrollLeft('scrollLeft', value, $(elements)),
+  scrollLeft: (value) => getOrSetScrollTopOrScrollLeft('scrollLeft', value, jLight(elements)),
 
   /**
    * Gets or sets the collections elements offset.
@@ -3401,7 +3422,7 @@ const $ = (elements) => ({
           : `${parseFloat(computedStyles.getPropertyValue('left'), 10)}${offsetLeft || ''}${unitLeft}`;
       });
 
-      return $(elements);
+      return jLight(elements);
     }
 
     let offset;
@@ -3488,7 +3509,7 @@ const $ = (elements) => ({
       }, duration);
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -3538,7 +3559,7 @@ const $ = (elements) => ({
       element.scrollTop = startPositionY + differenceY * percent;
     }, callback);
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -3572,7 +3593,7 @@ const $ = (elements) => ({
       element.style.transition = '';
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -3597,11 +3618,11 @@ const $ = (elements) => ({
       element.style.display = type || 'block';
 
       setTimeout(() => {
-        $([element]).animate({ opacity: 1 }, duration, callback, easing);
+        jLight([element]).animate({ opacity: 1 }, duration, callback, easing);
       }, 1);
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -3620,7 +3641,7 @@ const $ = (elements) => ({
       const element = theElement;
 
       setTimeout(() => {
-        $([element]).animate({ opacity: 0 }, duration, () => {
+        jLight([element]).animate({ opacity: 0 }, duration, () => {
           element.style.display = 'none';
 
           if (callback) {
@@ -3630,7 +3651,7 @@ const $ = (elements) => ({
       }, 1);
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -3652,13 +3673,13 @@ const $ = (elements) => ({
       const computedStyles = window.getComputedStyle(element);
 
       if (computedStyles.getPropertyValue('display') === 'none') {
-        $([element]).fadeIn(duration, callback, type, easing);
+        jLight([element]).fadeIn(duration, callback, type, easing);
       } else {
-        $([element]).fadeOut(duration, callback, easing);
+        jLight([element]).fadeOut(duration, callback, easing);
       }
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -3697,7 +3718,7 @@ const $ = (elements) => ({
       element.style.paddingBottom = 0;
 
       setTimeout(() => {
-        $([element]).animate({
+        jLight([element]).animate({
           height: `${targetHeight}px`,
           paddingTop: `${paddingTop}px`,
           paddingBottom: `${paddingBottom}px`,
@@ -3714,7 +3735,7 @@ const $ = (elements) => ({
       }, 10);
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -3741,7 +3762,7 @@ const $ = (elements) => ({
       element.style.paddingBottom = computedStyles.getPropertyValue('padding-bottom');
 
       setTimeout(() => {
-        $([element]).animate({ height: 0, paddingTop: 0, paddingBottom: 0 }, duration, () => {
+        jLight([element]).animate({ height: 0, paddingTop: 0, paddingBottom: 0 }, duration, () => {
           element.style.display = 'none';
           element.style.height = '';
           element.style.overflow = '';
@@ -3756,7 +3777,7 @@ const $ = (elements) => ({
       }, 1);
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -3784,13 +3805,13 @@ const $ = (elements) => ({
       const computedStyles = window.getComputedStyle(element);
 
       if (forceSlideDown || (computedStyles.getPropertyValue('display') === 'none' && !forceSlideUp)) {
-        $([element]).slideDown(duration, callback, height, type, easing);
+        jLight([element]).slideDown(duration, callback, height, type, easing);
       } else {
-        $([element]).slideUp(duration, callback, easing);
+        jLight([element]).slideUp(duration, callback, easing);
       }
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -3944,7 +3965,7 @@ const $ = (elements) => ({
       }, scrollTimer);
     });
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -3972,13 +3993,13 @@ const $ = (elements) => ({
   when: (condition, callback, ...args) => {
     if (typeof condition === 'function' ? condition() : condition) {
       if (typeof callback === 'string') {
-        $(elements)[callback](...args);
+        jLight(elements)[callback](...args);
       } else {
         callback();
       }
     }
 
-    return $(elements);
+    return jLight(elements);
   },
 
   /**
@@ -4035,23 +4056,23 @@ const $ = (elements) => ({
   },
 });
 
-const documentAndWindowJLightElement = (argument) => ({
+const documentAndWindowJLight = (argument) => ({
   ...argument,
 
   on: (eventNames, callbackOrSelector, delegatedCallbackOrOptions, options) => attachListener(
-    documentAndWindowJLightElement,
+    documentAndWindowJLight,
     [argument],
     eventNames,
     callbackOrSelector,
     delegatedCallbackOrOptions,
     options,
-    $,
+    jLight,
   ),
 
   /* eslint-disable max-len */
 
   once: (eventNames, callbackOrSelector, delegatedCallbackOrOptions, options = {}) => attachListener(
-    documentAndWindowJLightElement,
+    documentAndWindowJLight,
     [argument],
     eventNames,
     callbackOrSelector,
@@ -4060,20 +4081,20 @@ const documentAndWindowJLightElement = (argument) => ({
       ...options,
       once: true,
     },
-    $,
+    jLight,
   ),
 
   /* eslint-enable max-len */
 
   off: (eventNames, callback) => removeListener(
-    documentAndWindowJLightElement,
+    documentAndWindowJLight,
     [argument],
     eventNames,
     callback,
   ),
 
   trigger: (eventNames, jLightEventData) => triggerListener(
-    documentAndWindowJLightElement,
+    documentAndWindowJLight,
     [argument],
     eventNames,
     jLightEventData,
@@ -4091,7 +4112,7 @@ const documentAndWindowJLightElement = (argument) => ({
     if (value !== undefined) {
       window.scrollTo(0, value);
 
-      return documentAndWindowJLightElement(argument);
+      return documentAndWindowJLight(argument);
     }
 
     return window.pageYOffset;
@@ -4101,7 +4122,7 @@ const documentAndWindowJLightElement = (argument) => ({
     if (value !== undefined) {
       window.scrollTo(value, 0);
 
-      return documentAndWindowJLightElement(argument);
+      return documentAndWindowJLight(argument);
     }
 
     return window.pageXOffset;
@@ -4138,28 +4159,46 @@ const documentAndWindowJLightElement = (argument) => ({
       );
     }, callback);
 
-    return documentAndWindowJLightElement(argument);
+    return documentAndWindowJLight(argument);
   },
 });
 
 /**
  * @global
- * @function $
+ * @function
  * @tutorial tut-constructor
  * @description jLights default export
  * @param {jLight|string|Function|HTMLElement|HTMLCollection|NodeList|document|window} argument
  * The argument to initialize jLight on
+ * @property {function} noop [Go to definition]{@link module:Utility.noop}
+ * @property {function} uniqid [Go to definition]{@link module:Utility.uniqid}
+ * @property {function} generateHash [Go to definition]{@link module:Utility.generateHash}
+ * @property {function} isEmptyObject [Go to definition]{@link module:Utility.isEmptyObject}
+ * @property {function} isSameObject [Go to definition]{@link module:Utility.isSameObject}
+ * @property {function} preventEvent [Go to definition]{@link module:Utility.preventEvent}
+ * @property {function} doEasing [Go to definition]{@link module:Utility.doEasing}
+ * @property {function} lcfirst [Go to definition]{@link module:String.lcfirst}
+ * @property {function} ucfirst [Go to definition]{@link module:String.ucfirst}
+ * @property {function} camelToKebab [Go to definition]{@link module:String.camelToKebab}
+ * @property {function} camelToSnake [Go to definition]{@link module:String.camelToSnake}
+ * @property {function} kebabToCamel [Go to definition]{@link module:String.kebabToCamel}
+ * @property {function} kebabToSnake [Go to definition]{@link module:String.kebabToSnake}
+ * @property {function} snakeToCamel [Go to definition]{@link module:String.snakeToCamel}
+ * @property {function} snakeToKebab [Go to definition]{@link module:String.snakeToKebab}
+ * @property {function} ajax [Go to definition]{@link module:Ajax.ajax}
+ * @property {function} get [Go to definition]{@link module:Ajax.get}
+ * @property {function} post [Go to definition]{@link module:Ajax.post}
  * @returns {jLight} jLight collection
  */
-export default (argument) => {
+const $ = (argument) => {
   if (!argument) {
-    return $([]);
+    return jLight([]);
   }
 
   if (argument.elements
     && Array.isArray(argument.elements)
     && argument.elements.every((element) => element instanceof HTMLElement)) {
-    return $(argument.elements);
+    return jLight(argument.elements);
   }
 
   if (typeof argument === 'function') {
@@ -4169,22 +4208,22 @@ export default (argument) => {
       document.addEventListener('DOMContentLoaded', argument);
     }
 
-    return documentAndWindowJLightElement(document);
+    return documentAndWindowJLight(document);
   }
 
   if (argument === document || argument === window) {
     initalizeJLightElementData(argument, argument);
 
-    return documentAndWindowJLightElement(argument);
+    return documentAndWindowJLight(argument);
   }
 
   if (argument instanceof HTMLElement) {
-    return $([argument]);
+    return jLight([argument]);
   }
 
   if (argument instanceof NodeList
     || argument instanceof HTMLCollection) {
-    return $([...argument]);
+    return jLight([...argument]);
   }
 
   let elements = [];
@@ -4200,10 +4239,31 @@ export default (argument) => {
           initalizeJLightElementData(element, argument);
         });
       } catch (e) {
-        return $([]);
+        return jLight([]);
       }
     }
   }
 
-  return $(elements);
+  return jLight(elements);
 };
+
+$.noop = noop;
+$.uniqid = uniqid;
+$.generateHash = generateHash;
+$.isEmptyObject = isEmptyObject;
+$.isSameObject = isSameObject;
+$.preventEvent = preventEvent;
+$.doEasing = doEasing;
+$.lcfirst = lcfirst;
+$.ucfirst = ucfirst;
+$.camelToKebab = camelToKebab;
+$.camelToSnake = camelToSnake;
+$.kebabToCamel = kebabToCamel;
+$.kebabToSnake = kebabToSnake;
+$.snakeToCamel = snakeToCamel;
+$.snakeToKebab = snakeToKebab;
+$.ajax = ajax;
+$.get = get;
+$.post = post;
+
+export default $;

@@ -1,25 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
-import $, {
-  ajax,
-  get,
-  post,
-  noop,
-  uniqid,
-  lcfirst,
-  ucfirst,
-  doEasing,
-  isEmptyObject,
-  isSameObject,
-  preventEvent,
-  generateHash,
-  camelToKebab,
-  camelToSnake,
-  kebabToCamel,
-  kebabToSnake,
-  snakeToCamel,
-  snakeToKebab,
-} from './index';
+import $ from './index';
 
 $(() => {
   const $button = $('button');
