@@ -355,13 +355,13 @@
 
 /**
  * @callback visibilityCallback
- * @param {string} [type] The css display type to apply to the function (default: 'block')
+ * @param {string} [type] The css display type to apply to the function
  * @returns {jLight} jLight collection
  */
 
 /**
  * @callback toggleVisibilityCallback
- * @param {string} [type] The css display type to apply to the function (default: 'block')
+ * @param {string} [type] The css display type to apply to the function
  * @param {boolean} [force] Force whether to show or hide elements
  * @returns {jLight} jLight collection
  */
@@ -1334,6 +1334,21 @@ const getElementsFromArgument = (argument) => {
   return [];
 };
 
+const getElementStyle = (element, property) => {
+  const computedStyles = window.getComputedStyle(element);
+
+  return computedStyles.getPropertyValue(property);
+};
+
+const updateJLightDisplayData = (element, display) => {
+  updateJLightElementData(element, {
+    jLightInternal: {
+      ...(getJLightElementData(element).jLightInternal || {}),
+      display,
+    },
+  });
+};
+
 const getPrevMatchingElement = (element, selector) => {
   const prev = element.previousElementSibling;
 
@@ -2012,14 +2027,35 @@ const jLight = (elements) => ({
    * @function
    * @tutorial show
    * @param {string} [type]
-   * The css display type to apply to the collections elements (default: 'block')
+   * The css display type to apply to the collections elements
    * @returns {jLight} jLight collection
    */
-  show: (type = 'block') => {
+  show: (type) => {
     elements.forEach((theElement) => {
       const element = theElement;
 
-      element.style.display = type;
+      if (type) {
+        element.style.display = type;
+
+        return;
+      }
+
+      const { display } = getJLightElementData(element).jLightInternal;
+
+      if (display) {
+        element.style.display = display;
+
+        return;
+      }
+
+      const computedDisplay = getElementStyle(element, 'display');
+
+      if (computedDisplay !== 'none') {
+        updateJLightDisplayData(element, computedDisplay);
+        element.style.display = computedDisplay;
+      } else {
+        element.style.display = 'revert';
+      }
     });
 
     return jLight(elements);
@@ -2035,6 +2071,11 @@ const jLight = (elements) => ({
   hide: () => {
     elements.forEach((theElement) => {
       const element = theElement;
+      const computedDisplay = getElementStyle(element, 'display');
+
+      if (computedDisplay !== 'none') {
+        updateJLightDisplayData(element, computedDisplay);
+      }
 
       element.style.display = 'none';
     });
@@ -2047,23 +2088,23 @@ const jLight = (elements) => ({
    *
    * @function
    * @tutorial toggle
-   * @param {string} [type] The css display type to apply to the function (default: 'block')
+   * @param {string} [type] The css display type to apply to the function
    * @param {boolean} [force] Force whether to show or hide elements
    * @returns {jLight} jLight collection
    */
-  toggle: (type = 'block', force) => {
+  toggle: (type, force) => {
     const forceDefined = force !== undefined;
     const forceShow = forceDefined && force;
     const forceHide = forceDefined && !force;
 
     elements.forEach((theElement) => {
       const element = theElement;
-      const computedStyles = window.getComputedStyle(element);
+      const display = getElementStyle(element, 'display');
 
-      if (forceShow || (computedStyles.getPropertyValue('display') === 'none' && !forceHide)) {
-        element.style.display = type;
+      if (forceShow || (display === 'none' && !forceHide)) {
+        jLight([element]).show(type);
       } else {
-        element.style.display = 'none';
+        jLight([element]).hide();
       }
     });
 
@@ -3473,9 +3514,7 @@ const jLight = (elements) => ({
         transition += `${index === 0 ? '' : ','}${theKey} ${duration}ms ${easing}`;
 
         if (element.style[key] === undefined) {
-          element.style[key] = window
-            .getComputedStyle(element)
-            .getPropertyValue(key);
+          element.style[key] = getElementStyle(element, key);
         }
 
         setTimeout(() => {
@@ -3572,7 +3611,6 @@ const jLight = (elements) => ({
   stop: () => {
     elements.forEach((theElement) => {
       const element = theElement;
-      const computedStyles = window.getComputedStyle(element);
       const jLightInternalData = getJLightElementData(element).jLightInternal;
       const animatedProperties = jLightInternalData.animatedProperties
         || [];
@@ -3585,9 +3623,7 @@ const jLight = (elements) => ({
       });
 
       animatedProperties.forEach((key) => {
-        element.style[key] = computedStyles.getPropertyValue(
-          camelToKebab(key),
-        );
+        element.style[key] = getElementStyle(element, camelToKebab(key));
       });
 
       element.style.transition = '';
@@ -3670,9 +3706,9 @@ const jLight = (elements) => ({
   fadeToggle: (duration, callback, type, easing) => {
     elements.forEach((theElement) => {
       const element = theElement;
-      const computedStyles = window.getComputedStyle(element);
+      const display = getElementStyle(element, 'display');
 
-      if (computedStyles.getPropertyValue('display') === 'none') {
+      if (display === 'none') {
         jLight([element]).fadeIn(duration, callback, type, easing);
       } else {
         jLight([element]).fadeOut(duration, callback, easing);
@@ -3802,9 +3838,9 @@ const jLight = (elements) => ({
 
     elements.forEach((theElement) => {
       const element = theElement;
-      const computedStyles = window.getComputedStyle(element);
+      const display = getElementStyle(element, 'display');
 
-      if (forceSlideDown || (computedStyles.getPropertyValue('display') === 'none' && !forceSlideUp)) {
+      if (forceSlideDown || (display === 'none' && !forceSlideUp)) {
         jLight([element]).slideDown(duration, callback, height, type, easing);
       } else {
         jLight([element]).slideUp(duration, callback, easing);
