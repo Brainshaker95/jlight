@@ -263,7 +263,7 @@
  * @property {animateOutCallback} fadeOut
  * Fades the collections elements out.
  *
- * @property {fadeCallback} fadeToggle
+ * @property {fadeToggleCallback} fadeToggle
  * Toggles the display state of the collections elements by fading.
  *
  * @property {slideCallback} slideDown
@@ -676,9 +676,20 @@
  * @callback fadeCallback
  * @param {number} [duration] The duration for the animation in ms (default: 300)
  * @param {Function} [callback] The function to run after the animation is complete (default: noop)
- * @param {string} [type]
- * The css display type to apply to the collections elements (default: 'block')
  * @param {string} [easing] Which type of css easing to use for the animation (default: 'ease')
+ * @param {string} [type]
+ * The css display type to apply to the collections elements
+ * @returns {jLight} jLight collection
+ */
+
+/**
+ * @callback fadeToggleCallback
+ * @param {number} [duration] The duration for the animation in ms (default: 300)
+ * @param {Function} [callback] The function to run after the animation is complete (default: noop)
+ * @param {string} [easing] Which type of css easing to use for the animation (default: 'ease')
+ * @param {string} [type]
+ * The css display type to apply to the collections elements
+ * @param {boolean} [force] Force whether to fade in or out
  * @returns {jLight} jLight collection
  */
 
@@ -686,10 +697,10 @@
  * @callback slideCallback
  * @param {number} [duration] The duration for the animation in ms (default: 300)
  * @param {Function} [callback] The function to run after the animation is complete (default: noop)
- * @param {string} [height] The css height value to end the sliding animation (default: 'auto')
- * @param {string} [type]
- * The css display type to apply to the collections elements (default: 'block')
  * @param {string} [easing] Which type of css easing to use for the animation (default: 'ease')
+ * @param {string} [type]
+ * The css display type to apply to the collections elements
+ * @param {string} [height] The css height value to end the sliding animation
  * @returns {jLight} jLight collection
  */
 
@@ -697,10 +708,10 @@
  * @callback slideToggleCallback
  * @param {number} [duration] The duration for the animation in ms (default: 300)
  * @param {Function} [callback] The function to run after the animation is complete (default: noop)
- * @param {string} [height] The css height value to end the sliding animation (default: 'auto')
- * @param {string} [type]
- * The css display type to apply to the collections elements (default: 'block')
  * @param {string} [easing] Which type of css easing to use for the animation (default: 'ease')
+ * @param {string} [type]
+ * The css display type to apply to the collections elements
+ * @param {string} [height] The css height value to end the sliding animation
  * @param {boolean} [force] Force whether to slide down or up
  * @returns {jLight} jLight collection
  */
@@ -2099,9 +2110,8 @@ const jLight = (elements) => ({
 
     elements.forEach((theElement) => {
       const element = theElement;
-      const display = getElementStyle(element, 'display');
 
-      if (forceShow || (display === 'none' && !forceHide)) {
+      if (forceShow || (getElementStyle(element, 'display') === 'none' && !forceHide)) {
         jLight([element]).show(type);
       } else {
         jLight([element]).hide();
@@ -3640,18 +3650,28 @@ const jLight = (elements) => ({
    * @param {number} [duration] The duration for the animation in ms (default: 300)
    * @param {Function} [callback]
    * The function to run after the animation is complete (default: noop)
-   * @param {string} [type]
-   * The css display type to apply to the collections elements (default: 'block')
    * @param {string} [easing] Which type of css easing to use for the animation (default: 'ease')
+   * @param {string} [type]
+   * The css display type to apply to the collections elements
    * @returns {jLight} jLight collection
    */
-  fadeIn: (duration, callback, type, easing) => {
+  fadeIn: (duration, callback, easing, type) => {
     elements.forEach((theElement) => {
       const element = theElement;
+      const { display } = getJLightElementData(element).jLightInternal;
+      const computedDisplay = getElementStyle(element, 'display');
+
+      if (computedDisplay !== 'none') {
+        updateJLightDisplayData(element, computedDisplay);
+      }
 
       getUpdateAnimationId(element);
       element.style.opacity = 0;
-      element.style.display = type || 'block';
+
+      element.style.display = type
+      || display
+      || (computedDisplay !== 'none' ? computedDisplay : false)
+      || 'block';
 
       setTimeout(() => {
         jLight([element]).animate({ opacity: 1 }, duration, callback, easing);
@@ -3675,6 +3695,11 @@ const jLight = (elements) => ({
   fadeOut: (duration, callback, easing) => {
     elements.forEach((theElement) => {
       const element = theElement;
+      const computedDisplay = getElementStyle(element, 'display');
+
+      if (computedDisplay !== 'none') {
+        updateJLightDisplayData(element, computedDisplay);
+      }
 
       setTimeout(() => {
         jLight([element]).animate({ opacity: 0 }, duration, () => {
@@ -3698,18 +3723,22 @@ const jLight = (elements) => ({
    * @param {number} [duration] The duration for the animation in ms (default: 300)
    * @param {Function} [callback]
    * The function to run after the animation is complete (default: noop)
-   * @param {string} [type]
-   * The css display type to apply to the collections elements (default: 'block')
    * @param {string} [easing] Which type of css easing to use for the animation (default: 'ease')
+   * @param {string} [type]
+   * The css display type to apply to the collections elements
+   * @param {boolean} [force] Force whether to fade in or out
    * @returns {jLight} jLight collection
    */
-  fadeToggle: (duration, callback, type, easing) => {
+  fadeToggle: (duration, callback, easing, type, force) => {
+    const forceDefined = force !== undefined;
+    const forceFadeIn = forceDefined && force;
+    const forceFadeOut = forceDefined && !force;
+
     elements.forEach((theElement) => {
       const element = theElement;
-      const display = getElementStyle(element, 'display');
 
-      if (display === 'none') {
-        jLight([element]).fadeIn(duration, callback, type, easing);
+      if (forceFadeIn || (getElementStyle(element, 'display') === 'none' && !forceFadeOut)) {
+        jLight([element]).fadeIn(duration, callback, easing, type);
       } else {
         jLight([element]).fadeOut(duration, callback, easing);
       }
@@ -3726,49 +3755,88 @@ const jLight = (elements) => ({
    * @param {number} [duration] The duration for the animation in ms (default: 300)
    * @param {Function} [callback]
    * The function to run after the animation is complete (default: noop)
-   * @param {string} [height] The css height value to end the sliding animation (default: 'auto')
-   * @param {string} [type]
-   * The css display type to apply to the collections elements (default: 'block')
    * @param {string} [easing] Which type of css easing to use for the animation (default: 'ease')
+   * @param {string} [type]
+   * The css display type to apply to the collections elements
+   * @param {string} [height] The css height value to end the sliding animation
    * @returns {jLight} jLight collection
    */
-  slideDown: (duration, callback, height, type, easing) => {
+  slideDown: (duration, callback, easing, type, height) => {
+    jLight(elements).stop();
+
     elements.forEach((theElement) => {
       const element = theElement;
       const startHeight = Math.max(element.clientHeight, element.offsetHeight);
       const computedStyles = window.getComputedStyle(element);
+      const computedDisplay = computedStyles.getPropertyValue('display');
+      const computedMinHeight = computedStyles.getPropertyValue('min-height');
       const paddingTop = parseFloat(computedStyles.getPropertyValue('padding-top'), 10);
       const paddingBottom = parseFloat(computedStyles.getPropertyValue('padding-bottom'), 10);
+      const borderTop = computedStyles.getPropertyValue('border-top');
+      const borderBottom = computedStyles.getPropertyValue('border-bottom');
+      const borderTopParsed = parseFloat(borderTop, 10);
+      const borderBottomParsed = parseFloat(borderBottom, 10);
+      const borderTopStyle = borderTop.replace(`${borderTopParsed}px`, '');
+      const borderBottomStyle = borderBottom.replace(`${borderBottomParsed}px`, '');
+      const { display } = getJLightElementData(element).jLightInternal;
 
-      element.style.overflow = 'hidden';
-      element.style.visibility = 'hidden';
-      element.style.display = type || 'block';
-      element.style.height = height || 'auto';
+      if (computedDisplay !== 'none') {
+        updateJLightDisplayData(element, computedDisplay);
+      }
 
-      const targetHeight = Math.max(element.clientHeight, element.offsetHeight)
-        + parseFloat(computedStyles.getPropertyValue('border-bottom'), 10);
+      Object.assign(element.style, {
+        overflow: 'hidden',
+        visibility: 'hidden',
+        minHeight: '',
+      });
 
-      element.style.height = `${startHeight}px`;
-      element.style.visibility = '';
-      element.style.paddingTop = 0;
-      element.style.paddingBottom = 0;
+      element.style.height = height
+        || (computedMinHeight !== '0px' ? computedMinHeight : false)
+        || '';
+
+      element.style.display = type
+        || display
+        || (computedDisplay !== 'none' ? computedDisplay : false)
+        || 'block';
+
+      const targetHeight = Math.max(
+        element.clientHeight,
+        element.offsetHeight,
+        parseFloat(computedMinHeight, 10),
+      ) - borderTopParsed
+        - borderBottomParsed;
+
+      Object.assign(element.style, {
+        height: `${startHeight}px`,
+        minHeight: 'revert',
+        visibility: '',
+        paddingTop: 0,
+        paddingBottom: 0,
+        borderTop: `0px${borderTopStyle}`,
+        borderBottom: `0px${borderBottomStyle}`,
+      });
 
       setTimeout(() => {
         jLight([element]).animate({
           height: `${targetHeight}px`,
           paddingTop: `${paddingTop}px`,
           paddingBottom: `${paddingBottom}px`,
+          borderTop: `${borderTopParsed}px${borderTopStyle}`,
+          borderBottom: `${borderBottomParsed}px${borderBottomStyle}`,
         }, duration, () => {
-          element.style.height = '';
-          element.style.paddingTop = '';
-          element.style.paddingBottom = '';
-          element.style.overflow = '';
+          Object.assign(element.style, {
+            height: height || '',
+            minHeight: '',
+            paddingTop: '',
+            paddingBottom: '',
+            overflow: '',
+          });
 
           if (callback) {
             callback();
           }
         }, easing);
-      }, 10);
+      }, 15);
     });
 
     return jLight(elements);
@@ -3786,25 +3854,55 @@ const jLight = (elements) => ({
    * @returns {jLight} jLight collection
    */
   slideUp: (duration, callback, easing) => {
+    jLight(elements).stop();
+
     elements.forEach((theElement) => {
       const element = theElement;
-      const startHeight = Math.max(element.clientHeight, element.offsetHeight);
       const computedStyles = window.getComputedStyle(element);
+      const computedDisplay = computedStyles.getPropertyValue('display');
+      const borderTop = computedStyles.getPropertyValue('border-top');
+      const borderBottom = computedStyles.getPropertyValue('border-bottom');
+      const borderTopParsed = parseFloat(borderTop, 10);
+      const borderBottomParsed = parseFloat(borderBottom, 10);
 
-      element.style.overflow = 'hidden';
-      element.style.height = `${startHeight}px`;
-      element.style.minHeight = 'auto';
-      element.style.paddingTop = computedStyles.getPropertyValue('padding-top');
-      element.style.paddingBottom = computedStyles.getPropertyValue('padding-bottom');
+      const startHeight = Math.max(
+        element.clientHeight,
+        element.offsetHeight,
+      ) - borderTopParsed
+        - borderBottomParsed;
+
+      if (computedDisplay !== 'none') {
+        updateJLightDisplayData(element, computedDisplay);
+      }
+
+      Object.assign(element.style, {
+        overflow: 'hidden',
+        height: `${startHeight}px`,
+        minHeight: 'auto',
+        paddingTop: computedStyles.getPropertyValue('padding-top'),
+        paddingBottom: computedStyles.getPropertyValue('padding-bottom'),
+        borderTop,
+        borderBottom,
+      });
 
       setTimeout(() => {
-        jLight([element]).animate({ height: 0, paddingTop: 0, paddingBottom: 0 }, duration, () => {
-          element.style.display = 'none';
-          element.style.height = '';
-          element.style.overflow = '';
-          element.style.minHeight = '';
-          element.style.paddingTop = '';
-          element.style.paddingBottom = '';
+        jLight([element]).animate({
+          height: 0,
+          paddingTop: 0,
+          paddingBottom: 0,
+          borderTop: `0px${borderTop.replace(`${borderTopParsed}px`, '')}`,
+          borderBottom: `0px${borderBottom.replace(`${borderBottomParsed}px`, '')}`,
+        }, duration, () => {
+          Object.assign(element.style, {
+            display: 'none',
+            height: '',
+            overflow: '',
+            minHeight: '',
+            paddingTop: '',
+            paddingBottom: '',
+            borderTop: '',
+            borderBottom: '',
+          });
 
           if (callback) {
             callback();
@@ -3824,24 +3922,23 @@ const jLight = (elements) => ({
    * @param {number} [duration] The duration for the animation in ms (default: 300)
    * @param {Function} [callback]
    * The function to run after the animation is complete (default: noop)
-   * @param {string} [height] The css height value to end the sliding animation (default: 'auto')
-   * @param {string} [type]
-   * The css display type to apply to the collections elements (default: 'block')
    * @param {string} [easing] Which type of css easing to use for the animation (default: 'ease')
+   * @param {string} [type]
+   * The css display type to apply to the collections elements
+   * @param {string} [height] The css height value to end the sliding animation
    * @param {boolean} [force] Force whether to slide down or up
    * @returns {jLight} jLight collection
    */
-  slideToggle: (duration, callback, height, type, easing, force) => {
+  slideToggle: (duration, callback, easing, type, height, force) => {
     const forceDefined = force !== undefined;
     const forceSlideDown = forceDefined && force;
     const forceSlideUp = forceDefined && !force;
 
     elements.forEach((theElement) => {
       const element = theElement;
-      const display = getElementStyle(element, 'display');
 
-      if (forceSlideDown || (display === 'none' && !forceSlideUp)) {
-        jLight([element]).slideDown(duration, callback, height, type, easing);
+      if (forceSlideDown || (getElementStyle(element, 'display') === 'none' && !forceSlideUp)) {
+        jLight([element]).slideDown(duration, callback, easing, type, height);
       } else {
         jLight([element]).slideUp(duration, callback, easing);
       }
