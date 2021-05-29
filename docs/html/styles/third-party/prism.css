@@ -77,8 +77,9 @@ pre.language-js,
 	color: #C5C8C6;
 }
 
-.token.interpolation-punctuation {
-	color: #D08442;
+.token.interpolation-punctuation,
+.language-html .language-css .token {
+	color: #D08442 !important;
 }
 
 .token.namespace {
@@ -90,7 +91,8 @@ pre.language-js,
 .token.symbol,
 .token.deleted,
 .language-js .token.class-name,
-.language-css .token.color {
+.language-css .token.color,
+.language-css .token.default {
 	color: #C7444A;
 }
 

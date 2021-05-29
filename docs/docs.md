@@ -146,6 +146,8 @@
 <dd></dd>
 <dt><a href="#fadeCallback">fadeCallback</a> ⇒ <code><a href="#jLight">jLight</a></code></dt>
 <dd></dd>
+<dt><a href="#fadeToggleCallback">fadeToggleCallback</a> ⇒ <code><a href="#jLight">jLight</a></code></dt>
+<dd></dd>
 <dt><a href="#slideCallback">slideCallback</a> ⇒ <code><a href="#jLight">jLight</a></code></dt>
 <dd></dd>
 <dt><a href="#slideToggleCallback">slideToggleCallback</a> ⇒ <code><a href="#jLight">jLight</a></code></dt>
@@ -654,7 +656,7 @@ Shows the collections elements.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [type] | <code>string</code> | The css display type to apply to the collections elements (default: 'block') |
+| [type] | <code>string</code> | The css display type to apply to the collections elements |
 
 <a name="module_CSS..hide"></a>
 
@@ -673,7 +675,7 @@ Toggles the collections elements visibility.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [type] | <code>string</code> | The css display type to apply to the function (default: 'block') |
+| [type] | <code>string</code> | The css display type to apply to the function |
 | [force] | <code>boolean</code> | Force whether to show or hide elements |
 
 <a name="module_Event"></a>
@@ -1586,12 +1588,12 @@ Gets or sets the collections elements offset.
     * [~animate([properties], [duration], [callback], [easing])](#module_Animation..animate) ⇒ [<code>jLight</code>](#jLight)
     * [~scrollTo($elements, [duration], [offset], [callback])](#module_Animation..scrollTo) ⇒ [<code>jLight</code>](#jLight)
     * [~stop()](#module_Animation..stop) ⇒ [<code>jLight</code>](#jLight)
-    * [~fadeIn([duration], [callback], [type], [easing])](#module_Animation..fadeIn) ⇒ [<code>jLight</code>](#jLight)
+    * [~fadeIn([duration], [callback], [easing], [type])](#module_Animation..fadeIn) ⇒ [<code>jLight</code>](#jLight)
     * [~fadeOut([duration], [callback], [easing])](#module_Animation..fadeOut) ⇒ [<code>jLight</code>](#jLight)
-    * [~fadeToggle([duration], [callback], [type], [easing])](#module_Animation..fadeToggle) ⇒ [<code>jLight</code>](#jLight)
-    * [~slideDown([duration], [callback], [height], [type], [easing])](#module_Animation..slideDown) ⇒ [<code>jLight</code>](#jLight)
+    * [~fadeToggle([duration], [callback], [easing], [type], [force])](#module_Animation..fadeToggle) ⇒ [<code>jLight</code>](#jLight)
+    * [~slideDown([duration], [callback], [easing], [type], [height])](#module_Animation..slideDown) ⇒ [<code>jLight</code>](#jLight)
     * [~slideUp([duration], [callback], [easing])](#module_Animation..slideUp) ⇒ [<code>jLight</code>](#jLight)
-    * [~slideToggle([duration], [callback], [height], [type], [easing], [force])](#module_Animation..slideToggle) ⇒ [<code>jLight</code>](#jLight)
+    * [~slideToggle([duration], [callback], [easing], [type], [height], [force])](#module_Animation..slideToggle) ⇒ [<code>jLight</code>](#jLight)
 
 <a name="module_Animation..animate"></a>
 
@@ -1632,7 +1634,7 @@ Stops all running animations on the collections elements.
 **Returns**: [<code>jLight</code>](#jLight) - jLight collection  
 <a name="module_Animation..fadeIn"></a>
 
-### Animation~fadeIn([duration], [callback], [type], [easing]) ⇒ [<code>jLight</code>](#jLight)
+### Animation~fadeIn([duration], [callback], [easing], [type]) ⇒ [<code>jLight</code>](#jLight)
 Fades the collections elements in.
 
 **Kind**: inner method of [<code>Animation</code>](#module_Animation)  
@@ -1642,8 +1644,8 @@ Fades the collections elements in.
 | --- | --- | --- |
 | [duration] | <code>number</code> | The duration for the animation in ms (default: 300) |
 | [callback] | <code>function</code> | The function to run after the animation is complete (default: noop) |
-| [type] | <code>string</code> | The css display type to apply to the collections elements (default: 'block') |
 | [easing] | <code>string</code> | Which type of css easing to use for the animation (default: 'ease') |
+| [type] | <code>string</code> | The css display type to apply to the collections elements |
 
 <a name="module_Animation..fadeOut"></a>
 
@@ -1661,7 +1663,7 @@ Fades the collections elements out.
 
 <a name="module_Animation..fadeToggle"></a>
 
-### Animation~fadeToggle([duration], [callback], [type], [easing]) ⇒ [<code>jLight</code>](#jLight)
+### Animation~fadeToggle([duration], [callback], [easing], [type], [force]) ⇒ [<code>jLight</code>](#jLight)
 Toggles the display state of the collections elements by fading.
 
 **Kind**: inner method of [<code>Animation</code>](#module_Animation)  
@@ -1671,12 +1673,13 @@ Toggles the display state of the collections elements by fading.
 | --- | --- | --- |
 | [duration] | <code>number</code> | The duration for the animation in ms (default: 300) |
 | [callback] | <code>function</code> | The function to run after the animation is complete (default: noop) |
-| [type] | <code>string</code> | The css display type to apply to the collections elements (default: 'block') |
 | [easing] | <code>string</code> | Which type of css easing to use for the animation (default: 'ease') |
+| [type] | <code>string</code> | The css display type to apply to the collections elements |
+| [force] | <code>boolean</code> | Force whether to fade in or out |
 
 <a name="module_Animation..slideDown"></a>
 
-### Animation~slideDown([duration], [callback], [height], [type], [easing]) ⇒ [<code>jLight</code>](#jLight)
+### Animation~slideDown([duration], [callback], [easing], [type], [height]) ⇒ [<code>jLight</code>](#jLight)
 Slides the collections elements down.
 
 **Kind**: inner method of [<code>Animation</code>](#module_Animation)  
@@ -1686,9 +1689,9 @@ Slides the collections elements down.
 | --- | --- | --- |
 | [duration] | <code>number</code> | The duration for the animation in ms (default: 300) |
 | [callback] | <code>function</code> | The function to run after the animation is complete (default: noop) |
-| [height] | <code>string</code> | The css height value to end the sliding animation (default: 'auto') |
-| [type] | <code>string</code> | The css display type to apply to the collections elements (default: 'block') |
 | [easing] | <code>string</code> | Which type of css easing to use for the animation (default: 'ease') |
+| [type] | <code>string</code> | The css display type to apply to the collections elements |
+| [height] | <code>string</code> | The css height value to end the sliding animation |
 
 <a name="module_Animation..slideUp"></a>
 
@@ -1706,7 +1709,7 @@ Slides the collections elements up.
 
 <a name="module_Animation..slideToggle"></a>
 
-### Animation~slideToggle([duration], [callback], [height], [type], [easing], [force]) ⇒ [<code>jLight</code>](#jLight)
+### Animation~slideToggle([duration], [callback], [easing], [type], [height], [force]) ⇒ [<code>jLight</code>](#jLight)
 Toggles the display state of the collections elements by sliding.
 
 **Kind**: inner method of [<code>Animation</code>](#module_Animation)  
@@ -1716,9 +1719,9 @@ Toggles the display state of the collections elements by sliding.
 | --- | --- | --- |
 | [duration] | <code>number</code> | The duration for the animation in ms (default: 300) |
 | [callback] | <code>function</code> | The function to run after the animation is complete (default: noop) |
-| [height] | <code>string</code> | The css height value to end the sliding animation (default: 'auto') |
-| [type] | <code>string</code> | The css display type to apply to the collections elements (default: 'block') |
 | [easing] | <code>string</code> | Which type of css easing to use for the animation (default: 'ease') |
+| [type] | <code>string</code> | The css display type to apply to the collections elements |
+| [height] | <code>string</code> | The css height value to end the sliding animation |
 | [force] | <code>boolean</code> | Force whether to slide down or up |
 
 <a name="module_Utility"></a>
@@ -2028,7 +2031,7 @@ jLights default export
 | stop | [<code>defaultCallback</code>](#defaultCallback) | Stops all running animations on the collections elements. |
 | fadeIn | [<code>fadeCallback</code>](#fadeCallback) | Fades the collections elements in. |
 | fadeOut | [<code>animateOutCallback</code>](#animateOutCallback) | Fades the collections elements out. |
-| fadeToggle | [<code>fadeCallback</code>](#fadeCallback) | Toggles the display state of the collections elements by fading. |
+| fadeToggle | [<code>fadeToggleCallback</code>](#fadeToggleCallback) | Toggles the display state of the collections elements by fading. |
 | slideDown | [<code>slideCallback</code>](#slideCallback) | Slides the collections elements down. |
 | slideUp | [<code>animateOutCallback</code>](#animateOutCallback) | Slides the collections elements up. |
 | slideToggle | [<code>slideToggleCallback</code>](#slideToggleCallback) | Toggles the display state of the collections elements by sliding. |
@@ -2127,7 +2130,7 @@ jLights default export
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [type] | <code>string</code> | The css display type to apply to the function (default: 'block') |
+| [type] | <code>string</code> | The css display type to apply to the function |
 
 <a name="toggleVisibilityCallback"></a>
 
@@ -2137,7 +2140,7 @@ jLights default export
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [type] | <code>string</code> | The css display type to apply to the function (default: 'block') |
+| [type] | <code>string</code> | The css display type to apply to the function |
 | [force] | <code>boolean</code> | Force whether to show or hide elements |
 
 <a name="eventCallback"></a>
@@ -2584,8 +2587,22 @@ the collections elements
 | --- | --- | --- |
 | [duration] | <code>number</code> | The duration for the animation in ms (default: 300) |
 | [callback] | <code>function</code> | The function to run after the animation is complete (default: noop) |
-| [type] | <code>string</code> | The css display type to apply to the collections elements (default: 'block') |
 | [easing] | <code>string</code> | Which type of css easing to use for the animation (default: 'ease') |
+| [type] | <code>string</code> | The css display type to apply to the collections elements |
+
+<a name="fadeToggleCallback"></a>
+
+## fadeToggleCallback ⇒ [<code>jLight</code>](#jLight)
+**Kind**: global typedef  
+**Returns**: [<code>jLight</code>](#jLight) - jLight collection  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [duration] | <code>number</code> | The duration for the animation in ms (default: 300) |
+| [callback] | <code>function</code> | The function to run after the animation is complete (default: noop) |
+| [easing] | <code>string</code> | Which type of css easing to use for the animation (default: 'ease') |
+| [type] | <code>string</code> | The css display type to apply to the collections elements |
+| [force] | <code>boolean</code> | Force whether to fade in or out |
 
 <a name="slideCallback"></a>
 
@@ -2597,9 +2614,9 @@ the collections elements
 | --- | --- | --- |
 | [duration] | <code>number</code> | The duration for the animation in ms (default: 300) |
 | [callback] | <code>function</code> | The function to run after the animation is complete (default: noop) |
-| [height] | <code>string</code> | The css height value to end the sliding animation (default: 'auto') |
-| [type] | <code>string</code> | The css display type to apply to the collections elements (default: 'block') |
 | [easing] | <code>string</code> | Which type of css easing to use for the animation (default: 'ease') |
+| [type] | <code>string</code> | The css display type to apply to the collections elements |
+| [height] | <code>string</code> | The css height value to end the sliding animation |
 
 <a name="slideToggleCallback"></a>
 
@@ -2611,9 +2628,9 @@ the collections elements
 | --- | --- | --- |
 | [duration] | <code>number</code> | The duration for the animation in ms (default: 300) |
 | [callback] | <code>function</code> | The function to run after the animation is complete (default: noop) |
-| [height] | <code>string</code> | The css height value to end the sliding animation (default: 'auto') |
-| [type] | <code>string</code> | The css display type to apply to the collections elements (default: 'block') |
 | [easing] | <code>string</code> | Which type of css easing to use for the animation (default: 'ease') |
+| [type] | <code>string</code> | The css display type to apply to the collections elements |
+| [height] | <code>string</code> | The css height value to end the sliding animation |
 | [force] | <code>boolean</code> | Force whether to slide down or up |
 
 <a name="isCallback"></a>

@@ -1,4 +1,9 @@
+[🡸 Back]{@tutorial tut-ajax}
+___
+
 [Go to definition]{@link module:Ajax.ajax}
+
+&nbsp;
 
 The ajax function can be used to simplify the process of sending XMLHttpRequests.
 

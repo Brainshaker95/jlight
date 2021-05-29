@@ -1,4 +1,9 @@
+[🡸 Back]{@tutorial tut-ajax}
+___
+
 [Go to definition]{@link module:Ajax.post}
+
+&nbsp;
 
 This function can be used to simplify the process of sending POST XMLHttpRequests.
 

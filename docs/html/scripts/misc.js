@@ -1,5 +1,6 @@
 /* global document */
 /* global Prism */
+/* global Node */
 
 var accordionLocalStorageKey = 'accordion-id';
 
@@ -47,6 +48,27 @@ function rainbowBracesFunction(toggle, id)  {
     });
 
     Prism.highlightAll();
+}
+
+function addDefaultTokensToCss() {
+    const cssCodes = document.querySelectorAll('.language-css');
+
+    cssCodes.forEach((cssCode) => {
+        cssCode.childNodes.forEach((childNode) => {
+            if (childNode.nodeType === Node.TEXT_NODE) {
+                if (!childNode.textContent.trim()) {
+                    return;
+                }
+
+                const span = document.createElement('span');
+
+                childNode.after(span);
+                span.appendChild(childNode);
+                span.classList.add('token');
+                span.classList.add('default');
+            }
+        });
+    });
 }
 
 /* eslint-disable-next-line */
@@ -121,6 +143,8 @@ function removeCallbackLinksFromNav() {
     }
 
     rainbowBracesFunction();
+
+    setTimeout(addDefaultTokensToCss, 100);
 
     const constructorTutorialItem = document.querySelector('#constructor-tutorial');
 

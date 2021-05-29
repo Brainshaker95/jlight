@@ -918,7 +918,7 @@ clean-css@4.2.x:
 
 "clean-jsdoc-theme@git+https://github.com/Brainshaker95/clean-jsdoc-theme.git":
   version "3.2.6"
-  resolved "git+https://github.com/Brainshaker95/clean-jsdoc-theme.git#4ab5121726c8fcf876bca78218f7740e64e16b8f"
+  resolved "git+https://github.com/Brainshaker95/clean-jsdoc-theme.git#28967f579611af483e7de630768441f18453f5ba"
   dependencies:
     fs-extra "^9.1.0"
     seedrandom "^3.0.5"

@@ -1,4 +1,9 @@
+[🡸 Back]{@tutorial tut-ajax}
+___
+
 [Go to definition]{@link module:Ajax.get}
+
+&nbsp;
 
 This function can be used to simplify the process of sending GET XMLHttpRequests.
 
