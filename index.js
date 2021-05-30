@@ -370,6 +370,8 @@
  * @callback eventCallback
  * @param {Event} [event] The dispatched event with jLight elements for the events
  * currentTarget and target attached (event.$currentTarget and event.$target)
+ * @returns {void|boolean} If the callback returns false the events default behavior,
+ * propagation and immediate propagation will be prevented.
  */
 
 /* eslint-disable max-len */
@@ -377,14 +379,19 @@
 /**
  * @callback onCallback
  * @param {string} eventNames Space separated list of event names
- * @param {eventCallback} callbackOrSelector The function to execute when the event occurs
- * or a selector to delegate events to children of the current collections elements
- * @param {eventCallback|
+ * @param {eventCallback|string|boolean} callbackOrSelector The function to execute when the event occurs,
+ * a selector to delegate events to children of the current collections elements
+ * or a boolean to prevent the events default behavior, propagation and immediate propagation if set to false
+ * @param {eventCallback|boolean|
  *   {capture: boolean, once: boolean, passive: boolean, signal: AbortSignal, mozSystemGroup: boolean}
  * } [delegatedCallbackOrOptions]
- * The callback to run when the event is delegated or the options to apply to the listener
- * @param {{capture: boolean, once: boolean, passive: boolean, signal: AbortSignal, mozSystemGroup: boolean}} [options]
+ * The callback to run when the event is delegated, the options to apply to the listener
+ * or a boolean to prevent the events default behavior, propagation and immediate propagation if set to false
+ * @param {boolean|
+ *  {capture: boolean, once: boolean, passive: boolean, signal: AbortSignal, mozSystemGroup: boolean}
+ * } [options]
  * The options to apply to the listener
+ * or a boolean to prevent the events default behavior, propagation and immediate propagation if set to false
  * @returns {jLight} jLight collection
  */
 
@@ -1460,17 +1467,24 @@ const attachListener = (
   theJLightConstructor,
 ) => {
   const jlightConstructor = theJLightConstructor || jLight;
+  const hasDelegatedCallback = typeof delegatedCallbackOrOptions === 'function' || delegatedCallbackOrOptions === false;
+  const delegatedCallback = hasDelegatedCallback ? delegatedCallbackOrOptions : noop;
+  const isDocumentOrWindow = elements[0]
+    && (elements[0] === document || elements[0] === window);
+  let options = hasDelegatedCallback ? theOptions : delegatedCallbackOrOptions;
   let types = [eventNames];
+  let doPrevent;
 
   if (types[0].indexOf(' ') > -1) {
     types = types[0].split(' ');
   }
 
-  const hasDelegatedCallback = typeof delegatedCallbackOrOptions === 'function';
-  const options = (hasDelegatedCallback ? theOptions : delegatedCallbackOrOptions) || {};
-  const delegatedCallback = hasDelegatedCallback ? delegatedCallbackOrOptions : noop;
-  const isDocumentOrWindow = elements[0]
-    && (elements[0] === document || elements[0] === window);
+  if (options === false) {
+    doPrevent = true;
+    options = {};
+  } else if (!options) {
+    options = {};
+  }
 
   if (typeof callbackOrSelector === 'function' || callbackOrSelector === false) {
     elements.forEach((element) => {
@@ -1481,8 +1495,9 @@ const attachListener = (
         event.$currentTarget = jLight([event.currentTarget]);
 
         if (callbackOrSelector === false
-          || callbackOrSelector(event, event.jLightEventData) === false
-          || delegatedCallback === false) {
+          || delegatedCallback === false
+          || doPrevent
+          || callbackOrSelector(event, event.jLightEventData) === false) {
           preventEvent(event);
         }
       };
@@ -1499,33 +1514,39 @@ const attachListener = (
         }, options);
       });
     });
-  } else {
-    types.forEach((type) => {
-      elements.forEach((element) => {
-        const callback = (theEvent) => {
-          const event = theEvent;
-          const contains = isDocumentOrWindow || element.contains(event.target);
 
-          if (contains && event.target.matches(callbackOrSelector)) {
-            event.$target = jlightConstructor([event.target]);
-            event.$currentTarget = jLight([event.currentTarget]);
-
-            if (delegatedCallback === false
-              || delegatedCallback(event, event.jLightEventData) === false) {
-              preventEvent(event);
-            }
-          }
-
-          if (options.once) {
-            removeJLightElementEventData(element, type, delegatedCallback, callback);
-          }
-        };
-
-        addJLightElementEventData(element, type, delegatedCallback, callback);
-        element.addEventListener(type, callback, options);
-      });
-    });
+    return jLight(elements);
   }
+
+  elements.forEach((element) => {
+    const callback = (theEvent) => {
+      const event = theEvent;
+      const contains = isDocumentOrWindow || element.contains(event.target);
+
+      if (contains && event.target.matches(callbackOrSelector)) {
+        event.$target = jlightConstructor([event.target]);
+        event.$currentTarget = jLight([event.currentTarget]);
+
+        if (delegatedCallback === false
+          || doPrevent
+          || delegatedCallback(event, event.jLightEventData) === false) {
+          preventEvent(event);
+        }
+      }
+    };
+
+    types.forEach((type) => {
+      addJLightElementEventData(element, type, delegatedCallback, callback);
+
+      element.addEventListener(type, (event) => {
+        if (options.once) {
+          removeJLightElementEventData(element, type, callbackOrSelector, callback);
+        }
+
+        return callback(event);
+      }, options);
+    });
+  });
 
   return jLight(elements);
 };
@@ -2134,14 +2155,19 @@ const jLight = (elements) => ({
    * @function
    * @tutorial on
    * @param {string} eventNames Space separated list of event names
-   * @param {eventCallback} callbackOrSelector The function to execute when the event occurs
-   * or a selector to delegate events to children of the current collections elements
-   * @param {eventCallback|
+   * @param {eventCallback|boolean} callbackOrSelector The function to execute when the event occurs,
+   * a selector to delegate events to children of the current collections elements
+   * or a boolean to prevent the events default behavior, propagation and immediate propagation if set to false
+   * @param {eventCallback|boolean|
    *   {capture: boolean, once: boolean, passive: boolean, signal: AbortSignal, mozSystemGroup: boolean}
    * } [delegatedCallbackOrOptions]
-   * The callback to run when the event is delegated or the options to apply to the listener
-   * @param {{capture: boolean, once: boolean, passive: boolean, signal: AbortSignal, mozSystemGroup: boolean}} [options]
+   * The callback to run when the event is delegated, the options to apply to the listener
+   * or a boolean to prevent the events default behavior, propagation and immediate propagation if set to false
+   * @param {boolean|
+   *  {capture: boolean, once: boolean, passive: boolean, signal: AbortSignal, mozSystemGroup: boolean}
+   * } [options]
    * The options to apply to the listener
+   * or a boolean to prevent the events default behavior, propagation and immediate propagation if set to false
    * @returns {jLight} jLight collection
    */
   on: (eventNames, callbackOrSelector, delegatedCallbackOrOptions, options) => attachListener(
@@ -2157,16 +2183,21 @@ const jLight = (elements) => ({
    * Adds event handlers to elements fo one time execution.
    *
    * @function
-   * @tutorial on
+   * @tutorial once
    * @param {string} eventNames Space separated list of event names
-   * @param {eventCallback} callbackOrSelector The function to execute when the event occurs
-   * or a selector to delegate events to children of the current collections elements
-   * @param {eventCallback|
+   * @param {eventCallback|boolean} callbackOrSelector The function to execute when the event occurs,
+   * a selector to delegate events to children of the current collections elements
+   * or a boolean to prevent the events default behavior, propagation and immediate propagation if set to false
+   * @param {eventCallback|boolean|
    *   {capture: boolean, once: boolean, passive: boolean, signal: AbortSignal, mozSystemGroup: boolean}
    * } [delegatedCallbackOrOptions]
-   * The callback to run when the event is delegated or the options to apply to the listener
-   * @param {{capture: boolean, once: boolean, passive: boolean, signal: AbortSignal, mozSystemGroup: boolean}} [options]
+   * The callback to run when the event is delegated, the options to apply to the listener
+   * or a boolean to prevent the events default behavior, propagation and immediate propagation if set to false
+   * @param {boolean|
+   *  {capture: boolean, once: boolean, passive: boolean, signal: AbortSignal, mozSystemGroup: boolean}
+   * } [options]
    * The options to apply to the listener
+   * or a boolean to prevent the events default behavior, propagation and immediate propagation if set to false
    * @returns {jLight} jLight collection
    */
   once: (eventNames, callbackOrSelector, delegatedCallbackOrOptions, options = {}) => attachListener(
