@@ -1573,30 +1573,27 @@ const attachListener = (
 
   if (typeof callbackOrSelector === 'function' || callbackOrSelector === false) {
     elements.forEach((element) => {
-      const callback = (theEvent) => {
-        const event = theEvent;
-
-        event.$target = jlightConstructor([event.target]);
-        event.$currentTarget = jLight([event.currentTarget]);
-
-        if (callbackOrSelector === false
-          || delegatedCallback === false
-          || doPrevent
-          || callbackOrSelector(event, event.jLightEventData) === false) {
-          preventEvent(event);
-        }
-      };
-
       types.forEach((type) => {
-        addJLightElementEventData(element, type, callbackOrSelector, callback);
+        const callback = (theEvent) => {
+          const event = theEvent;
 
-        element.addEventListener(type, (event) => {
+          event.$target = jlightConstructor([event.target]);
+          event.$currentTarget = jLight([event.currentTarget]);
+
+          if (callbackOrSelector === false
+            || delegatedCallback === false
+            || doPrevent
+            || callbackOrSelector(event, event.jLightEventData) === false) {
+            preventEvent(event);
+          }
+
           if (options.once) {
             removeJLightElementEventData(element, type, callbackOrSelector, callback);
           }
+        };
 
-          return callback(event);
-        }, options);
+        addJLightElementEventData(element, type, callbackOrSelector, callback);
+        element.addEventListener(type, callback, options);
       });
     });
 
@@ -1604,32 +1601,29 @@ const attachListener = (
   }
 
   elements.forEach((element) => {
-    const callback = (theEvent) => {
-      const event = theEvent;
-      const contains = isDocumentOrWindow || element.contains(event.target);
-
-      if (contains && event.target.matches(callbackOrSelector)) {
-        event.$target = jlightConstructor([event.target]);
-        event.$currentTarget = jLight([event.currentTarget]);
-
-        if (delegatedCallback === false
-          || doPrevent
-          || delegatedCallback(event, event.jLightEventData) === false) {
-          preventEvent(event);
-        }
-      }
-    };
-
     types.forEach((type) => {
-      addJLightElementEventData(element, type, delegatedCallback, callback);
+      const callback = (theEvent) => {
+        const event = theEvent;
+        const contains = isDocumentOrWindow || element.contains(event.target);
 
-      element.addEventListener(type, (event) => {
-        if (options.once) {
-          removeJLightElementEventData(element, type, callbackOrSelector, callback);
+        if (contains && event.target.matches(callbackOrSelector)) {
+          event.$target = jlightConstructor([event.target]);
+          event.$currentTarget = jLight([event.currentTarget]);
+
+          if (delegatedCallback === false
+            || doPrevent
+            || delegatedCallback(event, event.jLightEventData) === false) {
+            preventEvent(event);
+          }
+
+          if (options.once) {
+            removeJLightElementEventData(element, type, callbackOrSelector, callback);
+          }
         }
+      };
 
-        return callback(event);
-      }, options);
+      addJLightElementEventData(element, type, delegatedCallback, callback);
+      element.addEventListener(type, callback, options);
     });
   });
 

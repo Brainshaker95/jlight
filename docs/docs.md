@@ -62,7 +62,7 @@
 <dd></dd>
 <dt><a href="#toggleVisibilityCallback">toggleVisibilityCallback</a> ⇒ <code><a href="#jLight">jLight</a></code></dt>
 <dd></dd>
-<dt><a href="#eventCallback">eventCallback</a> : <code>function</code></dt>
+<dt><a href="#eventCallback">eventCallback</a> ⇒ <code>void</code> | <code>boolean</code></dt>
 <dd></dd>
 <dt><a href="#onCallback">onCallback</a> ⇒ <code><a href="#jLight">jLight</a></code></dt>
 <dd></dd>
@@ -177,7 +177,11 @@
         * [.generateHash(string)](#module_Utility.generateHash) ⇒ <code>number</code>
         * [.isEmptyObject(object)](#module_Utility.isEmptyObject) ⇒ <code>boolean</code>
         * [.isSameObject(object1, object2)](#module_Utility.isSameObject) ⇒ <code>boolean</code>
+        * [.isSameJLight($elements1, $elements2)](#module_Utility.isSameJLight) ⇒ <code>boolean</code>
         * [.preventEvent(event)](#module_Utility.preventEvent) ⇒ <code>void</code>
+        * [.openFullscreen([$elements])](#module_Utility.openFullscreen) ⇒ <code>void</code>
+        * [.closeFullscreen()](#module_Utility.closeFullscreen) ⇒ <code>void</code>
+        * [.toggleFullscreen([$elements], [force])](#module_Utility.toggleFullscreen) ⇒ <code>void</code>
         * [.doEasing(duration, onStep, [callback])](#module_Utility.doEasing) ⇒ <code>void</code>
     * _inner_
         * [~is(propertyOrElements)](#module_Utility..is) ⇒ <code>boolean</code>
@@ -239,6 +243,19 @@ Checks if two objects are the same.
 | object1 | <code>object</code> | The object to compare |
 | object2 | <code>object</code> | The object to compare to |
 
+<a name="module_Utility.isSameJLight"></a>
+
+### Utility.isSameJLight($elements1, $elements2) ⇒ <code>boolean</code>
+Checks if two jLight collections are the same.
+
+**Kind**: static method of [<code>Utility</code>](#module_Utility)  
+**Returns**: <code>boolean</code> - If the jLight collections are the same  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| $elements1 | [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>HTMLElement</code> \| <code>HTMLCollection</code> \| <code>NodeList</code> | The elements to compare |
+| $elements2 | [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>HTMLElement</code> \| <code>HTMLCollection</code> \| <code>NodeList</code> | The elements to compare to |
+
 <a name="module_Utility.preventEvent"></a>
 
 ### Utility.preventEvent(event) ⇒ <code>void</code>
@@ -250,6 +267,38 @@ Prevents the events default beheavior, propagation and immediate propagation
 | Param | Type | Description |
 | --- | --- | --- |
 | event | <code>Event</code> | The event to prevent |
+
+<a name="module_Utility.openFullscreen"></a>
+
+### Utility.openFullscreen([$elements]) ⇒ <code>void</code>
+Opens fullscreen mode
+
+**Kind**: static method of [<code>Utility</code>](#module_Utility)  
+**Returns**: <code>void</code> - void  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [$elements] | [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>HTMLElement</code> \| <code>HTMLCollection</code> \| <code>NodeList</code> | The elements to open in fullscreen |
+
+<a name="module_Utility.closeFullscreen"></a>
+
+### Utility.closeFullscreen() ⇒ <code>void</code>
+Closes fullscreen mode
+
+**Kind**: static method of [<code>Utility</code>](#module_Utility)  
+**Returns**: <code>void</code> - void  
+<a name="module_Utility.toggleFullscreen"></a>
+
+### Utility.toggleFullscreen([$elements], [force]) ⇒ <code>void</code>
+Opens fullscreen mode
+
+**Kind**: static method of [<code>Utility</code>](#module_Utility)  
+**Returns**: <code>void</code> - void  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [$elements] | [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>HTMLElement</code> \| <code>HTMLCollection</code> \| <code>NodeList</code> | The elements to open in fullscreen |
+| [force] | <code>boolean</code> | Force whether to open or close fullscreen mode |
 
 <a name="module_Utility.doEasing"></a>
 
@@ -701,9 +750,9 @@ Adds event handlers to elements.
 | Param | Type | Description |
 | --- | --- | --- |
 | eventNames | <code>string</code> | Space separated list of event names |
-| callbackOrSelector | [<code>eventCallback</code>](#eventCallback) | The function to execute when the event occurs or a selector to delegate events to children of the current collections elements |
-| [delegatedCallbackOrOptions] | [<code>eventCallback</code>](#eventCallback) \| <code>Object</code> | The callback to run when the event is delegated or the options to apply to the listener |
-| [options] | <code>Object</code> | The options to apply to the listener |
+| callbackOrSelector | [<code>eventCallback</code>](#eventCallback) \| <code>boolean</code> | The function to execute when the event occurs, a selector to delegate events to children of the current collections elements or a boolean to prevent the events default behavior, propagation and immediate propagation if set to false |
+| [delegatedCallbackOrOptions] | [<code>eventCallback</code>](#eventCallback) \| <code>boolean</code> \| <code>Object</code> | The callback to run when the event is delegated, the options to apply to the listener or a boolean to prevent the events default behavior, propagation and immediate propagation if set to false |
+| [options] | <code>boolean</code> \| <code>Object</code> | The options to apply to the listener or a boolean to prevent the events default behavior, propagation and immediate propagation if set to false |
 
 <a name="module_Event..once"></a>
 
@@ -716,9 +765,9 @@ Adds event handlers to elements fo one time execution.
 | Param | Type | Description |
 | --- | --- | --- |
 | eventNames | <code>string</code> | Space separated list of event names |
-| callbackOrSelector | [<code>eventCallback</code>](#eventCallback) | The function to execute when the event occurs or a selector to delegate events to children of the current collections elements |
-| [delegatedCallbackOrOptions] | [<code>eventCallback</code>](#eventCallback) \| <code>Object</code> | The callback to run when the event is delegated or the options to apply to the listener |
-| [options] | <code>Object</code> | The options to apply to the listener |
+| callbackOrSelector | [<code>eventCallback</code>](#eventCallback) \| <code>boolean</code> | The function to execute when the event occurs, a selector to delegate events to children of the current collections elements or a boolean to prevent the events default behavior, propagation and immediate propagation if set to false |
+| [delegatedCallbackOrOptions] | [<code>eventCallback</code>](#eventCallback) \| <code>boolean</code> \| <code>Object</code> | The callback to run when the event is delegated, the options to apply to the listener or a boolean to prevent the events default behavior, propagation and immediate propagation if set to false |
+| [options] | <code>boolean</code> \| <code>Object</code> | The options to apply to the listener or a boolean to prevent the events default behavior, propagation and immediate propagation if set to false |
 
 <a name="module_Event..off"></a>
 
@@ -1735,7 +1784,11 @@ Toggles the display state of the collections elements by sliding.
         * [.generateHash(string)](#module_Utility.generateHash) ⇒ <code>number</code>
         * [.isEmptyObject(object)](#module_Utility.isEmptyObject) ⇒ <code>boolean</code>
         * [.isSameObject(object1, object2)](#module_Utility.isSameObject) ⇒ <code>boolean</code>
+        * [.isSameJLight($elements1, $elements2)](#module_Utility.isSameJLight) ⇒ <code>boolean</code>
         * [.preventEvent(event)](#module_Utility.preventEvent) ⇒ <code>void</code>
+        * [.openFullscreen([$elements])](#module_Utility.openFullscreen) ⇒ <code>void</code>
+        * [.closeFullscreen()](#module_Utility.closeFullscreen) ⇒ <code>void</code>
+        * [.toggleFullscreen([$elements], [force])](#module_Utility.toggleFullscreen) ⇒ <code>void</code>
         * [.doEasing(duration, onStep, [callback])](#module_Utility.doEasing) ⇒ <code>void</code>
     * _inner_
         * [~is(propertyOrElements)](#module_Utility..is) ⇒ <code>boolean</code>
@@ -1797,6 +1850,19 @@ Checks if two objects are the same.
 | object1 | <code>object</code> | The object to compare |
 | object2 | <code>object</code> | The object to compare to |
 
+<a name="module_Utility.isSameJLight"></a>
+
+### Utility.isSameJLight($elements1, $elements2) ⇒ <code>boolean</code>
+Checks if two jLight collections are the same.
+
+**Kind**: static method of [<code>Utility</code>](#module_Utility)  
+**Returns**: <code>boolean</code> - If the jLight collections are the same  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| $elements1 | [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>HTMLElement</code> \| <code>HTMLCollection</code> \| <code>NodeList</code> | The elements to compare |
+| $elements2 | [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>HTMLElement</code> \| <code>HTMLCollection</code> \| <code>NodeList</code> | The elements to compare to |
+
 <a name="module_Utility.preventEvent"></a>
 
 ### Utility.preventEvent(event) ⇒ <code>void</code>
@@ -1808,6 +1874,38 @@ Prevents the events default beheavior, propagation and immediate propagation
 | Param | Type | Description |
 | --- | --- | --- |
 | event | <code>Event</code> | The event to prevent |
+
+<a name="module_Utility.openFullscreen"></a>
+
+### Utility.openFullscreen([$elements]) ⇒ <code>void</code>
+Opens fullscreen mode
+
+**Kind**: static method of [<code>Utility</code>](#module_Utility)  
+**Returns**: <code>void</code> - void  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [$elements] | [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>HTMLElement</code> \| <code>HTMLCollection</code> \| <code>NodeList</code> | The elements to open in fullscreen |
+
+<a name="module_Utility.closeFullscreen"></a>
+
+### Utility.closeFullscreen() ⇒ <code>void</code>
+Closes fullscreen mode
+
+**Kind**: static method of [<code>Utility</code>](#module_Utility)  
+**Returns**: <code>void</code> - void  
+<a name="module_Utility.toggleFullscreen"></a>
+
+### Utility.toggleFullscreen([$elements], [force]) ⇒ <code>void</code>
+Opens fullscreen mode
+
+**Kind**: static method of [<code>Utility</code>](#module_Utility)  
+**Returns**: <code>void</code> - void  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [$elements] | [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>HTMLElement</code> \| <code>HTMLCollection</code> \| <code>NodeList</code> | The elements to open in fullscreen |
+| [force] | <code>boolean</code> | Force whether to open or close fullscreen mode |
 
 <a name="module_Utility.doEasing"></a>
 
@@ -2145,8 +2243,10 @@ jLights default export
 
 <a name="eventCallback"></a>
 
-## eventCallback : <code>function</code>
+## eventCallback ⇒ <code>void</code> \| <code>boolean</code>
 **Kind**: global typedef  
+**Returns**: <code>void</code> \| <code>boolean</code> - If the callback returns false the events default behavior,
+propagation and immediate propagation will be prevented.  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -2161,9 +2261,9 @@ jLights default export
 | Param | Type | Description |
 | --- | --- | --- |
 | eventNames | <code>string</code> | Space separated list of event names |
-| callbackOrSelector | [<code>eventCallback</code>](#eventCallback) | The function to execute when the event occurs or a selector to delegate events to children of the current collections elements |
-| [delegatedCallbackOrOptions] | [<code>eventCallback</code>](#eventCallback) \| <code>Object</code> | The callback to run when the event is delegated or the options to apply to the listener |
-| [options] | <code>Object</code> | The options to apply to the listener |
+| callbackOrSelector | [<code>eventCallback</code>](#eventCallback) \| <code>string</code> \| <code>boolean</code> | The function to execute when the event occurs, a selector to delegate events to children of the current collections elements or a boolean to prevent the events default behavior, propagation and immediate propagation if set to false |
+| [delegatedCallbackOrOptions] | [<code>eventCallback</code>](#eventCallback) \| <code>boolean</code> \| <code>Object</code> | The callback to run when the event is delegated, the options to apply to the listener or a boolean to prevent the events default behavior, propagation and immediate propagation if set to false |
+| [options] | <code>boolean</code> \| <code>Object</code> | The options to apply to the listener or a boolean to prevent the events default behavior, propagation and immediate propagation if set to false |
 
 <a name="offCallback"></a>
 
