@@ -782,6 +782,69 @@
 const jLightGlobalElements = [];
 const jLightGlobalData = [];
 
+const initalizeJLightElementData = (element, selector) => {
+  if (jLightGlobalElements.indexOf(element) > -1) {
+    return;
+  }
+
+  jLightGlobalElements.push(element);
+
+  jLightGlobalData[jLightGlobalElements.length - 1] = {
+    jLightInternal: { selector },
+  };
+};
+
+const createElementsFromString = (string) => {
+  const div = document.createElement('div');
+
+  div.innerHTML = string.trim();
+
+  const { children } = div;
+
+  [...children].forEach((theChild) => {
+    let child = theChild;
+
+    if (!(child instanceof HTMLElement)) {
+      const fallbackDiv = document.createElement('div');
+
+      fallbackDiv.textContent = child.textContent;
+      child = fallbackDiv;
+    }
+
+    initalizeJLightElementData(child, child.tagName.toLowerCase());
+  });
+
+  return children;
+};
+
+const getElementsFromArgument = (theArgument) => {
+  let argument = theArgument;
+
+  if (!argument) {
+    argument = {};
+  }
+
+  if (argument.elements) {
+    return argument.elements;
+  }
+
+  if (typeof argument === 'string') {
+    return argument.match(/<(.|\n)+>/)
+      ? [...createElementsFromString(argument)]
+      : [...document.querySelectorAll(argument)];
+  }
+
+  if (argument instanceof HTMLElement) {
+    return [argument];
+  }
+
+  if (argument instanceof HTMLCollection || argument instanceof NodeList) {
+    return [...argument];
+  }
+
+  return [];
+};
+
 /**
  * @module Utility
  * @tutorial tut-utility
@@ -854,6 +917,26 @@ const isSameObject = (object1, object2) => object1
   && Object.is(object1, object2);
 
 /**
+ * Checks if two jLight collections are the same.
+ *
+ * @static
+ * @function
+ * @tutorial isSameJLight
+ * @param {jLight|string|HTMLElement|HTMLCollection|NodeList} $elements1
+ * The elements to compare
+ * @param {jLight|string|HTMLElement|HTMLCollection|NodeList} $elements2
+ * The elements to compare to
+ * @returns {boolean} If the jLight collections are the same
+ */
+const isSameJLight = ($elements1, $elements2) => {
+  const elements1 = getElementsFromArgument($elements1);
+  const elements2 = getElementsFromArgument($elements2);
+
+  return elements1.length === elements2.length
+    && elements1.every((element, index) => element === elements2[index]);
+};
+
+/**
  * Prevents the events default beheavior, propagation and immediate propagation
  *
  * @static
@@ -866,6 +949,65 @@ const preventEvent = (event) => {
   event.preventDefault();
   event.stopPropagation();
   event.stopImmediatePropagation();
+};
+
+/**
+ * Opens fullscreen mode
+ *
+ * @static
+ * @function
+ * @tutorial openFullscreen
+ * @param {jLight|string|HTMLElement|HTMLCollection|NodeList} [$elements]
+ * The elements to open in fullscreen
+ * @returns {void} void
+ */
+const openFullscreen = ($elements) => {
+  const elements = getElementsFromArgument($elements);
+  const element = elements[0] ? elements[0] : document.documentElement;
+
+  element.requestFullScreen = element.requestFullScreen || element.webkitRequestFullScreen
+  || element.mozRequestFullScreen || noop;
+
+  element.requestFullScreen();
+};
+
+/**
+ * Closes fullscreen mode
+ *
+ * @static
+ * @function
+ * @tutorial closeFullscreen
+ * @returns {void} void
+ */
+const closeFullscreen = () => {
+  document.cancelFullScreen = document.cancelFullScreen || document.webkitCancelFullScreen
+    || document.mozCancelFullScreen || noop;
+
+  document.cancelFullScreen();
+};
+
+/**
+ * Opens fullscreen mode
+ *
+ * @static
+ * @function
+ * @tutorial toggleFullscreen
+ * @param {jLight|string|HTMLElement|HTMLCollection|NodeList} [$elements]
+ * The elements to open in fullscreen
+ * @param {boolean} [force] Force whether to open or close fullscreen mode
+ * @returns {void} void
+ */
+const toggleFullscreen = ($elements, force) => {
+  const forceDefined = force !== undefined;
+  const forceOpen = forceDefined && force;
+  const forceClose = forceDefined && !force;
+
+  if (!forceOpen
+    && (forceClose || document.webkitIsFullScreen || document.mozFullScreen)) {
+    closeFullscreen();
+  } else {
+    openFullscreen($elements);
+  }
 };
 
 /**
@@ -1211,18 +1353,6 @@ const post = (url, opts = {}) => ajax({
   ...opts,
 });
 
-const initalizeJLightElementData = (element, selector) => {
-  if (jLightGlobalElements.indexOf(element) > -1) {
-    return;
-  }
-
-  jLightGlobalElements.push(element);
-
-  jLightGlobalData[jLightGlobalElements.length - 1] = {
-    jLightInternal: { selector },
-  };
-};
-
 const removeJLightElementData = (element) => {
   const elementIndex = jLightGlobalElements.indexOf(element);
 
@@ -1305,51 +1435,6 @@ const removeJLightElementEventData = (element, type, callback, realCallback) => 
         || event.realCallback !== realCallback),
     },
   });
-};
-
-const createElementsFromString = (string) => {
-  const div = document.createElement('div');
-
-  div.innerHTML = string.trim();
-
-  const { children } = div;
-
-  [...children].forEach((theChild) => {
-    let child = theChild;
-
-    if (!(child instanceof HTMLElement)) {
-      const fallbackDiv = document.createElement('div');
-
-      fallbackDiv.textContent = child.textContent;
-      child = fallbackDiv;
-    }
-
-    initalizeJLightElementData(child, child.tagName.toLowerCase());
-  });
-
-  return children;
-};
-
-const getElementsFromArgument = (argument) => {
-  if (argument.elements) {
-    return argument.elements;
-  }
-
-  if (typeof argument === 'string') {
-    return argument.match(/<(.|\n)+>/)
-      ? [...createElementsFromString(argument)]
-      : [...document.querySelectorAll(argument)];
-  }
-
-  if (argument instanceof HTMLElement) {
-    return [argument];
-  }
-
-  if (argument instanceof HTMLCollection || argument instanceof NodeList) {
-    return [...argument];
-  }
-
-  return [];
 };
 
 const getElementStyle = (element, property) => {
@@ -4416,7 +4501,11 @@ $.uniqid = uniqid;
 $.generateHash = generateHash;
 $.isEmptyObject = isEmptyObject;
 $.isSameObject = isSameObject;
+$.isSameJLight = isSameJLight;
 $.preventEvent = preventEvent;
+$.openFullscreen = openFullscreen;
+$.closeFullscreen = closeFullscreen;
+$.toggleFullscreen = toggleFullscreen;
 $.doEasing = doEasing;
 $.lcfirst = lcfirst;
 $.ucfirst = ucfirst;
