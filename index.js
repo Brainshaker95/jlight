@@ -431,7 +431,9 @@
 
 /**
  * @callback attrCallback
- * @param {string|Object.<string, *>} [attribute] The attribute or attributes to set or get
+ * @param {string|Object.<string, *>|boolean} [attribute]
+ * The attribute or attributes to set or get
+ * or wheter to convert the resulting objects keys into camel case
  * @param {*} [value] The value to set the attribute to
  * @returns {jLight|Object.<string, string|true>|boolean}
  * jLight collection, the attributes value, an object of each attribute on the
@@ -1064,7 +1066,7 @@ const lcfirst = (string) => string.charAt(0).toLowerCase() + string.slice(1);
 const ucfirst = (string) => string.charAt(0).toUpperCase() + string.slice(1);
 
 /**
- * Converts a string from camel case to kebap case.
+ * Converts a string from camel case to kebab case.
  *
  * @static
  * @function
@@ -1090,7 +1092,7 @@ const camelToSnake = (string) => (typeof string === 'string'
   : '');
 
 /**
- * Converts a string from kebap case to camel case.
+ * Converts a string from kebab case to camel case.
  *
  * @static
  * @function
@@ -1103,7 +1105,7 @@ const kebabToCamel = (string) => (typeof string === 'string'
   : '');
 
 /**
- * Converts a string from kebap case to snake case.
+ * Converts a string from kebab case to snake case.
  *
  * @static
  * @function
@@ -1129,7 +1131,7 @@ const snakeToCamel = (string) => (typeof string === 'string'
   : '');
 
 /**
- * Converts a string from snake case to kebap case.
+ * Converts a string from snake case to kebab case.
  *
  * @static
  * @function
@@ -2438,7 +2440,9 @@ const jLight = (elements) => ({
    *
    * @function
    * @tutorial attr
-   * @param {string|Object.<string, *>} [attribute] The attribute or attributes to set or get
+   * @param {string|Object.<string, *>|boolean} [attribute]
+   * The attribute or attributes to set or get
+   * or wheter to convert the resulting objects keys into camel case
    * @param {*} [value] The value to set the attribute to
    * @returns {jLight|Object.<string, string|true>|boolean}
    * jLight collection, the attributes value, an object of each attribute on the
@@ -2456,13 +2460,22 @@ const jLight = (elements) => ({
       return jLight(elements);
     }
 
-    if (attribute === undefined) {
+    const attributeDefined = attribute !== undefined;
+    const isBoolean = typeof attribute === 'boolean';
+
+    if (!attributeDefined || isBoolean) {
       const attrs = {};
 
       elements.forEach((element) => {
         [...element.attributes].forEach((attr) => {
-          if (!attrs[attr]) {
-            attrs[attr.name] = attr.value || true;
+          let { name } = attr;
+
+          if (!attributeDefined || (attributeDefined && !attribute)) {
+            name = kebabToCamel(name);
+          }
+
+          if (!attrs[name]) {
+            attrs[name] = attr.value || true;
           }
         });
       });
