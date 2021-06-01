@@ -74,7 +74,7 @@
 <dd></dd>
 <dt><a href="#propCallback">propCallback</a> ⇒ <code><a href="#jLight">jLight</a></code> | <code>boolean</code></dt>
 <dd></dd>
-<dt><a href="#attrCallback">attrCallback</a> ⇒ <code><a href="#jLight">jLight</a></code> | <code>Object.&lt;string, string&gt;</code> | <code>boolean</code></dt>
+<dt><a href="#attrCallback">attrCallback</a> ⇒ <code><a href="#jLight">jLight</a></code> | <code>Object.&lt;string, (string|true)&gt;</code> | <code>boolean</code></dt>
 <dd></dd>
 <dt><a href="#removeAttrCallback">removeAttrCallback</a> ⇒ <code><a href="#jLight">jLight</a></code></dt>
 <dd></dd>
@@ -160,6 +160,8 @@
 <dd></dd>
 <dt><a href="#whenCallback">whenCallback</a> ⇒ <code><a href="#jLight">jLight</a></code></dt>
 <dd></dd>
+<dt><a href="#isSameJLightCallback">isSameJLightCallback</a> ⇒ <code>boolean</code></dt>
+<dd></dd>
 <dt><a href="#stringCallback">stringCallback</a> ⇒ <code>string</code></dt>
 <dd></dd>
 <dt><a href="#stringObjectCallback">stringObjectCallback</a> ⇒ <code>Object.&lt;string, string&gt;</code></dt>
@@ -177,7 +179,6 @@
         * [.generateHash(string)](#module_Utility.generateHash) ⇒ <code>number</code>
         * [.isEmptyObject(object)](#module_Utility.isEmptyObject) ⇒ <code>boolean</code>
         * [.isSameObject(object1, object2)](#module_Utility.isSameObject) ⇒ <code>boolean</code>
-        * [.isSameJLight($elements1, $elements2)](#module_Utility.isSameJLight) ⇒ <code>boolean</code>
         * [.preventEvent(event)](#module_Utility.preventEvent) ⇒ <code>void</code>
         * [.openFullscreen([$elements])](#module_Utility.openFullscreen) ⇒ <code>void</code>
         * [.closeFullscreen()](#module_Utility.closeFullscreen) ⇒ <code>void</code>
@@ -189,6 +190,7 @@
         * [~inView([offsetOrCallback], [callbackOrOptions])](#module_Utility..inView) ⇒ [<code>jLight</code>](#jLight) \| <code>boolean</code>
         * [~delay([delay])](#module_Utility..delay) ⇒ <code>Promise</code>
         * [~when(condition, callback, [...args])](#module_Utility..when) ⇒ [<code>jLight</code>](#jLight)
+        * [~isSameJLight($elements)](#module_Utility..isSameJLight) ⇒ <code>boolean</code>
         * [~serialize()](#module_Utility..serialize) ⇒ <code>string</code>
         * [~serializeJson()](#module_Utility..serializeJson) ⇒ <code>Object.&lt;string, string&gt;</code>
 
@@ -242,19 +244,6 @@ Checks if two objects are the same.
 | --- | --- | --- |
 | object1 | <code>object</code> | The object to compare |
 | object2 | <code>object</code> | The object to compare to |
-
-<a name="module_Utility.isSameJLight"></a>
-
-### Utility.isSameJLight($elements1, $elements2) ⇒ <code>boolean</code>
-Checks if two jLight collections are the same.
-
-**Kind**: static method of [<code>Utility</code>](#module_Utility)  
-**Returns**: <code>boolean</code> - If the jLight collections are the same  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| $elements1 | [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>HTMLElement</code> \| <code>HTMLCollection</code> \| <code>NodeList</code> | The elements to compare |
-| $elements2 | [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>HTMLElement</code> \| <code>HTMLCollection</code> \| <code>NodeList</code> | The elements to compare to |
 
 <a name="module_Utility.preventEvent"></a>
 
@@ -379,6 +368,18 @@ Calls the supplied function with the supplied arguments if the given condition i
 | callback | <code>string</code> \| <code>function</code> | The function to run when the condition is met. If a string is provided it should be a valid jLight function name |
 | [...args] | <code>\*</code> | The arguments to supply to the given jLight function |
 
+<a name="module_Utility..isSameJLight"></a>
+
+### Utility~isSameJLight($elements) ⇒ <code>boolean</code>
+Checks if two jLight collections are the same.
+
+**Kind**: inner method of [<code>Utility</code>](#module_Utility)  
+**Returns**: <code>boolean</code> - If the jLight collections are the same  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| $elements | [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>HTMLElement</code> \| <code>HTMLCollection</code> \| <code>NodeList</code> | The elements to compare to |
+
 <a name="module_Utility..serialize"></a>
 
 ### Utility~serialize() ⇒ <code>string</code>
@@ -434,7 +435,7 @@ Converts the first character of a string to uppercase.
 <a name="module_String.camelToKebab"></a>
 
 ### String.camelToKebab(string) ⇒ <code>string</code>
-Converts a string from camel case to kebap case.
+Converts a string from camel case to kebab case.
 
 **Kind**: static method of [<code>String</code>](#module_String)  
 **Returns**: <code>string</code> - The converted string  
@@ -458,7 +459,7 @@ Converts a string from camel case to snake case.
 <a name="module_String.kebabToCamel"></a>
 
 ### String.kebabToCamel(string) ⇒ <code>string</code>
-Converts a string from kebap case to camel case.
+Converts a string from kebab case to camel case.
 
 **Kind**: static method of [<code>String</code>](#module_String)  
 **Returns**: <code>string</code> - The converted string  
@@ -470,7 +471,7 @@ Converts a string from kebap case to camel case.
 <a name="module_String.kebabToSnake"></a>
 
 ### String.kebabToSnake(string) ⇒ <code>string</code>
-Converts a string from kebap case to snake case.
+Converts a string from kebab case to snake case.
 
 **Kind**: static method of [<code>String</code>](#module_String)  
 **Returns**: <code>string</code> - The converted string  
@@ -494,7 +495,7 @@ Converts a string from snake case to camel case.
 <a name="module_String.snakeToKebab"></a>
 
 ### String.snakeToKebab(string) ⇒ <code>string</code>
-Converts a string from snake case to kebap case.
+Converts a string from snake case to kebab case.
 
 **Kind**: static method of [<code>String</code>](#module_String)  
 **Returns**: <code>string</code> - The converted string  
@@ -526,7 +527,7 @@ Handles asynchronous HTTP requests.
 | opts.url | <code>string</code> | The url to send the request to |
 | [opts.method] | <code>string</code> | The HTTP method to use (default: 'POST') |
 | [opts.data] | <code>Object.&lt;string, \*&gt;</code> \| <code>string</code> | The data to send |
-| [opts.headers] | <code>Object.&lt;string, string&gt;</code> | The headers to send |
+| [opts.headers] | <code>Object.&lt;string, (string\|false)&gt;</code> | The headers to send |
 | [opts.processData] | <code>boolean</code> | Whether to process the data or not |
 | [opts.crossDomain] | <code>boolean</code> | Whether to send the request cross domain or not |
 | [opts.async] | <code>boolean</code> | Whether to send the request asynchronously or not |
@@ -552,7 +553,7 @@ Handles asynchronous GET requests.
 | url | <code>string</code> | The url for the request |
 | opts | <code>object</code> | The options for the request |
 | [opts.data] | <code>Object.&lt;string, \*&gt;</code> \| <code>string</code> | The data to send |
-| [opts.headers] | <code>Object.&lt;string, string&gt;</code> | The headers to send |
+| [opts.headers] | <code>Object.&lt;string, (string\|false)&gt;</code> | The headers to send |
 | [opts.processData] | <code>boolean</code> | Whether to process the data or not |
 | [opts.crossDomain] | <code>boolean</code> | Whether to send the request cross domain or not |
 | [opts.async] | <code>boolean</code> | Whether to send the request asynchronously or not |
@@ -578,7 +579,7 @@ Handles asynchronous POST requests.
 | url | <code>string</code> | The url for the request |
 | opts | <code>object</code> | The options for the request |
 | [opts.data] | <code>Object.&lt;string, \*&gt;</code> \| <code>string</code> | The data to send |
-| [opts.headers] | <code>Object.&lt;string, string&gt;</code> | The headers to send |
+| [opts.headers] | <code>Object.&lt;string, (string\|false)&gt;</code> | The headers to send |
 | [opts.processData] | <code>boolean</code> | Whether to process the data or not |
 | [opts.crossDomain] | <code>boolean</code> | Whether to send the request cross domain or not |
 | [opts.async] | <code>boolean</code> | Whether to send the request asynchronously or not |
@@ -831,7 +832,7 @@ Triggers events on the collections elements.
 
 * [ElementData](#module_ElementData)
     * [~prop(property, [state])](#module_ElementData..prop) ⇒ [<code>jLight</code>](#jLight) \| <code>boolean</code>
-    * [~attr([attribute], [value])](#module_ElementData..attr) ⇒ [<code>jLight</code>](#jLight) \| <code>Object.&lt;string, string&gt;</code> \| <code>boolean</code>
+    * [~attr([attribute], [value])](#module_ElementData..attr) ⇒ [<code>jLight</code>](#jLight) \| <code>Object.&lt;string, (string\|true)&gt;</code> \| <code>boolean</code>
     * [~removeAttr(attribute)](#module_ElementData..removeAttr) ⇒ [<code>jLight</code>](#jLight)
     * [~text([text])](#module_ElementData..text) ⇒ [<code>jLight</code>](#jLight) \| <code>string</code>
     * [~html([html])](#module_ElementData..html) ⇒ [<code>jLight</code>](#jLight) \| <code>string</code>
@@ -853,17 +854,17 @@ Sets a property of the collections elements or gets its value.
 
 <a name="module_ElementData..attr"></a>
 
-### ElementData~attr([attribute], [value]) ⇒ [<code>jLight</code>](#jLight) \| <code>Object.&lt;string, string&gt;</code> \| <code>boolean</code>
+### ElementData~attr([attribute], [value]) ⇒ [<code>jLight</code>](#jLight) \| <code>Object.&lt;string, (string\|true)&gt;</code> \| <code>boolean</code>
 Sets an attribute or attributes to the collections elements or gets its value or values.
 
 **Kind**: inner method of [<code>ElementData</code>](#module_ElementData)  
-**Returns**: [<code>jLight</code>](#jLight) \| <code>Object.&lt;string, string&gt;</code> \| <code>boolean</code> - jLight collection, the attributes value, an object of each attribute on the
+**Returns**: [<code>jLight</code>](#jLight) \| <code>Object.&lt;string, (string\|true)&gt;</code> \| <code>boolean</code> - jLight collection, the attributes value, an object of each attribute on the
 collections elements or if the attribute whether present on at least one of
 the collections elements  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [attribute] | <code>string</code> \| <code>Object.&lt;string, \*&gt;</code> | The attribute or attributes to set or get |
+| [attribute] | <code>string</code> \| <code>Object.&lt;string, \*&gt;</code> \| <code>boolean</code> | The attribute or attributes to set or get or wheter to convert the resulting objects keys into camel case |
 | [value] | <code>\*</code> | The value to set the attribute to |
 
 <a name="module_ElementData..removeAttr"></a>
@@ -876,7 +877,7 @@ Removes the supplied attributes from the collections elements.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| attribute | <code>string</code> \| <code>Array.&lt;string&gt;</code> | The attribute or attributes to remove |
+| attribute | <code>string</code> | Space sepearated attributes to remove |
 
 <a name="module_ElementData..text"></a>
 
@@ -1279,7 +1280,7 @@ Gets a filtered jLight collection based on the input.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| callbackOrSelector | <code>string</code> \| [<code>iteratorCallback</code>](#iteratorCallback) | The selector to filter the collection by or a custom function to decide which elements to filter out |
+| callbackOrSelector | <code>string</code> \| [<code>iteratorCallback</code>](#iteratorCallback) \| [<code>iteratorBooleanCallback</code>](#iteratorBooleanCallback) | The selector to filter the collection by or a custom function to decide which elements to filter out |
 
 <a name="module_ArrayLike..forEach"></a>
 
@@ -1654,7 +1655,7 @@ Animates the given properties to the given values on the collections elements.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [properties] | <code>Object.&lt;string, string&gt;</code> | The css properties and values to animate |
+| [properties] | <code>Object.&lt;string, (string\|number)&gt;</code> | The css properties and values to animate |
 | [duration] | <code>number</code> | The duration for the animation in ms (default: 300) |
 | [callback] | <code>function</code> | The function to run after the animation is complete (default: noop) |
 | [easing] | <code>string</code> | Which type of css easing to use for the animation (default: 'ease') |
@@ -1784,7 +1785,6 @@ Toggles the display state of the collections elements by sliding.
         * [.generateHash(string)](#module_Utility.generateHash) ⇒ <code>number</code>
         * [.isEmptyObject(object)](#module_Utility.isEmptyObject) ⇒ <code>boolean</code>
         * [.isSameObject(object1, object2)](#module_Utility.isSameObject) ⇒ <code>boolean</code>
-        * [.isSameJLight($elements1, $elements2)](#module_Utility.isSameJLight) ⇒ <code>boolean</code>
         * [.preventEvent(event)](#module_Utility.preventEvent) ⇒ <code>void</code>
         * [.openFullscreen([$elements])](#module_Utility.openFullscreen) ⇒ <code>void</code>
         * [.closeFullscreen()](#module_Utility.closeFullscreen) ⇒ <code>void</code>
@@ -1796,6 +1796,7 @@ Toggles the display state of the collections elements by sliding.
         * [~inView([offsetOrCallback], [callbackOrOptions])](#module_Utility..inView) ⇒ [<code>jLight</code>](#jLight) \| <code>boolean</code>
         * [~delay([delay])](#module_Utility..delay) ⇒ <code>Promise</code>
         * [~when(condition, callback, [...args])](#module_Utility..when) ⇒ [<code>jLight</code>](#jLight)
+        * [~isSameJLight($elements)](#module_Utility..isSameJLight) ⇒ <code>boolean</code>
         * [~serialize()](#module_Utility..serialize) ⇒ <code>string</code>
         * [~serializeJson()](#module_Utility..serializeJson) ⇒ <code>Object.&lt;string, string&gt;</code>
 
@@ -1849,19 +1850,6 @@ Checks if two objects are the same.
 | --- | --- | --- |
 | object1 | <code>object</code> | The object to compare |
 | object2 | <code>object</code> | The object to compare to |
-
-<a name="module_Utility.isSameJLight"></a>
-
-### Utility.isSameJLight($elements1, $elements2) ⇒ <code>boolean</code>
-Checks if two jLight collections are the same.
-
-**Kind**: static method of [<code>Utility</code>](#module_Utility)  
-**Returns**: <code>boolean</code> - If the jLight collections are the same  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| $elements1 | [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>HTMLElement</code> \| <code>HTMLCollection</code> \| <code>NodeList</code> | The elements to compare |
-| $elements2 | [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>HTMLElement</code> \| <code>HTMLCollection</code> \| <code>NodeList</code> | The elements to compare to |
 
 <a name="module_Utility.preventEvent"></a>
 
@@ -1985,6 +1973,18 @@ Calls the supplied function with the supplied arguments if the given condition i
 | condition | <code>boolean</code> \| <code>function</code> | The condition to check for. If a function is supplied its return value will be used for checking |
 | callback | <code>string</code> \| <code>function</code> | The function to run when the condition is met. If a string is provided it should be a valid jLight function name |
 | [...args] | <code>\*</code> | The arguments to supply to the given jLight function |
+
+<a name="module_Utility..isSameJLight"></a>
+
+### Utility~isSameJLight($elements) ⇒ <code>boolean</code>
+Checks if two jLight collections are the same.
+
+**Kind**: inner method of [<code>Utility</code>](#module_Utility)  
+**Returns**: <code>boolean</code> - If the jLight collections are the same  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| $elements | [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>HTMLElement</code> \| <code>HTMLCollection</code> \| <code>NodeList</code> | The elements to compare to |
 
 <a name="module_Utility..serialize"></a>
 
@@ -2138,6 +2138,7 @@ jLights default export
 | inView | [<code>inViewCallback</code>](#inViewCallback) | Checks if the collections first element is in view or runs a function if that is the case. |
 | delay | [<code>delayCallback</code>](#delayCallback) | Delays code execution. |
 | when | [<code>whenCallback</code>](#whenCallback) | Calls the supplied function with the supplied arguments if the given condition is met. |
+| isSameJLight | [<code>isSameJLightCallback</code>](#isSameJLightCallback) | Checks if two jLight collections are the same. |
 | serialize | [<code>stringCallback</code>](#stringCallback) | Serializes the collections elements values to a URL encoded string. |
 | serializeJson | [<code>stringObjectCallback</code>](#stringObjectCallback) | Serializes the collections elements values to a JSON object. |
 
@@ -2311,15 +2312,15 @@ propagation and immediate propagation will be prevented.
 
 <a name="attrCallback"></a>
 
-## attrCallback ⇒ [<code>jLight</code>](#jLight) \| <code>Object.&lt;string, string&gt;</code> \| <code>boolean</code>
+## attrCallback ⇒ [<code>jLight</code>](#jLight) \| <code>Object.&lt;string, (string\|true)&gt;</code> \| <code>boolean</code>
 **Kind**: global typedef  
-**Returns**: [<code>jLight</code>](#jLight) \| <code>Object.&lt;string, string&gt;</code> \| <code>boolean</code> - jLight collection, the attributes value, an object of each attribute on the
+**Returns**: [<code>jLight</code>](#jLight) \| <code>Object.&lt;string, (string\|true)&gt;</code> \| <code>boolean</code> - jLight collection, the attributes value, an object of each attribute on the
 collections elements or if the attribute whether present on at least one of
 the collections elements  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [attribute] | <code>string</code> \| <code>Object.&lt;string, \*&gt;</code> | The attribute or attributes to set or get |
+| [attribute] | <code>string</code> \| <code>Object.&lt;string, \*&gt;</code> \| <code>boolean</code> | The attribute or attributes to set or get or wheter to convert the resulting objects keys into camel case |
 | [value] | <code>\*</code> | The value to set the attribute to |
 
 <a name="removeAttrCallback"></a>
@@ -2330,7 +2331,7 @@ the collections elements
 
 | Param | Type | Description |
 | --- | --- | --- |
-| attribute | <code>string</code> \| <code>Array.&lt;string&gt;</code> | The attribute or attributes to remove |
+| attribute | <code>string</code> | Space sepearated attributes to remove |
 
 <a name="iteratorCallback"></a>
 
@@ -2453,7 +2454,7 @@ the collections elements
 
 | Param | Type | Description |
 | --- | --- | --- |
-| callbackOrSelector | <code>string</code> \| [<code>iteratorCallback</code>](#iteratorCallback) | The selector to filter the collection by or a custom function to decide which elements to filter out |
+| callbackOrSelector | <code>string</code> \| [<code>iteratorCallback</code>](#iteratorCallback) \| [<code>iteratorBooleanCallback</code>](#iteratorBooleanCallback) | The selector to filter the collection by or a custom function to decide which elements to filter out |
 
 <a name="outerIteratorCallback"></a>
 
@@ -2647,7 +2648,7 @@ the collections elements
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [properties] | <code>Object.&lt;string, string&gt;</code> | The css properties and values to animate |
+| [properties] | <code>Object.&lt;string, (string\|number)&gt;</code> | The css properties and values to animate |
 | [duration] | <code>number</code> | The duration for the animation in ms (default: 300) |
 | [callback] | <code>function</code> | The function to run after the animation is complete (default: noop) |
 | [easing] | <code>string</code> | Which type of css easing to use for the animation (default: 'ease') |
@@ -2776,6 +2777,16 @@ at least on of the elements is contained in the supplied elements
 | condition | <code>boolean</code> \| <code>function</code> | The condition to check for. If a function is supplied its return value will be used for checking |
 | callback | <code>string</code> \| <code>function</code> | The function to run when the condition is met. If a string is provided it should be a valid jLight function name |
 | [...args] | <code>\*</code> | The arguments to supply to the given jLight function |
+
+<a name="isSameJLightCallback"></a>
+
+## isSameJLightCallback ⇒ <code>boolean</code>
+**Kind**: global typedef  
+**Returns**: <code>boolean</code> - If the jLight collections are the same  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| $elements | [<code>jLight</code>](#jLight) \| <code>string</code> \| <code>HTMLElement</code> \| <code>HTMLCollection</code> \| <code>NodeList</code> | The elements to compare to |
 
 <a name="stringCallback"></a>
 

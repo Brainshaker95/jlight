@@ -41,7 +41,7 @@ If you want to set multiple properties an object can be passed:
 $div.css({
   color: 'yellow',
   backgroundColor: 'black', // Camel case works
-  'font-size': '20px', // Kebap case works
+  'font-size': '20px', // Kebab case works
 });
 ```
 
@@ -59,7 +59,7 @@ ___
 Get a specific css value:
 
 ```js
-console.log($div.css('font-size')); // 20px
+console.log($div.css('font-size')); // '20px'
 ```
 
 Get the elements whole style declaration:
@@ -67,6 +67,6 @@ Get the elements whole style declaration:
 ```js
 const computedStyles = $div.css();
 
-console.log(computedStyles.getPropertyValue('font-size')); // 20px
-console.log(computedStyles.fontSize); // 20px
+console.log(computedStyles.getPropertyValue('font-size')); // '20px'
+console.log(computedStyles.fontSize); // '20px'
 ```

@@ -17,7 +17,6 @@ Before:
 
 ```css
 .hide {
-  /* TODO: Add the back arrow on every tutorial (css, ajax done) */
   display: none;
 }
 
