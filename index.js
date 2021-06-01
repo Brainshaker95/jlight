@@ -443,7 +443,7 @@
 
 /**
  * @callback removeAttrCallback
- * @param {string|string[]} attribute The attribute or attributes to remove
+ * @param {string} attribute Space sepearated attributes to remove
  * @returns {jLight} jLight collection
  */
 
@@ -2507,18 +2507,20 @@ const jLight = (elements) => ({
    *
    * @function
    * @tutorial removeAttr
-   * @param {string|string[]} attribute The attribute or attributes to remove
+   * @param {string} attribute Space sepearated attributes to remove
    * @returns {jLight} jLight collection
    */
   removeAttr: (attribute) => {
+    let theAttribute = [attribute];
+
+    if (theAttribute[0].indexOf(' ') > -1) {
+      theAttribute = theAttribute[0].split(' ');
+    }
+
     elements.forEach((element) => {
-      if (Array.isArray(attribute)) {
-        attribute.forEach((attr) => {
-          element.removeAttribute(attr);
-        });
-      } else {
-        element.removeAttribute(attribute);
-      }
+      theAttribute.forEach((attr) => {
+        element.removeAttribute(attr);
+      });
     });
 
     return jLight(elements);
