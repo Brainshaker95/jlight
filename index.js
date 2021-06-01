@@ -430,7 +430,7 @@
  * @callback attrCallback
  * @param {string|Object.<string, *>} [attribute] The attribute or attributes to set or get
  * @param {*} [value] The value to set the attribute to
- * @returns {jLight|Object.<string, string>|boolean}
+ * @returns {jLight|Object.<string, string|true>|boolean}
  * jLight collection, the attributes value, an object of each attribute on the
  * collections elements or if the attribute whether present on at least one of
  * the collections elements
@@ -522,7 +522,7 @@
 
 /**
  * @callback filterCallback
- * @param {string|iteratorCallback} callbackOrSelector
+ * @param {string|iteratorCallback|iteratorBooleanCallback} callbackOrSelector
  * The selector to filter the collection by or a custom
  * function to decide which elements to filter out
  * @returns {jLight} jLight collection
@@ -654,7 +654,7 @@
 
 /**
  * @callback animateCallback
- * @param {Object.<string, string>} [properties] The css properties and values to animate
+ * @param {Object.<string, string|number>} [properties] The css properties and values to animate
  * @param {number} [duration] The duration for the animation in ms (default: 300)
  * @param {Function} [callback] The function to run after the animation is complete (default: noop)
  * @param {string} [easing] Which type of css easing to use for the animation (default: 'ease')
@@ -1169,7 +1169,7 @@ const snakeToKebab = (string) => (typeof string === 'string'
  * @param {string} opts.url The url to send the request to
  * @param {string} [opts.method] The HTTP method to use (default: 'POST')
  * @param {Object.<string, *>|string} [opts.data] The data to send
- * @param {Object.<string, string>} [opts.headers] The headers to send
+ * @param {Object.<string, string|false>} [opts.headers] The headers to send
  * @param {boolean} [opts.processData] Whether to process the data or not
  * @param {boolean} [opts.crossDomain] Whether to send the request cross domain or not
  * @param {boolean} [opts.async] Whether to send the request asynchronously or not
@@ -1217,9 +1217,11 @@ const ajax = (opts = {}) => {
     headers['Content-Type'] = options.contentType;
   }
 
-  if (headers['Content-Type'] === false) {
-    delete headers['Content-Type'];
-  }
+  Object.entries(headers).forEach(([key, value]) => {
+    if (value === false) {
+      delete headers[key];
+    }
+  });
 
   if (options.processData && typeof data !== 'string') {
     if (headers['Content-Type'] === 'application/json') {
@@ -1304,7 +1306,7 @@ const ajax = (opts = {}) => {
  * @param {string} url The url for the request
  * @param {object} opts The options for the request
  * @param {Object.<string, *>|string} [opts.data] The data to send
- * @param {Object.<string, string>} [opts.headers] The headers to send
+ * @param {Object.<string, string|false>} [opts.headers] The headers to send
  * @param {boolean} [opts.processData] Whether to process the data or not
  * @param {boolean} [opts.crossDomain] Whether to send the request cross domain or not
  * @param {boolean} [opts.async] Whether to send the request asynchronously or not
@@ -1333,7 +1335,7 @@ const get = (url, opts = {}) => ajax({
  * @param {string} url The url for the request
  * @param {object} opts The options for the request
  * @param {Object.<string, *>|string} [opts.data] The data to send
- * @param {Object.<string, string>} [opts.headers] The headers to send
+ * @param {Object.<string, string|false>} [opts.headers] The headers to send
  * @param {boolean} [opts.processData] Whether to process the data or not
  * @param {boolean} [opts.crossDomain] Whether to send the request cross domain or not
  * @param {boolean} [opts.async] Whether to send the request asynchronously or not
@@ -1790,8 +1792,8 @@ const getDimension = (identifier, elements, includeMargins) => {
     if (isInner || includeMargins) {
       const sign = isInner ? -1 : 1;
 
-      spacingLeftOrTop = sign * parseFloat(computedStyles.getPropertyValue(spacingOne), 10);
-      spacingRightOrBottom = sign * parseFloat(computedStyles.getPropertyValue(spacingTwo), 10);
+      spacingLeftOrTop = sign * parseFloat(computedStyles.getPropertyValue(spacingOne));
+      spacingRightOrBottom = sign * parseFloat(computedStyles.getPropertyValue(spacingTwo));
     }
 
     dimension = Math.max(
@@ -1951,7 +1953,7 @@ const getOrSetScrollTopOrScrollLeft = (identifier, value, $elements) => {
     elements.forEach((theElement) => {
       const element = theElement;
 
-      element[identifier] = parseFloat(value, 10);
+      element[identifier] = parseFloat(value);
     });
 
     return $elements;
@@ -1968,12 +1970,12 @@ const getOrSetScrollTopOrScrollLeft = (identifier, value, $elements) => {
   return scrollValue;
 };
 
-const isInView = (boundingBox, offset) => boundingBox.top >= parseFloat(offset.top, 10)
-  && boundingBox.left >= parseFloat(offset.left, 10)
+const isInView = (boundingBox, offset) => boundingBox.top >= parseFloat(offset.top)
+  && boundingBox.left >= parseFloat(offset.left)
   && boundingBox.bottom <= (window.innerHeight || document.documentElement.clientHeight)
-  + parseFloat(offset.bottom, 10)
+  + parseFloat(offset.bottom)
   && boundingBox.right <= (window.innerWidth || document.documentElement.clientWidth)
-  + parseFloat(offset.right, 10);
+  + parseFloat(offset.right);
 
 const jLight = (elements) => ({
   ...(() => {
@@ -2286,7 +2288,7 @@ const jLight = (elements) => ({
     callbackOrSelector,
     delegatedCallbackOrOptions,
     {
-      ...options,
+      ...(options || {}),
       once: true,
     },
   ),
@@ -2449,7 +2451,7 @@ const jLight = (elements) => ({
    * @tutorial attr
    * @param {string|Object.<string, *>} [attribute] The attribute or attributes to set or get
    * @param {*} [value] The value to set the attribute to
-   * @returns {jLight|Object.<string, string>|boolean}
+   * @returns {jLight|Object.<string, string|true>|boolean}
    * jLight collection, the attributes value, an object of each attribute on the
    * collections elements or if the attribute whether present on at least one of
    * the collections elements
@@ -2669,7 +2671,7 @@ const jLight = (elements) => ({
           Object.entries(element.dataset).forEach(([dataKey, dataValue]) => {
             if (!data[dataKey]) {
               if (!Number.isNaN(Number(dataValue))) {
-                data[dataKey] = parseFloat(dataValue, 10);
+                data[dataKey] = parseFloat(dataValue);
 
                 if (Number.isNaN(data[dataKey])) {
                   data[dataKey] = undefined;
@@ -2691,7 +2693,7 @@ const jLight = (elements) => ({
                 || element.hasAttribute(`data-${key}`))) {
               data = true;
             } else if (!Number.isNaN(Number(data))) {
-              data = parseFloat(data, 10);
+              data = parseFloat(data);
 
               if (Number.isNaN(data)) {
                 data = undefined;
@@ -3131,7 +3133,7 @@ const jLight = (elements) => ({
    *
    * @function
    * @tutorial filter
-   * @param {string|iteratorCallback} callbackOrSelector
+   * @param {string|iteratorCallback|iteratorBooleanCallback} callbackOrSelector
    * The selector to filter the collection by or a custom
    * function to decide which elements to filter out
    * @returns {jLight} jLight collection
@@ -3281,7 +3283,7 @@ const jLight = (elements) => ({
    * @param {compareCallback} compareFunction The function used for sorting
    * @returns {jLight} jLight collection
    */
-  sort: (compareFunction = noop) => jLight(
+  sort: (compareFunction) => jLight(
     elements.sort((element1, element2) => compareFunction(jLight([element1]), jLight([element2]))),
   ),
 
@@ -3575,24 +3577,22 @@ const jLight = (elements) => ({
         const computedStyles = window.getComputedStyle(element);
 
         element.style.top = (top || top === 0)
-          ? `${topIsPixelUnit ? parseFloat(top, 10) + offsetTop : top}${unitTop}`
-          : `${parseFloat(computedStyles.getPropertyValue('top'), 10)}${offsetTop || ''}${unitTop}`;
+          ? `${topIsPixelUnit ? parseFloat(top) + offsetTop : top}${unitTop}`
+          : `${parseFloat(computedStyles.getPropertyValue('top'))}${offsetTop || ''}${unitTop}`;
 
         element.style.left = (left || left === 0)
-          ? `${leftIsPixelUnit ? parseFloat(left, 10) + offsetLeft : top}${unitLeft}`
-          : `${parseFloat(computedStyles.getPropertyValue('left'), 10)}${offsetLeft || ''}${unitLeft}`;
+          ? `${leftIsPixelUnit ? parseFloat(left) + offsetLeft : top}${unitLeft}`
+          : `${parseFloat(computedStyles.getPropertyValue('left'))}${offsetLeft || ''}${unitLeft}`;
       });
 
       return jLight(elements);
     }
 
-    let offset;
+    let offset = {};
 
     elements.forEach((element) => {
-      const boundingBox = element.getBoundingClientRect();
-
       if (offset === undefined) {
-        offset = boundingBox;
+        offset = element.getBoundingClientRect();
       }
     });
 
@@ -3614,7 +3614,7 @@ const jLight = (elements) => ({
    *
    * @function
    * @tutorial animate
-   * @param {Object.<string, string>} [properties] The css properties and values to animate
+   * @param {Object.<string, string|number>} [properties] The css properties and values to animate
    * @param {number} [duration] The duration for the animation in ms (default: 300)
    * @param {Function} [callback]
    * The function to run after the animation is complete (default: noop)
@@ -3880,12 +3880,12 @@ const jLight = (elements) => ({
       const computedStyles = window.getComputedStyle(element);
       const computedDisplay = computedStyles.getPropertyValue('display');
       const computedMinHeight = computedStyles.getPropertyValue('min-height');
-      const paddingTop = parseFloat(computedStyles.getPropertyValue('padding-top'), 10);
-      const paddingBottom = parseFloat(computedStyles.getPropertyValue('padding-bottom'), 10);
+      const paddingTop = parseFloat(computedStyles.getPropertyValue('padding-top'));
+      const paddingBottom = parseFloat(computedStyles.getPropertyValue('padding-bottom'));
       const borderTop = computedStyles.getPropertyValue('border-top');
       const borderBottom = computedStyles.getPropertyValue('border-bottom');
-      const borderTopParsed = parseFloat(borderTop, 10);
-      const borderBottomParsed = parseFloat(borderBottom, 10);
+      const borderTopParsed = parseFloat(borderTop);
+      const borderBottomParsed = parseFloat(borderBottom);
       const borderTopStyle = borderTop.replace(`${borderTopParsed}px`, '');
       const borderBottomStyle = borderBottom.replace(`${borderBottomParsed}px`, '');
       const { display } = getJLightElementData(element).jLightInternal;
@@ -3912,7 +3912,7 @@ const jLight = (elements) => ({
       const targetHeight = Math.max(
         element.clientHeight,
         element.offsetHeight,
-        parseFloat(computedMinHeight, 10),
+        parseFloat(computedMinHeight),
       ) - borderTopParsed
         - borderBottomParsed;
 
@@ -3972,8 +3972,8 @@ const jLight = (elements) => ({
       const computedDisplay = computedStyles.getPropertyValue('display');
       const borderTop = computedStyles.getPropertyValue('border-top');
       const borderBottom = computedStyles.getPropertyValue('border-bottom');
-      const borderTopParsed = parseFloat(borderTop, 10);
-      const borderBottomParsed = parseFloat(borderBottom, 10);
+      const borderTopParsed = parseFloat(borderTop);
+      const borderBottomParsed = parseFloat(borderBottom);
 
       const startHeight = Math.max(
         element.clientHeight,
@@ -4321,7 +4321,7 @@ const documentAndWindowJLight = (argument) => ({
     callbackOrSelector,
     delegatedCallbackOrOptions,
     {
-      ...options,
+      ...(options || {}),
       once: true,
     },
     jLight,
