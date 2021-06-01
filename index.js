@@ -291,6 +291,9 @@
  * @property {whenCallback} when
  * Calls the supplied function with the supplied arguments if the given condition is met.
  *
+ * @property {isSameJLightCallback} isSameJLight
+ * Checks if two jLight collections are the same.
+ *
  * @property {stringCallback} serialize
  * Serializes the collections elements values to a URL encoded string.
  *
@@ -762,6 +765,12 @@
  */
 
 /**
+ * @callback isSameJLightCallback
+ * @param {jLight|string|HTMLElement|HTMLCollection|NodeList} $elements The elements to compare to
+ * @returns {boolean} If the jLight collections are the same
+ */
+
+/**
  * @callback stringCallback
  * @returns {string} The resulting string
  */
@@ -915,26 +924,6 @@ const isSameObject = (object1, object2) => object1
   && object1.constructor === Object
   && object2.constructor === Object
   && Object.is(object1, object2);
-
-/**
- * Checks if two jLight collections are the same.
- *
- * @static
- * @function
- * @tutorial isSameJLight
- * @param {jLight|string|HTMLElement|HTMLCollection|NodeList} $elements1
- * The elements to compare
- * @param {jLight|string|HTMLElement|HTMLCollection|NodeList} $elements2
- * The elements to compare to
- * @returns {boolean} If the jLight collections are the same
- */
-const isSameJLight = ($elements1, $elements2) => {
-  const elements1 = getElementsFromArgument($elements1);
-  const elements2 = getElementsFromArgument($elements2);
-
-  return elements1.length === elements2.length
-    && elements1.every((element, index) => element === elements2[index]);
-};
 
 /**
  * Prevents the events default beheavior, propagation and immediate propagation
@@ -4246,6 +4235,22 @@ const jLight = (elements) => ({
   },
 
   /**
+   * Checks if two jLight collections are the same.
+   *
+   * @function
+   * @tutorial isSameJLight
+   * @param {jLight|string|HTMLElement|HTMLCollection|NodeList} $elements
+   * The elements to compare to
+   * @returns {boolean} If the jLight collections are the same
+   */
+  isSameJLight: ($elements) => {
+    const referenceElements = getElementsFromArgument($elements);
+
+    return elements.length === referenceElements.length
+      && elements.every((element, index) => element === referenceElements[index]);
+  },
+
+  /**
    * Serializes the collections elements values to a URL encoded string.
    *
    * @function
@@ -4495,7 +4500,6 @@ $.uniqid = uniqid;
 $.generateHash = generateHash;
 $.isEmptyObject = isEmptyObject;
 $.isSameObject = isSameObject;
-$.isSameJLight = isSameJLight;
 $.preventEvent = preventEvent;
 $.openFullscreen = openFullscreen;
 $.closeFullscreen = closeFullscreen;
