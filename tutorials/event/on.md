@@ -84,7 +84,9 @@ $('div').on('click', 'button', (event) => {
 });
 ```
 
-[jLight]{@link jLight}.[append]{@link module:Manipulation~append} will add a new button to the div every time one of the existing buttons is clicked.
+A new button will be appended to the div every time one of the existing buttons is clicked.
+
+For details regarding [jLight]{@link jLight}.[data]{@link module:Manipulation~append} please refer to [the append tutorial]{@tutorial append}.
 
 &nbsp;
 ___

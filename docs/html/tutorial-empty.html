@@ -118,8 +118,25 @@
       <section>
 
 <article class="tutorial-content">
-    <p><a href="module-Manipulation.html#~empty">Go to definitition</a></p>
-<p>TODO</p>
+    <p><a href="tutorial-tut-manipulation.html">🡸 Back</a></p>
+<hr>
+<p><a href="module-Manipulation.html#~empty">Go to definitition</a></p>
+<p> </p>
+<p>This function can be used to empty the collections elements html content.</p>
+<p>Before:</p>
+<pre class="prettyprint source lang-html"><code>&lt;div>Remove me!&lt;/div>
+
+&lt;div>
+  &lt;span>Remove me!&lt;/span>
+&lt;/div>
+</code></pre>
+<pre class="prettyprint source lang-js"><code>$('div').empty();
+</code></pre>
+<p>After:</p>
+<pre class="prettyprint source lang-html"><code>&lt;div>&lt;/div>
+&lt;div>&lt;/div>
+</code></pre>
+<p>Notice that this is functionally the same as calling <a href="global.html#jLight">jLight</a>.<a href="module-ElementData.html#~html">html</a> with an empty string or <code>null</code>.</p>
 </article>
 
 

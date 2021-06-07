@@ -118,8 +118,54 @@
       <section>
 
 <article class="tutorial-content">
-    <p><a href="module-Manipulation.html#~clone">Go to definitition</a></p>
-<p>TODO</p>
+    <p><a href="tutorial-tut-manipulation.html">🡸 Back</a></p>
+<hr>
+<p><a href="module-Manipulation.html#~clone">Go to definitition</a></p>
+<p> </p>
+<p>This function can be used to clone the collections elements and create a new collection of the clones.</p>
+<p>Before:</p>
+<pre class="prettyprint source lang-html"><code>&lt;body>
+  &lt;div>I am real!&lt;/div>
+
+  &lt;div>
+    &lt;span>Me too!&lt;/span>
+  &lt;/div>
+&lt;/body>
+</code></pre>
+<pre class="prettyprint source lang-js"><code>$('body').append($('div').clone());
+</code></pre>
+<p>After:</p>
+<pre class="prettyprint source lang-html"><code>&lt;body>
+  &lt;div class=&quot;foo&quot;>I am real!&lt;/div>
+
+  &lt;div>
+    &lt;span>Me too!&lt;/span>
+  &lt;/div>
+
+  &lt;div class=&quot;foo&quot;>I am real!&lt;/div>
+
+  &lt;div>
+    &lt;span>Me too!&lt;/span>
+  &lt;/div>
+&lt;/body>
+</code></pre>
+<p>For details regarding <a href="global.html#jLight">jLight</a>.<a href="module-Manipulation.html#~append">append</a> please refer to <a href="tutorial-append.html">the append tutorial</a>.</p>
+<p>If you don't want deep cloning of the nodes you can disable it by passing <code>false</code> to the function:</p>
+<pre class="prettyprint source lang-js"><code>$('body').append($('div').clone(false));
+</code></pre>
+<p>After:</p>
+<pre class="prettyprint source lang-html"><code>&lt;body>
+  &lt;div class=&quot;foo&quot;>I am real!&lt;/div>
+
+  &lt;div>
+    &lt;span>Me too!&lt;/span>
+  &lt;/div>
+
+  &lt;div class=&quot;foo&quot;>&lt;/div>
+
+  &lt;div>&lt;/div>
+&lt;/body>
+</code></pre>
 </article>
 
 
