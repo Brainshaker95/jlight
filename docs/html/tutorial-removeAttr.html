@@ -126,9 +126,7 @@
 <p>Before:</p>
 <pre class="prettyprint source lang-html"><code>&lt;div id=&quot;two&quot; data-foo=&quot;false&quot; data-bar=&quot;foo&quot;>&lt;/div>
 </code></pre>
-<pre class="prettyprint source lang-js"><code>const $div = $('div');
-
-$('div')
+<pre class="prettyprint source lang-js"><code>$('div')
   .removeAttr('id')
   .removeAttr('data-foo data-bar'); // Passing multiple space separated attributes also works
 </code></pre>

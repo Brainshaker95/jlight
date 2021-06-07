@@ -1,3 +1,3 @@
-[Go to definitition]{@link module:Utility.isSameJLight}
+[Go to definitition]{@link module:Utility~isSameJLight}
 
 TODO

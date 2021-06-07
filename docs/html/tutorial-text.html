@@ -122,7 +122,50 @@
 <hr>
 <p><a href="module-ElementData.html#~text">Go to definitition</a></p>
 <p> </p>
-<p>TODO</p>
+<p>This function can be used to get or set text content.</p>
+<p>Before:</p>
+<pre class="prettyprint source lang-html"><code>&lt;div id=&quot;one&quot;>one&lt;/div>
+
+&lt;div id=&quot;two&quot;>
+  two
+  &lt;div id=&quot;three&quot;>
+    three
+  &lt;/div>
+&lt;/div>
+</code></pre>
+<pre class="prettyprint source lang-js"><code>const $one = $('#one');
+const $two = $('#two');
+const $three = $('#three');
+
+console.log($one.text()); // 'one'
+console.log($two.text()); // 'two three' (includes spaces caused by linebreaks)
+console.log($three.text()); // 'three' (includes spaces caused by linebreaks)
+
+$one.text('new one');
+$two.text('new two');
+
+console.log($one.text()); // 'new one'
+console.log($two.text()); // 'new two'
+</code></pre>
+<p>After:</p>
+<pre class="prettyprint source lang-html"><code>&lt;div id=&quot;one&quot;>new one&lt;/div>
+&lt;div id=&quot;two&quot;>new two&lt;/div> &lt;!-- notice that the inner div got replaced -->
+</code></pre>
+<p>You can also supply a function used for setting the text content.</p>
+<p>The function will run on each of the collections elements.</p>
+<p>Before:</p>
+<pre class="prettyprint source lang-html"><code>&lt;div id=&quot;one&quot; data-foo=&quot;bar - 1&quot;>one&lt;/div>
+&lt;div id=&quot;two&quot; data-foo=&quot;bar - 2&quot;>two&lt;/div>
+&lt;div id=&quot;three&quot; data-foo=&quot;bar - 3&quot;>three&lt;/div>
+</code></pre>
+<pre class="prettyprint source lang-js"><code>$('div').text((text, index, $element) => `${text} - ${index} - ${$element.data('foo')}`);
+</code></pre>
+<p>After:</p>
+<pre class="prettyprint source lang-html"><code>&lt;div id=&quot;one&quot;>one - 0 - bar - 1&lt;/div>
+&lt;div id=&quot;two&quot;>two - 1 - bar - 2&lt;/div>
+&lt;div id=&quot;three&quot;>three - 2 - bar - 3&lt;/div>
+</code></pre>
+<p>For details regarding <a href="global.html#jLight">jLight</a>.<a href="module-ElementData.html#~data">data</a> please refer to <a href="tutorial-data.html">the data tutorial</a>.</p>
 </article>
 
 

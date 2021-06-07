@@ -1928,8 +1928,8 @@ const getOrSetTextOrHtml = (identifier, $elements, theValue) => {
     elements.forEach((theElement, index) => {
       const element = theElement;
 
-      if (typeof value === 'function') {
-        value = theValue(index, element[identifier]);
+      if (typeof theValue === 'function') {
+        value = theValue(element[identifier], index, $elements.eq(index));
       }
 
       element[identifier] = value === 0 ? '0' : (value || '');
