@@ -164,6 +164,7 @@
     "children": [
       "noop",
       "uniqid",
+      "typeOf",
       "generateHash",
       "isEmptyObject",
       "isSameObject",
