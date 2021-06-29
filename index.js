@@ -496,8 +496,17 @@
 
 /**
  * @callback contentCallback
- * @param {string} [content] The content to supply to the function
- * @returns {jLight|string} jLight collection or the text content
+ * @param {string|contentInnerCallback} [contentOrCallback]
+ * The content to supply to the function or a callback to determine the text
+ * @returns {jLight|string} jLight collection or the content
+ */
+
+/**
+ * @callback contentInnerCallback
+ * @param {string} [content] The current content
+ * @param {number} [index] The current index
+ * @param {jLight} [$element] The current element
+ * @returns {string} The content to set
  */
 
 /**
@@ -2531,20 +2540,22 @@ const jLight = (elements) => ({
    *
    * @function
    * @tutorial text
-   * @param {string} [text] The text to supply to the function
+   * @param {string|contentInnerCallback} [textOrCallback]
+   * The text to supply to the function or a callback to determine the text
    * @returns {jLight|string} jLight collection or the text content
    */
-  text: (text) => getOrSetTextOrHtml('textContent', jLight(elements), text),
+  text: (textOrCallback) => getOrSetTextOrHtml('textContent', jLight(elements), textOrCallback),
 
   /**
    * Gets or sets the HTML content of the collections elements.
    *
    * @function
    * @tutorial html
-   * @param {string} [html] The html to supply to the function
+   * @param {string|contentInnerCallback} [htmlOrCallback]
+   * The html to supply to the function or a callback to determine the text
    * @returns {jLight|string} jLight collection or the html content
    */
-  html: (html) => getOrSetTextOrHtml('innerHTML', jLight(elements), html),
+  html: (htmlOrCallback) => getOrSetTextOrHtml('innerHTML', jLight(elements), htmlOrCallback),
 
   /**
    * Gets or sets the collections elements values.
