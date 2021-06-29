@@ -890,6 +890,44 @@ const noop = () => { };
  */
 const uniqid = () => Math.random().toString(36).substr(2, 9);
 
+/**
+ * Gets the real type of a value.
+ *
+ * @static
+ * @function
+ * @tutorial typeOf
+ * @param {string} value The value to check
+ * @returns {'undefined'|'object'|'function'|'string'|'nunber'|'boolean'|'symbol'|
+ * 'null'|'array'|'date'|'regex'} The real type
+ */
+const typeOf = (value) => {
+  if (typeof value !== 'object') {
+    return typeof value;
+  }
+
+  if (value === null) {
+    return 'null';
+  }
+
+  switch (value.constructor) {
+    // eslint-disable-next-line no-array-constructor
+    case (new Array()).constructor:
+      return 'array';
+    // eslint-disable-next-line no-new-wrappers
+    case (new String()).constructor:
+      return 'string';
+    // eslint-disable-next-line no-new-wrappers
+    case (new Boolean()).constructor:
+      return 'boolean';
+    case (new Date()).constructor:
+      return 'date';
+    case (new RegExp()).constructor:
+      return 'regex';
+    default:
+      return 'object';
+  }
+};
+
 /* eslint-disable no-bitwise */
 
 /**
@@ -4446,6 +4484,7 @@ const documentAndWindowJLight = (argument) => ({
  * The argument to initialize jLight on
  * @property {function} noop [Go to definition]{@link module:Utility.noop}
  * @property {function} uniqid [Go to definition]{@link module:Utility.uniqid}
+ * @property {function} typeOf [Go to definition]{@link module:Utility.typeOf}
  * @property {function} generateHash [Go to definition]{@link module:Utility.generateHash}
  * @property {function} isEmptyObject [Go to definition]{@link module:Utility.isEmptyObject}
  * @property {function} isSameObject [Go to definition]{@link module:Utility.isSameObject}
@@ -4523,6 +4562,7 @@ const $ = (argument) => {
 
 $.noop = noop;
 $.uniqid = uniqid;
+$.typeOf = typeOf;
 $.generateHash = generateHash;
 $.isEmptyObject = isEmptyObject;
 $.isSameObject = isSameObject;
