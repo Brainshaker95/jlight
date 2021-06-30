@@ -92,6 +92,8 @@
 <dd></dd>
 <dt><a href="#contentCallback">contentCallback</a> ⇒ <code><a href="#jLight">jLight</a></code> | <code>string</code></dt>
 <dd></dd>
+<dt><a href="#contentInnerCallback">contentInnerCallback</a> ⇒ <code>string</code></dt>
+<dd></dd>
 <dt><a href="#indexElementCallback">indexElementCallback</a> ⇒ <code>HTMLElement</code> | <code>undefined</code></dt>
 <dd></dd>
 <dt><a href="#indexjLightCallback">indexjLightCallback</a> ⇒ <code><a href="#jLight">jLight</a></code></dt>
@@ -176,6 +178,7 @@
     * _static_
         * [.noop()](#module_Utility.noop) ⇒ <code>void</code>
         * [.uniqid()](#module_Utility.uniqid) ⇒ <code>string</code>
+        * [.typeOf(value)](#module_Utility.typeOf) ⇒ <code>&#x27;undefined&#x27;</code> \| <code>&#x27;object&#x27;</code> \| <code>&#x27;function&#x27;</code> \| <code>&#x27;string&#x27;</code> \| <code>&#x27;nunber&#x27;</code> \| <code>&#x27;boolean&#x27;</code> \| <code>&#x27;symbol&#x27;</code> \| <code>&#x27;null&#x27;</code> \| <code>&#x27;array&#x27;</code> \| <code>&#x27;date&#x27;</code> \| <code>&#x27;regex&#x27;</code>
         * [.generateHash(string)](#module_Utility.generateHash) ⇒ <code>number</code>
         * [.isEmptyObject(object)](#module_Utility.isEmptyObject) ⇒ <code>boolean</code>
         * [.isSameObject(object1, object2)](#module_Utility.isSameObject) ⇒ <code>boolean</code>
@@ -208,6 +211,18 @@ Generates a semi-random string of length 9.
 
 **Kind**: static method of [<code>Utility</code>](#module_Utility)  
 **Returns**: <code>string</code> - The generated string  
+<a name="module_Utility.typeOf"></a>
+
+### Utility.typeOf(value) ⇒ <code>&#x27;undefined&#x27;</code> \| <code>&#x27;object&#x27;</code> \| <code>&#x27;function&#x27;</code> \| <code>&#x27;string&#x27;</code> \| <code>&#x27;nunber&#x27;</code> \| <code>&#x27;boolean&#x27;</code> \| <code>&#x27;symbol&#x27;</code> \| <code>&#x27;null&#x27;</code> \| <code>&#x27;array&#x27;</code> \| <code>&#x27;date&#x27;</code> \| <code>&#x27;regex&#x27;</code>
+Gets the real type of a value.
+
+**Kind**: static method of [<code>Utility</code>](#module_Utility)  
+**Returns**: <code>&#x27;undefined&#x27;</code> \| <code>&#x27;object&#x27;</code> \| <code>&#x27;function&#x27;</code> \| <code>&#x27;string&#x27;</code> \| <code>&#x27;nunber&#x27;</code> \| <code>&#x27;boolean&#x27;</code> \| <code>&#x27;symbol&#x27;</code> \| <code>&#x27;null&#x27;</code> \| <code>&#x27;array&#x27;</code> \| <code>&#x27;date&#x27;</code> \| <code>&#x27;regex&#x27;</code> - The real type  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>string</code> | The value to check |
+
 <a name="module_Utility.generateHash"></a>
 
 ### Utility.generateHash(string) ⇒ <code>number</code>
@@ -834,8 +849,8 @@ Triggers events on the collections elements.
     * [~prop(property, [state])](#module_ElementData..prop) ⇒ [<code>jLight</code>](#jLight) \| <code>boolean</code>
     * [~attr([attribute], [value])](#module_ElementData..attr) ⇒ [<code>jLight</code>](#jLight) \| <code>Object.&lt;string, (string\|true)&gt;</code> \| <code>boolean</code>
     * [~removeAttr(attribute)](#module_ElementData..removeAttr) ⇒ [<code>jLight</code>](#jLight)
-    * [~text([text])](#module_ElementData..text) ⇒ [<code>jLight</code>](#jLight) \| <code>string</code>
-    * [~html([html])](#module_ElementData..html) ⇒ [<code>jLight</code>](#jLight) \| <code>string</code>
+    * [~text([textOrCallback])](#module_ElementData..text) ⇒ [<code>jLight</code>](#jLight) \| <code>string</code>
+    * [~html([htmlOrCallback])](#module_ElementData..html) ⇒ [<code>jLight</code>](#jLight) \| <code>string</code>
     * [~val([valueOrFunction])](#module_ElementData..val) ⇒ [<code>jLight</code>](#jLight) \| <code>boolean</code> \| <code>string</code>
     * [~data([keyOrData], [value])](#module_ElementData..data) ⇒ [<code>jLight</code>](#jLight) \| <code>\*</code>
 
@@ -881,7 +896,7 @@ Removes the supplied attributes from the collections elements.
 
 <a name="module_ElementData..text"></a>
 
-### ElementData~text([text]) ⇒ [<code>jLight</code>](#jLight) \| <code>string</code>
+### ElementData~text([textOrCallback]) ⇒ [<code>jLight</code>](#jLight) \| <code>string</code>
 Gets or sets the text content of the collections elements.
 
 **Kind**: inner method of [<code>ElementData</code>](#module_ElementData)  
@@ -889,11 +904,11 @@ Gets or sets the text content of the collections elements.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [text] | <code>string</code> | The text to supply to the function |
+| [textOrCallback] | <code>string</code> \| [<code>contentInnerCallback</code>](#contentInnerCallback) | The text to supply to the function or a callback to determine the text |
 
 <a name="module_ElementData..html"></a>
 
-### ElementData~html([html]) ⇒ [<code>jLight</code>](#jLight) \| <code>string</code>
+### ElementData~html([htmlOrCallback]) ⇒ [<code>jLight</code>](#jLight) \| <code>string</code>
 Gets or sets the HTML content of the collections elements.
 
 **Kind**: inner method of [<code>ElementData</code>](#module_ElementData)  
@@ -901,7 +916,7 @@ Gets or sets the HTML content of the collections elements.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [html] | <code>string</code> | The html to supply to the function |
+| [htmlOrCallback] | <code>string</code> \| [<code>contentInnerCallback</code>](#contentInnerCallback) | The html to supply to the function or a callback to determine the text |
 
 <a name="module_ElementData..val"></a>
 
@@ -1782,6 +1797,7 @@ Toggles the display state of the collections elements by sliding.
     * _static_
         * [.noop()](#module_Utility.noop) ⇒ <code>void</code>
         * [.uniqid()](#module_Utility.uniqid) ⇒ <code>string</code>
+        * [.typeOf(value)](#module_Utility.typeOf) ⇒ <code>&#x27;undefined&#x27;</code> \| <code>&#x27;object&#x27;</code> \| <code>&#x27;function&#x27;</code> \| <code>&#x27;string&#x27;</code> \| <code>&#x27;nunber&#x27;</code> \| <code>&#x27;boolean&#x27;</code> \| <code>&#x27;symbol&#x27;</code> \| <code>&#x27;null&#x27;</code> \| <code>&#x27;array&#x27;</code> \| <code>&#x27;date&#x27;</code> \| <code>&#x27;regex&#x27;</code>
         * [.generateHash(string)](#module_Utility.generateHash) ⇒ <code>number</code>
         * [.isEmptyObject(object)](#module_Utility.isEmptyObject) ⇒ <code>boolean</code>
         * [.isSameObject(object1, object2)](#module_Utility.isSameObject) ⇒ <code>boolean</code>
@@ -1814,6 +1830,18 @@ Generates a semi-random string of length 9.
 
 **Kind**: static method of [<code>Utility</code>](#module_Utility)  
 **Returns**: <code>string</code> - The generated string  
+<a name="module_Utility.typeOf"></a>
+
+### Utility.typeOf(value) ⇒ <code>&#x27;undefined&#x27;</code> \| <code>&#x27;object&#x27;</code> \| <code>&#x27;function&#x27;</code> \| <code>&#x27;string&#x27;</code> \| <code>&#x27;nunber&#x27;</code> \| <code>&#x27;boolean&#x27;</code> \| <code>&#x27;symbol&#x27;</code> \| <code>&#x27;null&#x27;</code> \| <code>&#x27;array&#x27;</code> \| <code>&#x27;date&#x27;</code> \| <code>&#x27;regex&#x27;</code>
+Gets the real type of a value.
+
+**Kind**: static method of [<code>Utility</code>](#module_Utility)  
+**Returns**: <code>&#x27;undefined&#x27;</code> \| <code>&#x27;object&#x27;</code> \| <code>&#x27;function&#x27;</code> \| <code>&#x27;string&#x27;</code> \| <code>&#x27;nunber&#x27;</code> \| <code>&#x27;boolean&#x27;</code> \| <code>&#x27;symbol&#x27;</code> \| <code>&#x27;null&#x27;</code> \| <code>&#x27;array&#x27;</code> \| <code>&#x27;date&#x27;</code> \| <code>&#x27;regex&#x27;</code> - The real type  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>string</code> | The value to check |
+
 <a name="module_Utility.generateHash"></a>
 
 ### Utility.generateHash(string) ⇒ <code>number</code>
@@ -2018,6 +2046,7 @@ jLights default export
 | --- | --- | --- |
 | noop | <code>function</code> | [Go to definition](#module_Utility.noop) |
 | uniqid | <code>function</code> | [Go to definition](#module_Utility.uniqid) |
+| typeOf | <code>function</code> | [Go to definition](#module_Utility.typeOf) |
 | generateHash | <code>function</code> | [Go to definition](#module_Utility.generateHash) |
 | isEmptyObject | <code>function</code> | [Go to definition](#module_Utility.isEmptyObject) |
 | isSameObject | <code>function</code> | [Go to definition](#module_Utility.isSameObject) |
@@ -2400,11 +2429,23 @@ the collections elements
 
 ## contentCallback ⇒ [<code>jLight</code>](#jLight) \| <code>string</code>
 **Kind**: global typedef  
-**Returns**: [<code>jLight</code>](#jLight) \| <code>string</code> - jLight collection or the text content  
+**Returns**: [<code>jLight</code>](#jLight) \| <code>string</code> - jLight collection or the content  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [content] | <code>string</code> | The content to supply to the function |
+| [contentOrCallback] | <code>string</code> \| [<code>contentInnerCallback</code>](#contentInnerCallback) | The content to supply to the function or a callback to determine the text |
+
+<a name="contentInnerCallback"></a>
+
+## contentInnerCallback ⇒ <code>string</code>
+**Kind**: global typedef  
+**Returns**: <code>string</code> - The content to set  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [content] | <code>string</code> | The current content |
+| [index] | <code>number</code> | The current index |
+| [$element] | [<code>jLight</code>](#jLight) | The current element |
 
 <a name="indexElementCallback"></a>
 
