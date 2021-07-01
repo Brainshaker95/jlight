@@ -165,6 +165,7 @@
       "noop",
       "uniqid",
       "typeOf",
+      "extend",
       "generateHash",
       "isEmptyObject",
       "isSameObject",

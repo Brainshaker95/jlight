@@ -801,6 +801,7 @@
 
 const jLightGlobalElements = [];
 const jLightGlobalData = [];
+const extensions = {};
 
 const initalizeJLightElementData = (element, selector) => {
   if (jLightGlobalElements.indexOf(element) > -1) {
@@ -926,6 +927,20 @@ const typeOf = (value) => {
     default:
       return 'object';
   }
+};
+
+/**
+ * Extends a jLight collection with the provided function.
+ *
+ * @static
+ * @function
+ * @tutorial extend
+ * @param {string} funcName The name of the function
+ * @param {function} func The function (this arg will provide access to the current collection)
+ * @returns {void} void
+ */
+const extend = (funcName, func) => {
+  extensions[funcName] = func;
 };
 
 /* eslint-disable no-bitwise */
@@ -4366,6 +4381,7 @@ const jLight = (elements) => ({
 
     return serializedJson;
   },
+  ...extensions,
 });
 
 const documentAndWindowJLight = (argument) => ({
@@ -4473,6 +4489,8 @@ const documentAndWindowJLight = (argument) => ({
 
     return documentAndWindowJLight(argument);
   },
+
+  ...extensions,
 });
 
 /**
@@ -4563,6 +4581,7 @@ const $ = (argument) => {
 $.noop = noop;
 $.uniqid = uniqid;
 $.typeOf = typeOf;
+$.extend = extend;
 $.generateHash = generateHash;
 $.isEmptyObject = isEmptyObject;
 $.isSameObject = isSameObject;
