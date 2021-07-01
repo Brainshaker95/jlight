@@ -8,6 +8,6 @@ ___
 This function can be used to get the collections first elements outer width (border will be included, margins will be excluded if `false` is passed).
 
 ```js
-console.log($foo.outerWidth()); // returns the outer width in px as a number (e.g. 300)
-console.log($foo.outerWidth(false)); // returns the outer width excluding the width of margins
+console.log($foo.outerWidth()); // Returns the outer width in px as a number (e.g. 300)
+console.log($foo.outerWidth(false)); // Returns the outer width excluding the width of margins
 ```
