@@ -221,10 +221,10 @@
  * @property {getOrSetValueCallback} height
  * Gets or sets the height of the collections elements.
  *
- * @property {dimensionCallback} innerWidth
+ * @property {innerDimensionCallback} innerWidth
  * Gets the inner width of the collections elements.
  *
- * @property {dimensionCallback} innerHeight
+ * @property {innerDimensionCallback} innerHeight
  * Gets the inner height of the collections elements.
  *
  * @property {outerDimensionCallback} outerWidth
@@ -651,8 +651,15 @@
  */
 
 /**
+ * @callback innerDimensionCallback
+ * @param {boolean} [includePaddingsAndBorder]
+ * Whether to include the elements paddings and border (default: false)
+ * @returns {number} The dimension value
+ */
+
+ /**
  * @callback outerDimensionCallback
- * @param {boolean} [includeMargins] Whether to include the elements margins (default: false)
+ * @param {boolean} [includeMargins] Whether to include the elements margins (default: true)
  * @returns {number} The dimension value
  */
 
@@ -940,7 +947,9 @@ const typeOf = (value) => {
  * @returns {void} void
  */
 const extend = (funcName, func) => {
-  extensions[funcName] = func;
+  if (typeof func === 'function') {
+    extensions[funcName] = func;
+  }
 };
 
 /* eslint-disable no-bitwise */
@@ -1797,39 +1806,45 @@ const getOrSetDimension = (identifier, $elements, value) => {
   return dimension;
 };
 
-const getDimension = (identifier, elements, includeMargins) => {
+const getDimension = (identifier, elements, options = {}) => {
   let dimension = 0;
-  let spacingOne;
-  let spacingTwo;
-  let functionSuffix;
+  let spacings = [];
 
-  switch (identifier) {
-    case 'innerWidth':
-      spacingOne = 'border-left';
-      spacingTwo = 'border-right';
-      functionSuffix = 'Width';
+  const functionSuffix = identifier.includes('Width')
+    ? 'Width'
+    : 'Height';
 
-      break;
-    case 'innerHeight':
-      spacingOne = 'border-top';
-      spacingTwo = 'border-bottom';
-      functionSuffix = 'Height';
+  if (Object.keys(options).length) {
+    switch (identifier) {
+      case 'innerWidth':
+        spacings.push(
+          'border-left',
+          'border-right',
+          'padding-left',
+          'padding-right',
+        );
 
-      break;
-    case 'outerWidth':
-      spacingOne = 'margin-left';
-      spacingTwo = 'margin-right';
-      functionSuffix = 'Width';
+        break;
+      case 'innerHeight':
+        spacings.push(
+          'border-top',
+          'border-bottom',
+          'padding-top',
+          'padding-bottom',
+        );
 
-      break;
-    case 'outerHeight':
-      spacingOne = 'margin-top';
-      spacingTwo = 'margin-bottom';
-      functionSuffix = 'Height';
+        break;
+      case 'outerWidth':
+        spacings.push('margin-left', 'margin-right');
 
-      break;
-    default:
-      break;
+        break;
+      case 'outerHeight':
+        spacings.push('margin-top', 'margin-bottom');
+
+        break;
+      default:
+        break;
+    }
   }
 
   elements.forEach((element) => {
@@ -1837,22 +1852,23 @@ const getDimension = (identifier, elements, includeMargins) => {
       return;
     }
 
-    let spacingLeftOrTop = 0;
-    let spacingRightOrBottom = 0;
     const computedStyles = window.getComputedStyle(element);
-    const isInner = identifier.indexOf('inner') > -1;
+    const isInner = identifier.includes('inner');
 
-    if (isInner || includeMargins) {
+    if (options.includeMargins
+      || (options.includePaddingsAndBorder !== undefined && !options.includePaddingsAndBorder)) {
       const sign = isInner ? -1 : 1;
 
-      spacingLeftOrTop = sign * parseFloat(computedStyles.getPropertyValue(spacingOne));
-      spacingRightOrBottom = sign * parseFloat(computedStyles.getPropertyValue(spacingTwo));
+      spacings = spacings
+        .map((spacing) => sign * parseFloat(computedStyles.getPropertyValue(spacing)));
     }
+
+    const spacing = spacings.reduce((sum, value) => sum + value, 0);
 
     dimension = Math.max(
       element[`client${functionSuffix}`],
       element[`offset${functionSuffix}`],
-    ) + spacingLeftOrTop + spacingRightOrBottom;
+    ) + (!Number.isNaN(Number(spacing)) ? spacing : 0);
   });
 
   return dimension;
@@ -3547,38 +3563,42 @@ const jLight = (elements) => ({
    *
    * @function
    * @tutorial innerWidth
+   * @param {boolean} [includePaddingsAndBorder]
+   * Whether to include the elements paddings and border (default: false)
    * @returns {number} The dimension value
    */
-  innerWidth: () => getDimension('innerWidth', elements),
+  innerWidth: (includePaddingsAndBorder = false) => getDimension('innerWidth', elements, { includePaddingsAndBorder }),
 
   /**
    * Gets the inner height of the collections elements.
    *
    * @function
    * @tutorial innerHeight
+   * @param {boolean} [includePaddingsAndBorder]
+   * Whether to include the elements paddings and border (default: false)
    * @returns {number} The dimension value
    */
-  innerHeight: () => getDimension('innerHeight', elements),
+  innerHeight: (includePaddingsAndBorder = false) => getDimension('innerHeight', elements, { includePaddingsAndBorder }),
 
   /**
    * Gets the outer width of the collections elements.
    *
    * @function
    * @tutorial outerWidth
-   * @param {boolean} [includeMargins] Whether to include the elements margins (default: false)
+   * @param {boolean} [includeMargins] Whether to include the elements margins (default: true)
    * @returns {number} The dimension value
    */
-  outerWidth: (includeMargins) => getDimension('outerWidth', elements, includeMargins),
+  outerWidth: (includeMargins = true) => getDimension('outerWidth', elements, { includeMargins }),
 
   /**
    * Gets the outer height of the collections elements.
    *
    * @function
    * @tutorial outerHeight
-   * @param {boolean} [includeMargins] Whether to include the elements margins (default: false)
+   * @param {boolean} [includeMargins] Whether to include the elements margins (default: true)
    * @returns {number} The dimension value
    */
-  outerHeight: (includeMargins) => getDimension('outerHeight', elements, includeMargins),
+  outerHeight: (includeMargins = true) => getDimension('outerHeight', elements, { includeMargins }),
 
   /**
    * Gets the scroll width of the collections elements.

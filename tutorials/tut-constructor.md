@@ -72,6 +72,7 @@ $foo = $(document.getElementsByTagName('div'));
 
 // The full list of the supported functions:
 // - on
+// - once
 // - off
 // - trigger
 // - innerWidth
