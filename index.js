@@ -3679,7 +3679,7 @@ const jLight = (elements) => ({
     let offset = {};
 
     elements.forEach((element) => {
-      if (offset === undefined) {
+      if (!Object.keys(offset).length) {
         offset = element.getBoundingClientRect();
       }
     });
@@ -3687,8 +3687,8 @@ const jLight = (elements) => ({
     const relative = typeof value === 'boolean' && value;
 
     return {
-      top: (offset.top || 0) + (relative ? window.pageYOffset : 0),
-      left: (offset.left || 0) + (relative ? window.pageXOffset : 0),
+      top: (offset.top || 0) + (relative ? 0 : window.pageYOffset),
+      left: (offset.left || 0) + (relative ? 0 : window.pageXOffset),
     };
   },
 
