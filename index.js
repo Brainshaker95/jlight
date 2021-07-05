@@ -294,6 +294,15 @@
  * @property {isSameJLightCallback} isSameJLight
  * Checks if two jLight collections are the same.
  *
+ * @property {defaultCallback} openFullscreen
+ * Opens fullscreen mode.
+ *
+ * @property {defaultCallback} closeFullscreen
+ * Closes fullscreen mode.
+ *
+ * @property {toggleFullscreenCallback} toggleFullscreen
+ * Toggles fullscreen mode.
+ *
  * @property {stringCallback} serialize
  * Serializes the collections elements values to a URL encoded string.
  *
@@ -789,6 +798,12 @@
  */
 
 /**
+ * @callback toggleFullscreenCallback
+ * @param {boolean} [force] Force whether to open or close fullscreen mode
+ * @returns {jLight} jLight collection
+ */
+
+/**
  * @callback stringCallback
  * @returns {string} The resulting string
  */
@@ -868,6 +883,10 @@ const getElementsFromArgument = (theArgument) => {
 
   if (argument instanceof HTMLCollection || argument instanceof NodeList) {
     return [...argument];
+  }
+
+  if ([...argument].every((item) => item instanceof HTMLElement)) {
+    return argument;
   }
 
   return [];
@@ -978,8 +997,7 @@ const generateHash = (string) => Math.abs(string.split('').reduce((hash, b) => {
  * @param {object} object The object to check
  * @returns {boolean} If the object is empty
  */
-const isEmptyObject = (object) => object
-  && object.constructor === Object
+const isEmptyObject = (object) => typeOf(object) === 'object'
   && !Object.keys(object).length;
 
 /**
@@ -999,7 +1017,7 @@ const isSameObject = (object1, object2) => object1
   && Object.is(object1, object2);
 
 /**
- * Prevents the events default beheavior, propagation and immediate propagation
+ * Prevents the events default beheavior, propagation and immediate propagation.
  *
  * @static
  * @function
@@ -1014,13 +1032,13 @@ const preventEvent = (event) => {
 };
 
 /**
- * Opens fullscreen mode
+ * Opens fullscreen mode.
  *
  * @static
  * @function
  * @tutorial openFullscreen
  * @param {jLight|string|HTMLElement|HTMLCollection|NodeList} [$elements]
- * The elements to open in fullscreen
+ * The elements to open in fullscreen.
  * @returns {void} void
  */
 const openFullscreen = ($elements) => {
@@ -1028,13 +1046,13 @@ const openFullscreen = ($elements) => {
   const element = elements[0] ? elements[0] : document.documentElement;
 
   element.requestFullScreen = element.requestFullScreen || element.webkitRequestFullScreen
-  || element.mozRequestFullScreen || noop;
+    || element.mozRequestFullScreen || noop;
 
   element.requestFullScreen();
 };
 
 /**
- * Closes fullscreen mode
+ * Closes fullscreen mode.
  *
  * @static
  * @function
@@ -1049,7 +1067,7 @@ const closeFullscreen = () => {
 };
 
 /**
- * Opens fullscreen mode
+ * Toggles fullscreen mode.
  *
  * @static
  * @function
@@ -1288,7 +1306,7 @@ const ajax = (opts = {}) => {
   if (options.processData && typeof data !== 'string') {
     if (headers['Content-Type'] === 'application/json') {
       data = JSON.stringify(data);
-    } else if (data && typeof data === 'object') {
+    } else if (typeOf(data) === 'object') {
       const params = [];
 
       Object.entries(data).forEach(([theKey, value]) => {
@@ -2170,7 +2188,7 @@ const jLight = (elements) => ({
    * jLight collection, property value or elements CSSStyleDeclaration
    */
   css: (property, value) => {
-    if (typeof property === 'object' && property !== null) {
+    if (typeOf(property) === 'object') {
       elements.forEach((theElement) => {
         const element = theElement;
 
@@ -2528,7 +2546,7 @@ const jLight = (elements) => ({
    * the collections elements
    */
   attr: (attribute, value) => {
-    if (typeof attribute === 'object' && attribute !== null) {
+    if (typeOf(attribute) === 'object') {
       Object.entries(attribute).forEach(([key, theValue]) => {
         elements.forEach((element) => {
           element.setAttribute(camelToKebab(key), `${theValue}`);
@@ -2715,7 +2733,7 @@ const jLight = (elements) => ({
    * @returns {jLight|*} jLight collection
    */
   data: (keyOrData, value) => {
-    if (typeof keyOrData === 'object' && keyOrData !== null) {
+    if (typeOf(keyOrData) === 'object') {
       const newData = keyOrData;
 
       if (newData.jLightInternal) {
@@ -4235,7 +4253,7 @@ const jLight = (elements) => ({
       right: 0,
     };
 
-    if (typeof offsetOrCallback === 'object' && offsetOrCallback) {
+    if (typeOf(offsetOrCallback) === 'object') {
       offset = {
         ...offset,
         ...offsetOrCallback,
@@ -4347,6 +4365,46 @@ const jLight = (elements) => ({
 
     return elements.length === referenceElements.length
       && elements.every((element, index) => element === referenceElements[index]);
+  },
+
+  /**
+   * Opens fullscreen mode.
+   *
+   * @function
+   * @tutorial openFullscreen
+   * @returns {jLight} jLight collection
+   */
+  openFullscreen: () => {
+    openFullscreen(elements);
+
+    return jLight(elements);
+  },
+
+  /**
+   * Closes fullscreen mode.
+   *
+   * @function
+   * @tutorial closeFullscreen
+   * @returns {jLight} jLight collection
+   */
+  closeFullscreen: () => {
+    closeFullscreen();
+
+    return jLight(elements);
+  },
+
+  /**
+   * Toggles fullscreen mode.
+   *
+   * @function
+   * @tutorial toggleFullscreen
+   * @param {boolean} [force] Force whether to open or close fullscreen mode
+   * @returns {jLight} jLight collection
+   */
+  toggleFullscreen: (force) => {
+    toggleFullscreen(elements, force);
+
+    return jLight(elements);
   },
 
   /**
