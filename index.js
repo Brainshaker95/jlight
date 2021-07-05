@@ -666,7 +666,7 @@
  * @returns {number} The dimension value
  */
 
- /**
+/**
  * @callback outerDimensionCallback
  * @param {boolean} [includeMargins] Whether to include the elements margins (default: true)
  * @returns {number} The dimension value
@@ -917,6 +917,23 @@ const noop = () => { };
  */
 const uniqid = () => Math.random().toString(36).substr(2, 9);
 
+/* eslint-disable no-bitwise */
+
+/**
+ * Generates a unique number hash from a string.
+ *
+ * @static
+ * @function
+ * @tutorial generateHash
+ * @param {string} string The string to hash
+ * @returns {number} The hashed string
+ */
+const generateHash = (string) => Math.abs(string.split('').reduce((hash, b) => {
+  const a = ((hash << 5) - hash) + b.charCodeAt(0);
+
+  return a & a;
+}, 0));
+
 /**
  * Gets the real type of a value.
  *
@@ -954,39 +971,6 @@ const typeOf = (value) => {
       return 'object';
   }
 };
-
-/**
- * Extends a jLight collection with the provided function.
- *
- * @static
- * @function
- * @tutorial extend
- * @param {string} funcName The name of the function
- * @param {function} func The function (this arg will provide access to the current collection)
- * @returns {void} void
- */
-const extend = (funcName, func) => {
-  if (typeof func === 'function') {
-    extensions[funcName] = func;
-  }
-};
-
-/* eslint-disable no-bitwise */
-
-/**
- * Generates a unique number hash from a string.
- *
- * @static
- * @function
- * @tutorial generateHash
- * @param {string} string The string to hash
- * @returns {number} The converted string
- */
-const generateHash = (string) => Math.abs(string.split('').reduce((hash, b) => {
-  const a = ((hash << 5) - hash) + b.charCodeAt(0);
-
-  return a & a;
-}, 0));
 
 /**
  * Checks if an object is empty.
@@ -1125,6 +1109,22 @@ const doEasing = (duration, onStep, callback) => {
   };
 
   window.requestAnimationFrame(step);
+};
+
+/**
+ * Extends a jLight collection with the provided function.
+ *
+ * @static
+ * @function
+ * @tutorial extend
+ * @param {string} funcName The name of the function
+ * @param {function} func The function (this arg will provide access to the current collection)
+ * @returns {void} void
+ */
+const extend = (funcName, func) => {
+  if (typeof func === 'function') {
+    extensions[funcName] = func;
+  }
 };
 
 /**
@@ -4580,12 +4580,16 @@ const documentAndWindowJLight = (argument) => ({
  * The argument to initialize jLight on
  * @property {function} noop [Go to definition]{@link module:Utility.noop}
  * @property {function} uniqid [Go to definition]{@link module:Utility.uniqid}
- * @property {function} typeOf [Go to definition]{@link module:Utility.typeOf}
  * @property {function} generateHash [Go to definition]{@link module:Utility.generateHash}
+ * @property {function} typeOf [Go to definition]{@link module:Utility.typeOf}
  * @property {function} isEmptyObject [Go to definition]{@link module:Utility.isEmptyObject}
  * @property {function} isSameObject [Go to definition]{@link module:Utility.isSameObject}
  * @property {function} preventEvent [Go to definition]{@link module:Utility.preventEvent}
+ * @property {function} openFullscreen [Go to definition]{@link module:Utility.openFullscreen}
+ * @property {function} closeFullscreen [Go to definition]{@link module:Utility.closeFullscreen}
+ * @property {function} toggleFullscreen [Go to definition]{@link module:Utility.toggleFullscreen}
  * @property {function} doEasing [Go to definition]{@link module:Utility.doEasing}
+ * @property {function} extend [Go to definition]{@link module:Utility.extend}
  * @property {function} lcfirst [Go to definition]{@link module:String.lcfirst}
  * @property {function} ucfirst [Go to definition]{@link module:String.ucfirst}
  * @property {function} camelToKebab [Go to definition]{@link module:String.camelToKebab}
@@ -4658,9 +4662,8 @@ const $ = (argument) => {
 
 $.noop = noop;
 $.uniqid = uniqid;
-$.typeOf = typeOf;
-$.extend = extend;
 $.generateHash = generateHash;
+$.typeOf = typeOf;
 $.isEmptyObject = isEmptyObject;
 $.isSameObject = isSameObject;
 $.preventEvent = preventEvent;
@@ -4668,6 +4671,7 @@ $.openFullscreen = openFullscreen;
 $.closeFullscreen = closeFullscreen;
 $.toggleFullscreen = toggleFullscreen;
 $.doEasing = doEasing;
+$.extend = extend;
 $.lcfirst = lcfirst;
 $.ucfirst = ucfirst;
 $.camelToKebab = camelToKebab;
