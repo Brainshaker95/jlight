@@ -994,8 +994,8 @@ const isEmptyObject = (object) => typeOf(object) === 'object'
  * @param {object} object2 The object to compare to
  * @returns {boolean} If the objects are the same
  */
-const isSameObject = (object1, object2) => object1
-  && object2
+const isSameObject = (object1, object2) => typeOf(object1) === 'object'
+  && typeOf(object2) === 'object'
   && object1.constructor === Object
   && object2.constructor === Object
   && Object.is(object1, object2);
